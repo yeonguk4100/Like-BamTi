@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #fff7ed;
+  color: #1f2937;
+  min-height: 100vh;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+button {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+button:not(:disabled):hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+button:focus-visible {
+  outline: 4px solid #1d4ed8;
+  outline-offset: 3px;
+}
+
+/* 화면이 좁으면 선택 버튼을 한 줄에 하나씩 (한 화면 한 선택 원칙) */
+@media (max-width: 480px) {
+  .kiosk-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}

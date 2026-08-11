@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.kostat.go.kr)",
+      "WebFetch(domain:www.seoul.co.kr)",
+      "WebFetch(domain:www.ohmynews.com)",
+      "WebFetch(domain:www.nngroup.com)",
+      "WebFetch(domain:kiosapp.kr)",
+      "WebFetch(domain:www.tech42.co.kr)",
+      "WebFetch(domain:www.koit.co.kr)",
+      "WebFetch(domain:apps.apple.com)",
+      "WebFetch(domain:www.law.go.kr)",
+      "WebFetch(domain:svakorea.org)",
+      "WebFetch(domain:smart.seoul.go.kr)",
+      "WebFetch(domain:www.w3.org)",
+      "WebFetch(domain:mods.go.kr)",
+      "WebFetch(domain:lbox.kr)",
+      "WebFetch(domain:www.segye.com)",
+      "WebFetch(domain:www.mohw.go.kr)",
+      "WebFetch(domain:blog.bsod.kr)",
+      "WebFetch(domain:www.xn--2z1bw8k1pjz5ccumkb.kr)",
+      "WebFetch(domain:www.dotincorp.com)",
+      "WebFetch(domain:www.kioskui.or.kr)",
+      "WebFetch(domain:bravo.etoday.co.kr)",
+      "PowerShell(npm install)"
+    ]
+  }
+}
