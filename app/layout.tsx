@@ -15,12 +15,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {/* SF Pro는 애플 시스템 폰트다. 비애플 환경에서는 Inter가 가장 가까운 대체재라
-            DESIGN.md의 권고대로 폴백으로 싣는다. */}
+        {/* Rubik — 모든 UI 텍스트 역할.
+            Space Grotesk — 전용 디스플레이 서체의 오픈 대체재(DESIGN.md 권고). */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
           rel="stylesheet"
         />
       </head>
