@@ -1010,3 +1010,263 @@ input[type="date"] {
     font-size: 12pt;
   }
 }
+
+/* ============================================================
+   장학재단 앱 계열 — 파스텔 카드 · 중첩 서브카드 · 상태 강조
+   KRDS 토큰 위에 얹는다. 색은 KRDS 계열에서 톤만 낮췄다.
+   ============================================================ */
+
+:root {
+  --tint-blue: #cfe6f7;
+  --tint-blue-line: #a9d1ec;
+  --tint-blue-ink: #12508f;
+  --tint-green: #d3ebdc;
+  --tint-green-line: #a9d4bb;
+  --tint-green-ink: #146c3a;
+  --subcard: #eef4f9;
+  --subcard-green: #e6f3ec;
+}
+
+/* ── 탭형 주 메뉴 ── */
+
+.tabnav {
+  background: var(--canvas);
+  border-bottom: 1px solid var(--border);
+}
+
+.tabnav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  padding: 0 var(--sp-base);
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: var(--sp-base) var(--sp-md);
+  font-size: 17px;
+  color: var(--text-subtle);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-on {
+  color: var(--primary-deep);
+  font-weight: 700;
+  border-bottom-color: var(--primary-deep);
+}
+
+/* ── 인사말 ── */
+
+.greeting {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--sp-lg) var(--sp-base) var(--sp-md);
+}
+
+.greeting h2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.greeting p {
+  margin-top: var(--sp-sm);
+  color: var(--text-subtle);
+  font-size: 15px;
+}
+
+/* ── 파스텔 카드 ── */
+
+.tint-card {
+  background: var(--tint-blue);
+  border: 1px solid var(--tint-blue-line);
+  border-radius: var(--r-xl);
+  padding: var(--sp-lg);
+  margin-bottom: var(--sp-base);
+}
+
+.tint-card-green {
+  background: var(--tint-green);
+  border-color: var(--tint-green-line);
+}
+
+.tint-title {
+  text-align: center;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--tint-blue-ink);
+  margin-bottom: var(--sp-md);
+}
+
+.tint-card-green .tint-title {
+  color: var(--tint-green-ink);
+}
+
+.tint-line {
+  text-align: center;
+  font-size: 15px;
+  color: var(--tint-blue-ink);
+  margin-bottom: var(--sp-sm);
+}
+
+.tint-card-green .tint-line {
+  color: var(--tint-green-ink);
+}
+
+/* 상태 강조 — 사진의 "심사중" 자리 */
+.tint-status {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tint-green-ink);
+  margin: var(--sp-sm) 0;
+}
+
+.tint-note {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-subtle);
+}
+
+/* ── 중첩 서브카드 ── */
+
+.subcard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-md);
+  margin-top: var(--sp-base);
+}
+
+.subcard {
+  background: var(--subcard);
+  border-radius: var(--r-md);
+  padding: var(--sp-md);
+}
+
+.subcard-label {
+  display: block;
+  background: var(--canvas);
+  border-radius: var(--r-sm);
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tint-blue-ink);
+  padding: var(--sp-sm) var(--sp-md);
+  margin-bottom: var(--sp-md);
+}
+
+.subcard-val {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--tint-blue-ink);
+  text-align: center;
+}
+
+.subcard-val .unit {
+  font-size: 15px;
+  margin-left: 2px;
+}
+
+.subcard-sub {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-subtle);
+  margin-top: var(--sp-sm);
+}
+
+.subcard-alert .subcard-val {
+  color: var(--danger);
+}
+
+/* ── 카드 하단 분할 액션 ── */
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: center;
+  margin-top: var(--sp-base);
+  padding-top: var(--sp-base);
+  border-top: 1px solid var(--tint-blue-line);
+}
+
+.tint-card-green .card-actions {
+  border-top-color: var(--tint-green-line);
+}
+
+.card-actions .divider {
+  height: 20px;
+  background: var(--tint-blue-line);
+}
+
+.tint-card-green .card-actions .divider {
+  background: var(--tint-green-line);
+}
+
+.card-action {
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--tint-blue-ink);
+  text-align: center;
+  text-decoration: none;
+  padding: var(--sp-md);
+  min-height: 44px;
+}
+
+.tint-card-green .card-action {
+  color: var(--tint-green-ink);
+}
+
+/* ── 작은 안내 알약 ── */
+
+.click-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  background: var(--tint-blue-ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 700;
+  padding: var(--sp-sm) var(--sp-md);
+  min-height: 28px;
+}
+
+.click-pill-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--sp-md);
+}
+
+@media (max-width: 768px) {
+  .tab {
+    font-size: 15px;
+    padding: var(--sp-md) var(--sp-sm);
+  }
+  .subcard-grid {
+    grid-template-columns: 1fr;
+  }
+  .tint-status {
+    font-size: 28px;
+  }
+}
+
+@media print {
+  .tabnav,
+  .greeting,
+  .card-actions,
+  .click-pill-row {
+    display: none !important;
+  }
+  .tint-card {
+    border-color: #000;
+    background: #fff;
+  }
+}

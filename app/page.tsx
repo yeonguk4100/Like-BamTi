@@ -12,7 +12,12 @@ import {
   type RegionId,
   type Track,
 } from "./lib/data";
-import { buildSheet, TRACK_LABEL, type ResolvedProgram } from "./lib/build-sheet";
+import {
+  age9EndOfMonth,
+  buildSheet,
+  TRACK_LABEL,
+  type ResolvedProgram,
+} from "./lib/build-sheet";
 
 const REPO = "https://github.com/yeonguk4100/Like-BamTi";
 const REPO_DOCS = `${REPO}/tree/main/docs`;
@@ -65,6 +70,10 @@ export default function Home() {
 
   const urgentCount = sheet.deadlines.filter((d) => d.urgent).length;
   const otherTrackCount = counts.welfare + counts.medical;
+  const firstUrgent = sheet.deadlines.find((d) => d.urgent);
+  /* 발달지체는 만 9세 생일이 지원 종료 기준이라 날짜가 계산된다 */
+  const age9Date =
+    sheet.disability.reselection === "age9" ? age9EndOfMonth(birthDate) : null;
 
   function toggleService(id: CurrentServiceId) {
     setCurrentServices((prev) =>
@@ -106,16 +115,31 @@ export default function Home() {
             <span className="logo-mark">특수교육</span>
             <span className="logo-name">너도나도 길잡이</span>
           </a>
-          <nav className="gnb-menu" aria-label="주 메뉴">
-            <a href="#step1">조건 입력</a>
-            <a href="#step2">결과 확인</a>
-            <a href="#reference">참고 자료</a>
+          <nav className="gnb-menu" aria-label="바로가기">
             <a href="#step1" className="btn btn-primary btn-sm">
               상담 시작
             </a>
           </nav>
         </div>
       </header>
+
+      <nav className="tabnav" aria-label="주 메뉴">
+        <div className="tabnav-inner">
+          {STEPS.map((s) => (
+            <a
+              key={s.no}
+              href={s.href}
+              className={`tab ${activeStep === s.no ? "tab-on" : ""}`}
+              onClick={() => setActiveStep(s.no)}
+            >
+              {s.title}
+            </a>
+          ))}
+          <a href="#reference" className="tab">
+            참고 자료
+          </a>
+        </div>
+      </nav>
 
       <div className="notice">
         <div className="notice-inner">
@@ -126,6 +150,11 @@ export default function Home() {
             가상입니다.
           </p>
         </div>
+      </div>
+
+      <div className="greeting">
+        <h2>담당자님, 안녕하세요.</h2>
+        <p>“소관이 달라도, 한 화면에서 확인하실 수 있습니다”</p>
       </div>
 
       {/* ═══════ 페이지 머리 ═══════ */}
@@ -287,11 +316,7 @@ export default function Home() {
           <div className="wrap">
             <div className="section-head">
               <h2 className="h-lg">2. 결과 확인</h2>
-              <div className="right">
-                <button type="button" className="btn btn-outline btn-sm" onClick={() => window.print()}>
-                  인쇄 · PDF 저장
-                </button>
-              </div>
+              <span className="b-sm subtle right">조건을 바꾸면 결과가 바로 다시 계산됩니다</span>
             </div>
 
             {/* 조건 요약 */}
@@ -307,37 +332,105 @@ export default function Home() {
               </a>
             </div>
 
-            {/* 요약 통계 */}
-            <div className="stat-grid">
-              <div className="stat">
-                <span className="stat-key">확인할 제도</span>
-                <span className="stat-val">
-                  {sheet.programs.length}
-                  <span className="unit">건</span>
-                </span>
+            {/* 요약 카드 */}
+            <div className="tint-card">
+              <p className="tint-title">이번 상담에서 확인할 항목</p>
+              <p className="tint-line">
+                {sheet.region.name} · {sheet.disability.name} · {sheet.level.name}
+              </p>
+              <p className="tint-line">
+                진단·평가 제출처 : {sheet.level.submitTo} · 결정 : {sheet.level.decider}
+              </p>
+
+              <div className="subcard-grid">
+                <div className="subcard">
+                  <span className="subcard-label">확인할 제도</span>
+                  <p className="subcard-val">
+                    {sheet.programs.length}
+                    <span className="unit">건</span>
+                  </p>
+                  <span className="subcard-sub">교육청 {counts.education}건 포함</span>
+                </div>
+                <div className="subcard">
+                  <span className="subcard-label">소관 밖 제도</span>
+                  <p className="subcard-val">
+                    {otherTrackCount}
+                    <span className="unit">건</span>
+                  </p>
+                  <span className="subcard-sub">복지부·의료 — 따로 신청해야 함</span>
+                </div>
+                <div className="subcard">
+                  <span className="subcard-label">날짜가 있는 마감</span>
+                  <p className="subcard-val">
+                    {sheet.deadlines.length}
+                    <span className="unit">개</span>
+                  </p>
+                  <span className="subcard-sub">그중 긴급 {urgentCount}개</span>
+                </div>
+                <div className="subcard subcard-alert">
+                  <span className="subcard-label">확인이 필요한 항목</span>
+                  <p className="subcard-val">
+                    {sheet.warnings.length}
+                    <span className="unit">건</span>
+                  </p>
+                  <span className="subcard-sub">아래 시트 맨 위에 표시</span>
+                </div>
               </div>
-              <div className="stat">
-                <span className="stat-key">소관 밖 제도</span>
-                <span className="stat-val">
-                  {otherTrackCount}
-                  <span className="unit">건</span>
-                </span>
+
+              <div className="click-pill-row">
+                <a href="#reference" className="click-pill">
+                  이 숫자가 무슨 뜻인가요 ⓘ
+                </a>
               </div>
-              <div className="stat">
-                <span className="stat-key">날짜가 있는 마감</span>
-                <span className="stat-val">
-                  {sheet.deadlines.length}
-                  <span className="unit">개</span>
-                </span>
-              </div>
-              <div className="stat stat-alert">
-                <span className="stat-key">확인이 필요한 항목</span>
-                <span className="stat-val">
-                  {sheet.warnings.length}
-                  <span className="unit">건</span>
-                </span>
+
+              <div className="card-actions">
+                <button type="button" className="card-action" onClick={() => window.print()}>
+                  인쇄하기
+                </button>
+                <span className="divider" />
+                <button type="button" className="card-action" onClick={copyLetter}>
+                  {copied ? "복사했습니다" : "안내문 복사"}
+                </button>
               </div>
             </div>
+
+            {/* 상태 카드 — 가장 급한 것 하나만 크게 */}
+            {age9Date ? (
+              <div className="tint-card tint-card-green">
+                <p className="tint-title">발달지체 지원 종료 예정일</p>
+                <p className="tint-status">{age9Date}</p>
+                <p className="tint-note">
+                  이 날짜까지 유지된 뒤 종료됩니다. 그 전에 재진단·재선정을 해야 방과후 교육활동과
+                  치료지원이 끊기지 않습니다.
+                </p>
+                <div className="card-actions">
+                  <a href="#deadlines" className="card-action">
+                    마감일 전체 보기
+                  </a>
+                  <span className="divider" />
+                  <a href="#step3" className="card-action">
+                    안내문 확인
+                  </a>
+                </div>
+              </div>
+            ) : (
+              firstUrgent && (
+                <div className="tint-card tint-card-green">
+                  <p className="tint-title">{firstUrgent.label}</p>
+                  <p className="tint-status">기한 확인 필요</p>
+                  <p className="tint-note">{firstUrgent.when}</p>
+                  <div className="card-actions">
+                    <a href="#deadlines" className="card-action">
+                      마감일 전체 보기
+                    </a>
+                    <span className="divider" />
+                    <a href="#step3" className="card-action">
+                      안내문 확인
+                    </a>
+                  </div>
+                </div>
+              )
+            )}
 
             <div className="result-grid">
               {/* ── 담당자용 ── */}
@@ -363,7 +456,7 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="block">
+                  <div className="block" id="deadlines">
                     <h4 className="block-title">
                       마감일
                       {urgentCount > 0 && <span className="count">긴급 {urgentCount}건</span>}
