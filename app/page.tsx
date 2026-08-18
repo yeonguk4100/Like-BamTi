@@ -10,10 +10,23 @@ import {
   type DisabilityId,
   type LevelId,
   type RegionId,
+  type Track,
 } from "./lib/data";
-import { buildSheet, TRACK_LABEL } from "./lib/build-sheet";
+import { buildSheet, TRACK_LABEL, type ResolvedProgram } from "./lib/build-sheet";
 
 const REPO_DOCS = "https://github.com/yeonguk4100/Like-BamTi/tree/main/docs";
+
+/** 제도 목록을 어떻게 볼지 */
+type ViewMode = "all" | "grouped";
+type TrackFilter = Track | "all";
+
+const TRACK_ORDER: Track[] = ["education", "welfare", "medical"];
+
+const TRACK_DESC: Record<Track, string> = {
+  education: "교육청 소관 — 특수교육대상자로 선정되어야 받습니다",
+  welfare: "복지부 소관 — 읍면동에 따로 신청해야 합니다",
+  medical: "의료 — 병원에서 먼저 받아야 하는 것",
+};
 
 export default function Home() {
   const [regionId, setRegionId] = useState<RegionId>("gangwon");
@@ -23,9 +36,26 @@ export default function Home() {
   const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>(["localChildCenter"]);
   const [copied, setCopied] = useState(false);
 
+  const [viewMode, setViewMode] = useState<ViewMode>("grouped");
+  const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
+
   const sheet = useMemo(
     () => buildSheet({ regionId, disabilityId, levelId, birthDate, currentServices }),
     [regionId, disabilityId, levelId, birthDate, currentServices]
+  );
+
+  const counts = useMemo(() => {
+    const c: Record<Track, number> = { education: 0, welfare: 0, medical: 0 };
+    for (const p of sheet.programs) c[p.track] += 1;
+    return c;
+  }, [sheet.programs]);
+
+  const visiblePrograms = useMemo(
+    () =>
+      trackFilter === "all"
+        ? sheet.programs
+        : sheet.programs.filter((p) => p.track === trackFilter),
+    [sheet.programs, trackFilter]
   );
 
   function toggleService(id: CurrentServiceId) {
@@ -185,40 +215,95 @@ export default function Home() {
           </div>
 
           <div className="block">
-            <h3 className="block-title">📋 확인해야 할 제도</h3>
-            {sheet.programs.map((p) => (
-              <details key={p.id} className="program" open={p.id === "selection"}>
-                <summary>
-                  <span className={`track track-${p.track}`}>{TRACK_LABEL[p.track]}</span>
-                  <span className="program-name">{p.resolvedName}</span>
-                  {!p.verified && <span className="tag tag-demo">예시</span>}
-                </summary>
-                <div className="program-body">
-                  <p className="program-summary">{p.summary}</p>
-                  <dl>
-                    <dt>신청처</dt>
-                    <dd>{p.resolvedApplyTo}</dd>
-                    <dt>준비 서류</dt>
-                    <dd>
-                      <ul className="docs">
-                        {p.resolvedDocuments.map((d, i) => (
-                          <li key={i}>{d}</li>
-                        ))}
-                      </ul>
-                    </dd>
-                    <dt>기한</dt>
-                    <dd>{p.deadline}</dd>
-                    <dt>근거</dt>
-                    <dd className="basis">{p.legalBasis}</dd>
-                    <dt>출처</dt>
-                    <dd className="basis">
-                      {p.verified ? "✅ " : "⚠ 데모용 예시 — "}
-                      {p.source}
-                    </dd>
-                  </dl>
+            <h3 className="block-title">
+              📋 확인해야 할 제도
+              <span className="count">{sheet.programs.length}건</span>
+            </h3>
+
+            {/* 보기 방식 · 소관 필터 */}
+            <div className="controls">
+              <div className="control-row">
+                <span className="control-label">보기</span>
+                <div className="seg">
+                  <button
+                    type="button"
+                    className={`seg-btn ${viewMode === "grouped" ? "seg-on" : ""}`}
+                    onClick={() => setViewMode("grouped")}
+                  >
+                    소관별로 나눠 보기
+                  </button>
+                  <button
+                    type="button"
+                    className={`seg-btn ${viewMode === "all" ? "seg-on" : ""}`}
+                    onClick={() => setViewMode("all")}
+                  >
+                    한꺼번에 보기
+                  </button>
                 </div>
-              </details>
-            ))}
+              </div>
+
+              <div className="control-row">
+                <span className="control-label">소관</span>
+                <div className="chip-row">
+                  <button
+                    type="button"
+                    className={`chip chip-sm ${trackFilter === "all" ? "chip-on" : ""}`}
+                    onClick={() => setTrackFilter("all")}
+                  >
+                    전체 {sheet.programs.length}
+                  </button>
+                  {TRACK_ORDER.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`chip chip-sm chip-${t} ${trackFilter === t ? "chip-on" : ""}`}
+                      onClick={() => setTrackFilter(t)}
+                      disabled={counts[t] === 0}
+                    >
+                      {TRACK_LABEL[t]} {counts[t]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {trackFilter === "all" && viewMode === "all" && (
+              <p className="view-note">
+                교육청·복지부·의료가 섞여 있습니다. <strong>이 목록이 한 화면에 있다는 것</strong>이
+                이 도구의 핵심입니다.
+              </p>
+            )}
+
+            {viewMode === "all" ? (
+              <div className="program-list">
+                {visiblePrograms.map((p) => (
+                  <ProgramItem key={p.id} program={p} />
+                ))}
+              </div>
+            ) : (
+              TRACK_ORDER.filter((t) => trackFilter === "all" || t === trackFilter).map((t) => {
+                const list = visiblePrograms.filter((p) => p.track === t);
+                if (list.length === 0) return null;
+                return (
+                  <div key={t} className="group">
+                    <div className={`group-head group-head-${t}`}>
+                      <span className={`track track-${t}`}>{TRACK_LABEL[t]}</span>
+                      <span className="group-desc">{TRACK_DESC[t]}</span>
+                      <span className="group-count">{list.length}건</span>
+                    </div>
+                    <div className="program-list">
+                      {list.map((p) => (
+                        <ProgramItem key={p.id} program={p} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {visiblePrograms.length === 0 && (
+              <p className="view-note">이 조건에 해당하는 제도가 없습니다.</p>
+            )}
           </div>
 
           <p className="foot-note">
@@ -235,7 +320,10 @@ export default function Home() {
               {copied ? "복사했습니다" : "복사"}
             </button>
           </h2>
-          <p className="panel-hint">출력해서 건네거나 문자로 보냅니다.</p>
+          <p className="panel-hint">
+            출력해서 건네거나 문자로 보냅니다. <strong>필터와 무관하게 항상 전체가 들어갑니다</strong>{" "}
+            — 보호자에게는 빠짐없이 전달해야 하기 때문입니다.
+          </p>
           <pre className="letter-body">{sheet.parentLetter}</pre>
         </section>
       </div>
@@ -260,5 +348,42 @@ export default function Home() {
         </p>
       </footer>
     </main>
+  );
+}
+
+/** 제도 한 건 — 접었다 펼 수 있는 항목 */
+function ProgramItem({ program: p }: { program: ResolvedProgram }) {
+  return (
+    <details className="program" open={p.id === "selection"}>
+      <summary>
+        <span className={`track track-${p.track}`}>{TRACK_LABEL[p.track]}</span>
+        <span className="program-name">{p.resolvedName}</span>
+        {!p.verified && <span className="tag tag-demo">예시</span>}
+      </summary>
+      <div className="program-body">
+        <p className="program-summary">{p.summary}</p>
+        <dl>
+          <dt>신청처</dt>
+          <dd>{p.resolvedApplyTo}</dd>
+          <dt>준비 서류</dt>
+          <dd>
+            <ul className="docs">
+              {p.resolvedDocuments.map((d, i) => (
+                <li key={i}>{d}</li>
+              ))}
+            </ul>
+          </dd>
+          <dt>기한</dt>
+          <dd>{p.deadline}</dd>
+          <dt>근거</dt>
+          <dd className="basis">{p.legalBasis}</dd>
+          <dt>출처</dt>
+          <dd className="basis">
+            {p.verified ? "✅ " : "⚠ 데모용 예시 — "}
+            {p.source}
+          </dd>
+        </dl>
+      </div>
+    </details>
   );
 }
