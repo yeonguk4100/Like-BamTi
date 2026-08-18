@@ -14,6 +14,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        {/* SF Pro는 애플 시스템 폰트다. 비애플 환경에서는 Inter가 가장 가까운 대체재라
+            DESIGN.md의 권고대로 폴백으로 싣는다. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
