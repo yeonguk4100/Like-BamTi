@@ -36,6 +36,19 @@ const TRACK_DESC: Record<Track, string> = {
   medical: "병원에서 먼저 받아야 합니다",
 };
 
+const LOOKUP_TARGETS = [
+  { id: "guide", label: "선정·배치 지침 문서", hint: "이 교육청 지침이 어디 있는지" },
+  { id: "card", label: "바우처 카드 안내", hint: "치료지원·방과후 카드 공식 페이지" },
+  { id: "local", label: "지역 자체 지원사업", hint: "그 지역에만 있는 사업" },
+] as const;
+
+type LookupResult = {
+  answer: string | null;
+  sources: { uri: string; title: string }[];
+  queries: string[];
+  note?: string;
+};
+
 const STEPS = [
   { no: 1, title: "조건 입력", desc: "상담하면서 아동 조건을 고릅니다", href: "#step1" },
   { no: 2, title: "결과 확인", desc: "확인할 제도·마감일·서류가 정리됩니다", href: "#step2" },
@@ -257,6 +270,11 @@ export default function Home() {
   const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
   const [aiError, setAiError] = useState("");
 
+  /* AI 웹 검색 — 지역+항목별로 캐시한다 */
+  const [lookupCache, setLookupCache] = useState<Record<string, LookupResult>>({});
+  const [lookupBusy, setLookupBusy] = useState("");
+  const [lookupError, setLookupError] = useState("");
+
   const [activeStep, setActiveStep] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("grouped");
   const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
@@ -371,6 +389,34 @@ export default function Home() {
     } catch {
       setAiError("요청을 보내지 못했습니다. 네트워크를 확인하세요.");
       setAiStatus("error");
+    }
+  }
+
+  async function runLookup(target: string) {
+    const cacheKey = `${regionId}:${target}`;
+    if (lookupBusy || lookupCache[cacheKey]) return;
+    setLookupBusy(target);
+    setLookupError("");
+    try {
+      const res = await fetch("/api/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target,
+          regionName: sheet.region.name,
+          officeName: sheet.region.officeName,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setLookupError(data.error ?? "검색에 실패했습니다.");
+      } else {
+        setLookupCache((prev) => ({ ...prev, [cacheKey]: data }));
+      }
+    } catch {
+      setLookupError("요청을 보내지 못했습니다.");
+    } finally {
+      setLookupBusy("");
     }
   }
 
@@ -1122,6 +1168,76 @@ export default function Home() {
                         </p>
                       </div>
                     )}
+
+                    {/* 빈칸을 AI가 웹에서 찾아본다 */}
+                    <div className="fold-static">
+                      <p className="h-xs">이 지역 정보를 AI가 찾아봅니다</p>
+                      <p className="hint" style={{ marginTop: 4, marginBottom: 12 }}>
+                        우리 데이터에 없는 칸입니다. 제미나이가 웹을 검색해 후보를 찾고 출처를
+                        함께 보여줍니다. <strong>확정이 아니므로 담당자가 확인해야 합니다.</strong>
+                      </p>
+
+                      <div className="chip-row" style={{ marginBottom: 12 }}>
+                        {LOOKUP_TARGETS.map((t) => {
+                          const cacheKey = `${regionId}:${t.id}`;
+                          const done = Boolean(lookupCache[cacheKey]);
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              className="chip chip-filter"
+                              onClick={() => runLookup(t.id)}
+                              disabled={Boolean(lookupBusy) || done}
+                              title={t.hint}
+                            >
+                              {lookupBusy === t.id
+                                ? "찾고 있습니다…"
+                                : done
+                                  ? `${t.label} ✓`
+                                  : t.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {lookupError && <p className="ai-error">{lookupError}</p>}
+
+                      {LOOKUP_TARGETS.map((t) => {
+                        const r = lookupCache[`${regionId}:${t.id}`];
+                        if (!r) return null;
+                        return (
+                          <div key={t.id} className="lookup-result">
+                            <p className="lookup-head">
+                              <span className="badge badge-danger">AI가 찾음 · 확인 필요</span>{" "}
+                              {t.label}
+                            </p>
+                            {r.answer ? (
+                              <p className="lookup-answer">{r.answer}</p>
+                            ) : (
+                              <p className="hint" style={{ marginTop: 0 }}>
+                                {r.note ?? "찾지 못했습니다."}
+                              </p>
+                            )}
+                            {r.sources.length > 0 && (
+                              <ul className="lookup-sources">
+                                {r.sources.map((src, i) => (
+                                  <li key={i}>
+                                    <a href={src.uri} target="_blank" rel="noreferrer">
+                                      {src.title || src.uri}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            {r.queries.length > 0 && (
+                              <p className="hint" style={{ marginTop: 4 }}>
+                                검색어: {r.queries.join(" · ")}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="alert alert-info">

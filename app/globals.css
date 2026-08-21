@@ -1418,3 +1418,41 @@ input::placeholder {
   margin-top: var(--sp-base);
   padding-top: var(--sp-md);
 }
+
+/* AI 웹 검색 결과 */
+.lookup-result {
+  border-top: 1px solid var(--border);
+  padding-top: var(--sp-md);
+  margin-top: var(--sp-md);
+}
+
+.lookup-head {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: var(--sp-md);
+}
+
+.lookup-answer {
+  font-size: 15px;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  margin-bottom: var(--sp-md);
+}
+
+.lookup-sources {
+  list-style: none;
+  font-size: 13px;
+}
+
+.lookup-sources li {
+  padding-left: var(--sp-base);
+  position: relative;
+  margin-bottom: var(--sp-xs);
+  word-break: break-all;
+}
+
+.lookup-sources li::before {
+  content: "↗";
+  position: absolute;
+  left: 0;
+}
