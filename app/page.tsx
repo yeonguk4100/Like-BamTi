@@ -42,12 +42,10 @@ import { ProgramItem } from "./components/ProgramItem";
 import { Faq } from "./components/Faq";
 import { NoticeBoard } from "./components/NoticeBoard";
 import { SiteFooter } from "./components/SiteFooter";
-import { DeadlineTable } from "./components/DeadlineTable";
 import { LetterPanel } from "./components/LetterPanel";
-import { LookupPanel } from "./components/LookupPanel";
-import { ProgramList } from "./components/ProgramList";
+import { DetailPanel } from "./components/DetailPanel";
+import { StaffBrief } from "./components/StaffBrief";
 import { Reference } from "./components/Reference";
-import { TestTable } from "./components/TestTable";
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
 import { DEMO_TERMS, PRESETS, type Preset } from "./lib/demo";
 import { DemoKey } from "./components/DemoKey";
@@ -819,7 +817,7 @@ export default function Home() {
               )
             )}
 
-            <div className="result-grid rel">
+            <div className="result-stack rel">
               <DemoKey top={0} left={-260}>
                 {`한꺼번에 보기 = 부처를 넘는 증거
 소관별 보기 = 어디로 보낼지
@@ -835,100 +833,6 @@ export default function Home() {
 = 안내 기록이 남는다`}
               </DemoKey>
 
-              <section className="panel">
-                <div className="panel-head">
-                  <h3 className="h-sm">담당자용 확인 시트</h3>
-                  <span className="b-sm subtle right">{sheet.region.officeName}</span>
-                </div>
-                <div className="panel-body">
-                  {sheet.warnings.length > 0 && (
-                    <div className="block">
-                      <h4 className="block-title">
-                        확인이 필요한 항목
-                        <span className="count">{sheet.warnings.length}건</span>
-                      </h4>
-                      {sheet.warnings.map((w, i) => (
-                        <div key={i} className={`alert ${alertClass(w.kind)}`}>
-                          <span className="alert-tag">{alertTag(w.kind)}</span>
-                          <p className="alert-title">{w.title}</p>
-                          <p className="alert-detail">{w.detail}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="block">
-                    <h4 className="block-title">
-                      제출 서류
-                      <span className="count">
-                        {sheet.procedure.name} · {sheet.documents.length}종
-                      </span>
-                    </h4>
-                    <table className="tbl">
-                      <caption className="skip">신청 상황별 제출 서류</caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">서류</th>
-                          <th scope="col" style={{ width: "34%" }}>
-                            {sheet.region.officeName} 서식
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sheet.documents.map((d) => (
-                          <tr key={d.key}>
-                            <th scope="row">{d.label}</th>
-                            <td className={d.formNo.includes("미확인") ? "td-sub" : ""}>
-                              {d.formNo}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {sheet.procedure.notes.length > 0 && (
-                      <ul className="notes">
-                        {sheet.procedure.notes.map((n, i) => (
-                          <li key={i}>{n}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <DeadlineTable
-                    deadlines={sheet.deadlines}
-                    urgentCount={urgentCount}
-                  />
-
-                  <TestTable
-                    disability={sheet.disability}
-                    detailNote={sheet.detailNote}
-                  />
-
-                  <ProgramList
-                    sheet={sheet}
-                    visible={visiblePrograms}
-                    counts={counts}
-                    viewMode={viewMode}
-                    trackFilter={trackFilter}
-                    onViewMode={setViewMode}
-                    onTrackFilter={setTrackFilter}
-                  >
-                    <LookupPanel
-                      regionId={regionId}
-                      cache={lookupCache}
-                      busy={lookupBusy}
-                      error={lookupError}
-                      onLookup={runLookup}
-                    />
-                  </ProgramList>
-
-                  <p className="panel-foot">
-                    이 시트는 자격을 판정하지 않습니다. 확인해야 할 항목과 근거만 제시하며, 최종
-                    판단은 담당자가 합니다.
-                  </p>
-                </div>
-              </section>
-
               <LetterPanel
                 letter={shownLetter}
                 isAi={Boolean(aiLetter)}
@@ -938,6 +842,29 @@ export default function Home() {
                 onCopy={copyLetter}
                 onRewrite={rewriteWithAi}
                 onReset={resetLetter}
+              />
+
+              <StaffBrief
+                documentsFirst={sheet.documentsFirst}
+                urgentDeadlines={sheet.deadlines.filter((d) => d.urgent)}
+                keyWarnings={sheet.keyWarnings}
+              />
+
+              <DetailPanel
+                sheet={sheet}
+                visible={visiblePrograms}
+                counts={counts}
+                viewMode={viewMode}
+                trackFilter={trackFilter}
+                onViewMode={setViewMode}
+                onTrackFilter={setTrackFilter}
+                lookup={{
+                  regionId,
+                  cache: lookupCache,
+                  busy: lookupBusy,
+                  error: lookupError,
+                  onLookup: runLookup,
+                }}
               />
             </div>
           </div>

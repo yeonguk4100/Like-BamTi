@@ -5,16 +5,20 @@ import type { Deadline } from "../lib/build-sheet";
 export function DeadlineTable({
   deadlines,
   urgentCount,
+  hideTitle,
 }: {
   deadlines: Deadline[];
   urgentCount: number;
+  hideTitle?: boolean;
 }) {
   return (
     <div className="block" id="deadlines">
-      <h4 className="block-title">
-        마감일
-        {urgentCount > 0 && <span className="count">긴급 {urgentCount}건</span>}
-      </h4>
+      {!hideTitle && (
+        <h4 className="block-title">
+          마감일
+          {urgentCount > 0 && <span className="count">긴급 {urgentCount}건</span>}
+        </h4>
+      )}
       <table className="tbl">
         <caption className="skip">항목별 마감일</caption>
         <thead>

@@ -12,6 +12,8 @@ import {
   DISABILITIES,
   FORM_LABEL,
   FORM_NO,
+  FORM_SOURCE,
+  NEEDS_OTHER_OFFICE,
   LEVELS,
   LOCAL_PROGRAMS,
   LOCAL_SOURCES,
@@ -103,8 +105,25 @@ export function buildSheet(input: Input) {
   const formNos = FORM_NO[input.regionId];
   const documents = procedure.forms.map((key) => {
     const no = formNos[key];
-    return { key, label: FORM_LABEL[key], formNo: no ?? "서식 번호 미확인" };
+    const src = FORM_SOURCE[key];
+    return {
+      key,
+      label: FORM_LABEL[key],
+      formNo: no ?? "서식 번호 미확인",
+      /** 어디서 떼는가. 이 칸이 비어 있어서 미비 접수가 생겼다 */
+      where: src.where,
+      whereVerified: src.verified,
+      /** 다른 기관에 먼저 가야 하는 서류 — 빠지면 접수가 되돌아간다 */
+      fromOtherOffice: src.sources.some((x) => NEEDS_OTHER_OFFICE.includes(x)),
+      /** 보호자가 준비할 서류가 아닌 것 (담당자·학교 취합) */
+      staffOnly: src.sources.includes("staff"),
+    };
   });
+
+  /** 학부모가 먼저 다른 기관에서 갖춰 와야 하는 것. 안내문 맨 위에 온다 */
+  const documentsFirst = documents.filter((d) => d.fromOtherOffice);
+  /** 신청처에서 받아 작성하는 서식 */
+  const documentsAtOffice = documents.filter((d) => !d.fromOtherOffice && !d.staffOnly);
   /* 「기타」를 골랐으면 담당자가 적은 이름을 쓴다 */
   const typed = input.otherDisabilityLabel?.trim();
   const disabilityLabel =
@@ -245,13 +264,25 @@ export function buildSheet(input: Input) {
     });
   }
 
+  /* ── 3-1. 경고를 두 갈래로 가른다 ──
+     담당자가 검수할 항목이 많으면 이 도구가 시간을 줄이지 못한다.
+     1면에는 담당자가 모를 수 있는 것과 이 아동에 대한 판단만 남기고,
+     조건과 무관하게 늘 뜨는 일반 안내는 「자세히 보기」로 내린다. */
+  const keyWarnings = warnings.filter(
+    (w) => w.kind === "term" || w.kind === "overlap" || w.kind === "unregistered"
+  );
+  const generalNotes = warnings.filter(
+    (w) => w.kind === "crossTrack" || w.kind === "easyToMiss"
+  );
+
   /* ── 4. 학부모용 안내문 ── */
   const parentLetter = buildParentLetter({
     region,
     disability,
     disabilityLabel,
     procedure,
-    documents,
+    documentsFirst,
+    documentsAtOffice,
     level,
     programs,
     deadlines,
@@ -270,6 +301,8 @@ export function buildSheet(input: Input) {
     detailNote,
     procedure,
     documents,
+    documentsFirst,
+    documentsAtOffice,
     level,
     /** 기준일 시점의 만 나이. 오늘 날짜를 쓰지 않는다 */
     age,
@@ -281,6 +314,8 @@ export function buildSheet(input: Input) {
     programs,
     deadlines,
     warnings,
+    keyWarnings,
+    generalNotes,
     parentLetter,
   };
 }
@@ -293,7 +328,8 @@ function buildParentLetter(args: {
   disability: (typeof DISABILITIES)[number];
   disabilityLabel: string;
   procedure: (typeof PROCEDURES)[number];
-  documents: { label: string; formNo: string }[];
+  documentsFirst: { label: string; formNo: string; where: string }[];
+  documentsAtOffice: { label: string; formNo: string; where: string }[];
   level: (typeof LEVELS)[number];
   programs: ResolvedProgram[];
   deadlines: Deadline[];
@@ -305,7 +341,8 @@ function buildParentLetter(args: {
     disability,
     disabilityLabel,
     procedure,
-    documents,
+    documentsFirst,
+    documentsAtOffice,
     level,
     programs,
     deadlines,
@@ -322,12 +359,21 @@ function buildParentLetter(args: {
   lines.push(`${region.name}에 사는 ${level.name} 아동의 보호자께 드리는 안내입니다.`);
   lines.push(`이 안내는 「${procedure.name}」 기준입니다. (${procedure.when})`);
   lines.push("");
-  lines.push("■ 준비하실 서류");
-  for (const d of documents) {
+  if (documentsFirst.length > 0) {
+    lines.push("■ 1단계 — 먼저 다른 곳에서 갖춰 오실 것");
+    lines.push("  이것이 빠지면 접수가 되돌아가고 다시 오셔야 합니다.");
+    for (const d of documentsFirst) {
+      lines.push(`· ${d.label}`);
+      lines.push(`   → ${d.where}`);
+    }
+    lines.push("");
+  }
+  lines.push(`■ ${documentsFirst.length > 0 ? "2단계 — " : ""}${level.submitTo}에서 작성하실 것`);
+  for (const d of documentsAtOffice) {
     lines.push(`· ${d.label} [${d.formNo}]`);
   }
   lines.push("");
-  lines.push("■ 먼저 하실 일");
+  lines.push("■ 그다음 어떻게 되나요");
   lines.push(`1. ${level.submitTo}에 서류를 제출합니다.`);
   lines.push(
     disability.tests.length > 0
@@ -345,6 +391,9 @@ function buildParentLetter(args: {
   }
   lines.push("");
   lines.push("■ 교육청과 따로 신청해야 하는 것 (복지·의료)");
+  // 확인 주체를 담당자가 아니라 해당 기관으로 넘긴다. 판정하지 않으면서
+  // 담당자에게 검수 숙제를 남기지 않는 유일한 방법이다.
+  lines.push("  교육청 소관이 아닙니다. 대상이 되는지와 신청 방법은 아래 기관에서 확인하셔야 합니다.");
   for (const p of otherPrograms) {
     lines.push(`· ${p.name} — ${p.applyTo}`);
   }

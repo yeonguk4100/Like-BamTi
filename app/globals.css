@@ -1098,11 +1098,76 @@ input::placeholder {
 
 /* ───────────────────── 결과 2단 ───────────────────── */
 
-.result-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+/* 안내문이 제품이다. 담당자는 위에서 아래로 한 번 읽고 건넨다 */
+.result-stack {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
-  align-items: start;
+}
+
+/* ── 자세히 보기 — 기본 경로에서 빠져 있어야 한다 ── */
+
+.detail-fold {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+
+.detail-fold > summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 16px 24px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.detail-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.detail-fold > summary::before {
+  content: "▸";
+  margin-right: 4px;
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.detail-fold[open] > summary::before {
+  content: "▾";
+}
+
+.detail-fold[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-fold-title {
+  font-size: 17.5px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--navy);
+}
+
+.detail-fold-hint {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.detail-fold-body {
+  padding: 20px 24px 24px;
+}
+
+.detail-fold-body .faq + .faq {
+  margin-top: 8px;
+}
+
+.detail-fold-body .block + .block {
+  margin-top: 0;
+}
+
+.detail-fold-body .panel-foot {
+  margin-top: 20px;
 }
 
 .panel {

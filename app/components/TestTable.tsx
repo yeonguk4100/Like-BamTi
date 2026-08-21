@@ -8,13 +8,15 @@ import type { Disability } from "../lib/data";
 export function TestTable({
   disability,
   detailNote,
+  hideTitle,
 }: {
   disability: Disability;
   detailNote?: string;
+  hideTitle?: boolean;
 }) {
   return (
     <div className="block">
-      <h4 className="block-title">이번 진단·평가에 들어가는 검사</h4>
+      {!hideTitle && <h4 className="block-title">이번 진단·평가에 들어가는 검사</h4>}
       {detailNote && (
         <p className="detail-line">
           <strong>{disability.detailLabel}</strong>

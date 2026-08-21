@@ -574,6 +574,130 @@ export const FORM_NO: Record<RegionId, Partial<Record<FormKey, string>>> = {
 };
 
 /* ══════════════════════════════════════════════════════════
+   서류를 어디서 얻는가
+
+   담당자 인터뷰(2026.08)에서 나온 것 — 다른 소관 자료(진단서 등)가
+   없는 채로 문의·신청이 들어와 되돌려 보내는 일이 잦다. 한 건이
+   담당자 손을 세 번 네 번 탄다.
+
+   원인은 서류 목록에 「어디서 떼는가」가 없었던 것이다. 학부모는
+   서류 이름만 보고는 병원인지 읍면동인지 학교인지 알 수 없다.
+   ══════════════════════════════════════════════════════════ */
+
+export type FormSource =
+  /** 교육지원청·특수교육지원센터가 배포하는 서식. 보호자가 받아 작성한다 */
+  | "eduForm"
+  /** 재학(예정) 학교가 작성·발급한다 */
+  | "school"
+  /** 병원 */
+  | "hospital"
+  /** 읍면동 행정복지센터 */
+  | "townOffice"
+  /** 담당자·학교가 취합한다. 보호자 몫이 아니다 */
+  | "staff"
+  /** 보호자가 이미 가지고 있는 것 */
+  | "guardianKept";
+
+/** 다른 기관에 먼저 가야 하는 출처. 이게 빠지면 접수가 되돌아간다 */
+export const NEEDS_OTHER_OFFICE: FormSource[] = ["hospital", "townOffice", "school"];
+
+export type FormSourceInfo = {
+  sources: FormSource[];
+  /** 안내문과 화면에 그대로 들어가는 문구 */
+  where: string;
+} & Sourced;
+
+export const FORM_SOURCE: Record<FormKey, FormSourceInfo> = {
+  medicalCertificate: {
+    sources: ["hospital"],
+    where: "병원에서 발급받습니다 (최근 3개월 이내)",
+    verified: true,
+    source: "서류 이름 자체가 발급처를 정한다 — 강원 지침 취학유예·면제 제출 서류",
+  },
+  principalOpinion: {
+    // ⚠ 한 항목에 서로 다른 두 기관이 섞여 있다. 학부모가 판단하게 두면 안 된다
+    sources: ["school", "townOffice"],
+    where:
+      "둘 중 하나를 준비하시면 됩니다 — 재학(예정) 학교에서 「학교장 의견서」, " +
+      "또는 읍면동 행정복지센터에서 「장애인증명서·복지카드」",
+    verified: true,
+    source: "강원·경남 지침 제출 서류 (2026.08 대조) — 택 1 항목",
+  },
+  basicSurvey: {
+    sources: ["eduForm", "school"],
+    where: "보호자용은 직접 작성하시고, 담임교사용은 학교에 요청합니다",
+    verified: true,
+    source: "강원 지침 — 기초조사 카드(보호자용 / 담임교사용)",
+  },
+  ldRecord: {
+    sources: ["school"],
+    where: "학교가 작성합니다 (사전 중재 6개월 이상 기록)",
+    verified: true,
+    source: "강원·경남 지침 — 학습장애는 최소 6개월 사전 중재 후 신청",
+  },
+  placementResultCopy: {
+    sources: ["guardianKept"],
+    where: "이전에 받으신 배치 결과통지서를 복사해 오시면 됩니다",
+    verified: true,
+    source: "이미 통보된 문서의 사본",
+  },
+  requestForm: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 작성합니다",
+    verified: false,
+    source: "서식 배포 경로(온라인·방문)는 지역마다 달라 확인 필요",
+  },
+  placementRequest: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 작성합니다",
+    verified: false,
+    source: "서식 배포 경로 확인 필요",
+  },
+  privacyConsent: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 서명합니다",
+    verified: false,
+    source: "서식 배포 경로 확인 필요",
+  },
+  advanceRequest: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 작성합니다",
+    verified: false,
+    source: "서식 배포 경로 확인 필요",
+  },
+  reassignRequest: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 작성합니다",
+    verified: false,
+    source: "서식 배포 경로 확인 필요",
+  },
+  deferralRequest: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 작성합니다",
+    verified: false,
+    source: "서식 배포 경로 확인 필요",
+  },
+  reenrollRequest: {
+    sources: ["eduForm"],
+    where: "신청처에서 서식을 받아 작성합니다",
+    verified: false,
+    source: "서식 배포 경로 확인 필요",
+  },
+  applicantList: {
+    sources: ["staff"],
+    where: "담당자·학교가 취합합니다. 보호자가 준비할 서류가 아닙니다",
+    verified: false,
+    source: "지침의 담당자 업무 항목 — 작성 주체 확인 필요",
+  },
+  advanceList: {
+    sources: ["staff"],
+    where: "담당자·학교가 취합합니다. 보호자가 준비할 서류가 아닙니다",
+    verified: false,
+    source: "지침의 담당자 업무 항목 — 작성 주체 확인 필요",
+  },
+};
+
+/* ══════════════════════════════════════════════════════════
    신청 상황 — 상황이 바뀌면 서류가 통째로 바뀐다
    ══════════════════════════════════════════════════════════ */
 
