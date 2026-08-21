@@ -25,6 +25,10 @@ import {
 const REPO = "https://github.com/yeonguk4100/Like-BamTi";
 const REPO_DOCS = `${REPO}/tree/main/docs`;
 
+/** 이 도구가 정리한 나이 구간. 밖이면 화면이 안내한다 */
+const SCOPE_AGE_MIN = 5;
+const SCOPE_AGE_MAX = 8;
+
 type ViewMode = "all" | "grouped";
 type TrackFilter = Track | "all";
 
@@ -35,6 +39,133 @@ const TRACK_DESC: Record<Track, string> = {
   welfare: "읍면동 행정복지센터에 따로 신청해야 합니다",
   medical: "병원에서 먼저 받아야 합니다",
 };
+
+const STEPS = [
+  { no: 1, title: "조건 입력", desc: "상담하면서 아동 조건을 고릅니다", href: "#step1" },
+  { no: 2, title: "결과 확인", desc: "확인할 제도·마감일·서류가 정리됩니다", href: "#step2" },
+  { no: 3, title: "안내문 전달", desc: "학부모용 안내문을 출력해 건넵니다", href: "#step3" },
+];
+
+const FIGURES = [
+  { key: "특수교육대상자", value: "120,735", unit: "명", note: "2025년 기준 · 10년간 37% 증가" },
+  { key: "일반학교 배치", value: "74.1", unit: "%", note: "특수학교가 아닌 학교에 있습니다" },
+  { key: "날짜가 있는 마감", value: "12", unit: "개", note: "교육 트랙 안에서만 센 수" },
+  { key: "시도별 카드 명칭", value: "6", unit: "종", note: "같은 지원, 다른 이름" },
+];
+
+const ICONS: Record<string, React.ReactNode> = {
+  doc: (
+    <>
+      <path d="M5 3h9l5 5v13H5z" />
+      <path d="M14 3v5h5M8 13h8M8 17h5" />
+    </>
+  ),
+  sheet: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18M9 9v11" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </>
+  ),
+  compare: (
+    <>
+      <path d="M4 6h7M4 12h7M4 18h7M17 4v16" />
+      <path d="m14 8 3-3 3 3M14 16l3 3 3-3" />
+    </>
+  ),
+  folder: <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
+  help: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.3" />
+      <path d="M12 17h.01" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 5 1.5 5H4.5S6 13 6 9" />
+      <path d="M10 18a2 2 0 0 0 4 0" />
+    </>
+  ),
+};
+
+const QUICK = [
+  { href: "#step1", icon: "doc", label: "상담 시작", desc: "조건 입력" },
+  { href: "#step2", icon: "sheet", label: "확인 시트", desc: "담당자용" },
+  { href: "#step3", icon: "mail", label: "안내문 만들기", desc: "학부모용" },
+  { href: "#deadlines", icon: "calendar", label: "마감일 보기", desc: "재선정·기한" },
+  { href: "#reference", icon: "compare", label: "지역별 명칭", desc: "카드 대조표" },
+  { href: "#forms", icon: "folder", label: "서식 자료실", desc: "제출 서류" },
+  { href: "#faq", icon: "help", label: "자주 묻는 질문", desc: "상담 FAQ" },
+  { href: "#notice-board", icon: "bell", label: "공지사항", desc: "지침 개정" },
+];
+
+/** 가상 공지 — 화면 구성용 */
+const BOARD = [
+  {
+    tag: "공지",
+    title: "2027학년도 특수교육대상자 선정·배치 신청 일정 안내",
+    date: "2026.08.18",
+    isNew: true,
+  },
+  {
+    tag: "개정",
+    title: "「장애등급」 표기 정비 요청 — 시도 지침 대조표 v2 배포",
+    date: "2026.08.11",
+    isNew: true,
+  },
+  { tag: "안내", title: "강원 마음모아카드 가맹 치료기관 확대 안내", date: "2026.08.04" },
+  { tag: "협조", title: "발달지체 만 9세 도래 대상자 사전 안내 협조 요청", date: "2026.07.29" },
+  { tag: "자료", title: "진단·평가 의뢰서 서식 지역 대조표 (6개 시도)", date: "2026.07.22" },
+];
+
+/** 가상 파일 — 화면 구성용 */
+const FILES = [
+  { ext: "HWP", name: "진단·평가 의뢰서 [서식 3]", meta: "82KB · 2026.08.18 갱신" },
+  { ext: "HWP", name: "기초조사 카드 (보호자용)", meta: "64KB · 2026.08.18 갱신" },
+  { ext: "HWP", name: "기초조사 카드 (담임교사용)", meta: "61KB · 2026.08.18 갱신" },
+  { ext: "HWP", name: "특수교육대상자 배치 신청서", meta: "48KB · 2026.07.22 갱신" },
+  { ext: "HWP", name: "개인정보 수집·이용 동의서", meta: "37KB · 2026.07.22 갱신" },
+  { ext: "XLSX", name: "선정·배치 신청자 명단", meta: "26KB · 2026.07.22 갱신" },
+];
+
+const FAQ = [
+  {
+    q: "장애인 등록이 되어 있으면 특수교육대상자로 자동 선정되나요?",
+    a: "아닙니다. 복지부의 장애인 등록과 교육청의 특수교육대상자 선정은 별개 절차입니다. 등록이 되어 있어도 진단·평가를 따로 의뢰해야 하고, 반대로 선정되어도 복지 지원은 읍면동에 따로 신청해야 합니다.",
+  },
+  {
+    q: "진단·평가는 얼마나 걸리나요?",
+    a: "교육장이 특수교육지원센터에 회부한 날로부터 30일 이내에 진단·평가를 마치고, 결과보고 후 2주 이내에 선정·배치 결과를 통보합니다.",
+  },
+  {
+    q: "배치 희망교는 몇 곳까지 적어야 하나요?",
+    a: "1지망부터 3지망까지 적습니다. 적지 않으면 특수교육운영위원회 심사에 따라 임의 배치될 수 있어, 상담 중에 반드시 짚어야 하는 항목입니다.",
+  },
+  {
+    q: "발달지체는 언제까지 지원되나요?",
+    a: "만 9세가 되는 생일이 속한 달의 말일까지 유지된 뒤 종료됩니다. 그 전에 재진단·재선정을 해야 방과후 교육활동과 치료지원이 끊기지 않습니다.",
+  },
+  {
+    q: "보호자가 「장애등급 결정서」를 요구받았다고 합니다.",
+    a: "2019년 7월 1일 장애등급제가 폐지되어 그 이후 등록한 보호자에게는 그런 서류가 없습니다. 「장애정도」(심한 / 심하지 않은) 표기로 안내하세요.",
+  },
+  {
+    q: "다른 시도로 이사하면 받던 지원이 이어지나요?",
+    a: "제도의 실질은 이어지지만 이름이 달라집니다. 강원 마음모아카드는 경기에서 꿈이든카드, 충남에서 디딤카드로 불립니다.",
+  },
+];
 
 const LOOKUP_TARGETS = [
   { id: "guide", label: "선정·배치 지침 문서", hint: "이 교육청 지침이 어디 있는지" },
@@ -48,12 +179,6 @@ type LookupResult = {
   queries: string[];
   note?: string;
 };
-
-const STEPS = [
-  { no: 1, title: "조건 입력", desc: "상담하면서 아동 조건을 고릅니다", href: "#step1" },
-  { no: 2, title: "결과 확인", desc: "확인할 제도·마감일·서류가 정리됩니다", href: "#step2" },
-  { no: 3, title: "안내문 전달", desc: "학부모용 안내문을 출력해 건넵니다", href: "#step3" },
-];
 
 /* ⚠ 데모용 — 발표 후 삭제. 전부 가상 사례다. */
 type Preset = {
@@ -120,8 +245,7 @@ const PRESETS: Preset[] = [
   },
 ];
 
-/* ⚠ 데모용 — 장애영역별 실제 진단·증후군 용어. 상세 칸에 무엇을 적는지 보여주는
-   참고 목록이다. 발표 후 삭제하거나, 남긴다면 입력 자동완성 사전으로 쓴다. */
+/* ⚠ 데모용 — 장애영역별 실제 진단·증후군 용어 참고 목록. 발표 후 삭제 */
 const DEMO_TERMS: Record<DisabilityId, { group: string; items: string }[]> = {
   autism: [
     {
@@ -131,12 +255,11 @@ const DEMO_TERMS: Record<DisabilityId, { group: string; items: string }[]> = {
     },
     {
       group: "정도 표현",
-      items:
-        "지원 요구 1·2·3단계(DSM-5) · 고기능 / 저기능(임상 통용, 공식 진단명 아님) · 지적장애 동반 / 비동반",
+      items: "지원 요구 1·2·3단계(DSM-5) · 고기능 / 저기능(임상 통용, 공식 진단명 아님)",
     },
     {
       group: "자주 동반되는 것",
-      items: "ADHD · 감각처리 어려움 · 표현언어 지연 · 뇌전증 · 수면 문제 · 편식·섭식 문제",
+      items: "ADHD · 감각처리 어려움 · 표현언어 지연 · 뇌전증 · 수면 문제",
     },
     {
       group: "유전 배경이 밝혀진 경우",
@@ -151,12 +274,12 @@ const DEMO_TERMS: Record<DisabilityId, { group: string; items: string }[]> = {
     {
       group: "염색체·유전 질환",
       items:
-        "다운 증후군(21 삼염색체) · 취약 X 증후군(FMR1, 유전성 지적장애 최다 원인) · 프래더-윌리 증후군 · 엔젤만 증후군 · 윌리엄스 증후군 · 레트 증후군(MECP2) · 스미스-마제니스 증후군 · 코넬리아 드 랑게 증후군 · 묘성 증후군(5p 결실) · 22q11.2 결실 증후군(디조지) · 결절성 경화증",
+        "다운 증후군(21 삼염색체) · 취약 X 증후군(FMR1) · 프래더-윌리 증후군 · 엔젤만 증후군 · 윌리엄스 증후군 · 레트 증후군(MECP2) · 스미스-마제니스 증후군 · 묘성 증후군(5p 결실) · 22q11.2 결실 증후군(디조지)",
     },
     {
       group: "⚠ 같은 병을 여러 이름으로 부르는 예",
       items:
-        "엔젤만 증후군 = 엔젤 증후군 = 행복한 인형 증후군(happy puppet) = 속칭 「스마일 증후군」. 진단서에는 Angelman syndrome으로 적힙니다. 보호자가 말한 이름과 서류의 이름이 다를 수 있습니다.",
+        "엔젤만 증후군 = 엔젤 증후군 = 행복한 인형 증후군(happy puppet) = 속칭 「스마일 증후군」. 진단서에는 Angelman syndrome으로 적힙니다.",
     },
     {
       group: "대사·내분비 질환",
@@ -164,14 +287,9 @@ const DEMO_TERMS: Record<DisabilityId, { group: string; items: string }[]> = {
     },
     {
       group: "후천·환경 요인",
-      items:
-        "태아알코올증후군(FAS) · 저산소성 허혈성 뇌손상 · 뇌수막염·뇌염 후유증 · 조산·극저체중 출생 · 납 중독",
+      items: "태아알코올증후군(FAS) · 저산소성 허혈성 뇌손상 · 뇌수막염 후유증 · 조산·극저체중",
     },
-    {
-      group: "정도 표현",
-      items:
-        "경도 · 중등도 · 중도 · 최중도 (DSM-5는 IQ 수치보다 개념·사회·실행 적응기능을 기준으로 봅니다)",
-    },
+    { group: "정도 표현", items: "경도 · 중등도 · 중도 · 최중도 (DSM-5는 적응기능 기준)" },
   ],
   developmentalDelay: [
     {
@@ -180,77 +298,79 @@ const DEMO_TERMS: Record<DisabilityId, { group: string; items: string }[]> = {
     },
     {
       group: "묶어 부르는 진단",
-      items:
-        "전반적 발달지연(GDD) · 언어발달지체 · 말소리장애(조음음운) · 아동기 발병 유창성장애 · 발달성 협응장애(DCD)",
+      items: "전반적 발달지연(GDD) · 언어발달지체 · 말소리장애 · 발달성 협응장애(DCD)",
     },
     {
       group: "배경으로 적히는 것",
-      items:
-        "조산·극저체중 출생 · 뇌성마비 초기 소견 · 유전 검사 진행 중 · 원인 미확인 · 감각처리 어려움",
+      items: "조산·극저체중 출생 · 뇌성마비 초기 소견 · 유전 검사 진행 중 · 원인 미확인",
     },
     {
       group: "⚠ 확인할 것",
       items:
-        "만 9세가 되기 전에 재선정해야 지원이 이어집니다. 다문화 배경 아동은 최근 6개월간 언어치료·학습지도 등 사전 중재를 받았는지 먼저 확인합니다(경남 지침).",
+        "만 9세가 되기 전에 재선정해야 지원이 이어집니다. 다문화 배경 아동은 최근 6개월 사전 중재 여부를 먼저 확인합니다(경남 지침).",
     },
   ],
   other: [
     {
       group: "시각장애",
-      items:
-        "저시력 · 전맹 · 망막색소변성 · 시신경 위축 · 백색증 · 선천성 녹내장 · 레베르 선천성 흑암시 · 미숙아 망막병증",
+      items: "저시력 · 전맹 · 망막색소변성 · 시신경 위축 · 백색증 · 레베르 선천성 흑암시",
     },
     {
       group: "청각장애",
-      items:
-        "감각신경성 난청 · 전음성 난청 · 혼합성 난청 · 일측성 난청 · 인공와우 이식 · 보청기 착용 · 청신경병증",
+      items: "감각신경성 난청 · 전음성 난청 · 일측성 난청 · 인공와우 이식 · 청신경병증",
     },
     {
       group: "지체장애",
-      items:
-        "뇌성마비(경직형·무정위형·혼합형) · 이분척추 · 듀센형 근이영양증 · 척수성 근위축(SMA) · 골형성부전증 · 선천성 사지결손 · 관절굽음증 · 척수손상",
+      items: "뇌성마비(경직형·무정위형) · 이분척추 · 듀센형 근이영양증 · 척수성 근위축(SMA)",
     },
     {
       group: "정서·행동장애",
       items:
-        "우울 · 불안 · 반항성 도전장애(ODD) · 품행장애 · 선택적 함묵증 · 애착 문제 · 틱·뚜렛. ⚠ ADHD와 정신질환은 정서·행동장애 선정 대상이 아니라고 경남 지침에 명시돼 있습니다",
+        "우울 · 불안 · 반항성 도전장애(ODD) · 품행장애 · 선택적 함묵증 · 틱·뚜렛. ⚠ ADHD와 정신질환은 선정 대상이 아니라고 경남 지침에 명시",
     },
-    {
-      group: "의사소통장애",
-      items: "조음음운장애 · 말더듬(유창성) · 음성장애 · 수용·표현 언어장애 · 아동기 말실행증",
-    },
-    { group: "학습장애", items: "난독증(읽기) · 난서증(쓰기) · 난산증(수학) · 주의집중 어려움" },
+    { group: "의사소통장애", items: "조음음운장애 · 말더듬 · 음성장애 · 수용·표현 언어장애" },
+    { group: "학습장애", items: "난독증(읽기) · 난서증(쓰기) · 난산증(수학)" },
     {
       group: "건강장애",
       items:
-        "소아암·백혈병 · 만성신부전(투석) · 선천성 심장질환 · 1형 당뇨 · 재생불량성빈혈 · 크론병 · 뇌전증 · 장기이식 후 관리. ⚠ 3개월 이상 장기 의료처치가 필요하다는 소견이 진단서에 있어야 합니다",
+        "소아암·백혈병 · 만성신부전(투석) · 선천성 심장질환 · 1형 당뇨 · 뇌전증. ⚠ 3개월 이상 장기 의료처치 소견이 진단서에 있어야 합니다",
     },
-    {
-      group: "두 가지 이상 중복된 장애",
-      items:
-        "중도중복장애(지적 또는 자폐성 + 시각·청각·지체·정서행동 중 하나, 각각 정도가 심한 경우) · 시청각장애(deafblind)",
-    },
+    { group: "두 가지 이상 중복된 장애", items: "중도중복장애 · 시청각장애(deafblind)" },
   ],
 };
 
-/* ⚠ 데모용 — 발표자 키워드. 빈 자리에 초록으로 띄운다. 발표 후 삭제. */
+/* ⚠ 데모용 — 발표자 키워드. 빈 자리에 초록으로 띄운다. 발표 후 삭제 */
 function DemoKey({
   children,
   top,
   right,
   left,
-  bottom,
 }: {
   children: React.ReactNode;
   top?: number | string;
   right?: number | string;
   left?: number | string;
-  bottom?: number | string;
 }) {
   return (
-    <span className="demo-key" style={{ top, right, left, bottom }} aria-hidden="true">
+    <span className="demo-key" style={{ top, right, left }} aria-hidden="true">
       {children}
     </span>
+  );
+}
+
+function Icon({ name }: { name: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ICONS[name]}
+    </svg>
   );
 }
 
@@ -263,9 +383,18 @@ export default function Home() {
   const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>(["localChildCenter"]);
   const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
   const [detailNote, setDetailNote] = useState("");
-  const [copied, setCopied] = useState(false);
 
-  /* AI 안내문 — 조건별로 캐시한다. 조건이 바뀌면 자동으로 템플릿으로 돌아간다 */
+  /* 안내문 발신 정보 — 담당자 본인 정보이며 저장하지 않는다 */
+  const [senderOrg, setSenderOrg] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [senderTel, setSenderTel] = useState("");
+
+  const [copied, setCopied] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>("grouped");
+  const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
+
+  /* AI 안내문 — 조건별로 캐시한다 */
   const [aiCache, setAiCache] = useState<Record<string, string>>({});
   const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
   const [aiError, setAiError] = useState("");
@@ -275,11 +404,9 @@ export default function Home() {
   const [lookupBusy, setLookupBusy] = useState("");
   const [lookupError, setLookupError] = useState("");
 
-  const [activeStep, setActiveStep] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>("grouped");
-  const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
   /* ⚠ 데모용 — 발표 후 삭제 */
-  const [presetId, setPresetId] = useState<string>("a");
+  const [presetId, setPresetId] = useState("a");
+  const [showKeys, setShowKeys] = useState(true);
 
   function applyPreset(p: Preset) {
     setPresetId(p.id);
@@ -303,6 +430,7 @@ export default function Home() {
         currentServices,
         otherDisabilityLabel,
         detailNote,
+        sender: { org: senderOrg, name: senderName, tel: senderTel },
       }),
     [
       regionId,
@@ -313,6 +441,9 @@ export default function Home() {
       currentServices,
       otherDisabilityLabel,
       detailNote,
+      senderOrg,
+      senderName,
+      senderTel,
     ]
   );
 
@@ -331,11 +462,11 @@ export default function Home() {
   const urgentCount = sheet.deadlines.filter((d) => d.urgent).length;
   const otherTrackCount = counts.welfare + counts.medical;
   const firstUrgent = sheet.deadlines.find((d) => d.urgent);
-  /* 발달지체는 만 9세 생일이 지원 종료 기준이라 날짜가 계산된다 */
-  const age9Date =
-    sheet.disability.reselection === "age9" ? age9EndOfMonth(birthDate) : null;
+  const age9Date = sheet.disability.reselection === "age9" ? age9EndOfMonth(birthDate) : null;
+  const outOfScope =
+    sheet.age !== null && (sheet.age < SCOPE_AGE_MIN || sheet.age > SCOPE_AGE_MAX);
 
-  /* AI로 보내는 내용. 생년월일과 상세 메모는 넣지 않는다 */
+  /* AI로 보내는 내용. 생년월일·상세 메모·발신 정보는 넣지 않는다 */
   const aiPayload = useMemo(
     () => ({
       지역: sheet.region.name,
@@ -408,11 +539,8 @@ export default function Home() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setLookupError(data.error ?? "검색에 실패했습니다.");
-      } else {
-        setLookupCache((prev) => ({ ...prev, [cacheKey]: data }));
-      }
+      if (!res.ok) setLookupError(data.error ?? "검색에 실패했습니다.");
+      else setLookupCache((prev) => ({ ...prev, [cacheKey]: data }));
     } catch {
       setLookupError("요청을 보내지 못했습니다.");
     } finally {
@@ -437,14 +565,17 @@ export default function Home() {
   }
 
   return (
-    <>
+    <div className={showKeys ? "" : "keys-off"}>
       <a className="skip" href="#main">
         본문 바로가기
       </a>
 
-      {/* ═══════ 헤더 ═══════ */}
       <div className="util-bar">
         <div className="util-inner">
+          <span className="util-flag">학습용 시연 화면입니다. 실제 행정 서비스가 아닙니다.</span>
+          <button type="button" onClick={() => setShowKeys((v) => !v)}>
+            발표 키워드 {showKeys ? "끄기" : "켜기"}
+          </button>
           <a href={REPO_DOCS} target="_blank" rel="noreferrer">
             기획서
           </a>
@@ -458,17 +589,29 @@ export default function Home() {
         <div className="gnb-inner">
           <a href="#main" className="logo">
             <span className="logo-mark">특수교육</span>
-            <span className="logo-name">너도나도 길잡이</span>
+            <span className="logo-name">소예진의 복지그루</span>
           </a>
-          <nav className="gnb-menu" aria-label="바로가기">
-            <a href="#step1" className="btn btn-primary btn-sm">
+          <nav className="gnb-menu" aria-label="주 메뉴">
+            <a href="#step1" className="gnb-link">
+              상담 지원
+            </a>
+            <a href="#step2" className="gnb-link">
+              확인 시트
+            </a>
+            <a href="#forms" className="gnb-link">
+              자료실
+            </a>
+            <a href="#reference" className="gnb-link">
+              참고 자료
+            </a>
+            <a href="#step1" className="btn btn-primary">
               상담 시작
             </a>
           </nav>
         </div>
       </header>
 
-      <nav className="tabnav" aria-label="주 메뉴">
+      <nav className="tabnav" aria-label="단계">
         <div className="tabnav-inner">
           {STEPS.map((s) => (
             <a
@@ -477,7 +620,7 @@ export default function Home() {
               className={`tab ${activeStep === s.no ? "tab-on" : ""}`}
               onClick={() => setActiveStep(s.no)}
             >
-              {s.title}
+              {s.no}. {s.title}
             </a>
           ))}
           <a href="#reference" className="tab">
@@ -497,54 +640,110 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="greeting">
-        <h2>담당자님, 안녕하세요.</h2>
-        <p>“소관이 달라도, 한 화면에서 확인하실 수 있습니다”</p>
-      </div>
-
-      {/* ═══════ 페이지 머리 ═══════ */}
-      <div className="page-head">
-        <div className="page-head-inner rel">
-          <DemoKey top={72} right={0}>
-            {`소관이 네 갈래
+      <main id="main">
+        <section className="hero" aria-label="서비스 소개">
+          <div className="hero-inner rel">
+            <DemoKey top={0} right={0}>
+              {`소관이 네 갈래
 교육 · 복지 · 의료 · 고용
 
 전 과정이 신청주의
 알려주는 주체가 없다`}
-          </DemoKey>
-          <p className="crumb">홈 &gt; 상담 지원 &gt; 특수교육 지원제도 확인</p>
-          <h1 className="h-xl">특수교육 지원제도 상담 지원</h1>
-          <p className="lead">
-            학부모 문의를 받았을 때 아동의 조건을 입력하면, <strong>교육청·복지부·의료로 갈라진
-            제도</strong>를 한 화면에 모아 확인할 제도와 마감일·준비 서류·근거를 정리해 드립니다.
-            학부모용 안내문을 작성합니다.
-          </p>
-        </div>
-        <ol className="steps">
-          {STEPS.map((s) => (
-            <li key={s.no}>
-              <a
-                href={s.href}
-                className={`step ${activeStep === s.no ? "step-on" : ""}`}
-                onClick={() => setActiveStep(s.no)}
-              >
-                <span className="step-num">{s.no}</span>
-                <span>
-                  <strong>{s.title}</strong>
-                  <br />
-                  <span className="b-sm">{s.desc}</span>
-                </span>
+            </DemoKey>
+            <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
+            <h1>
+              아동 조건을 넣으면 확인할 제도와
+              <br />
+              마감일이 한 장으로 정리됩니다
+            </h1>
+            <p className="hero-lead">
+              거주지·장애영역·생년월일·학교급을 넣으면 교육청·복지부·의료로 갈라진 제도를 한 화면에
+              모아 준비 서류와 근거 법령까지 정리합니다. 학부모용 안내문을 작성합니다. 지원 대상은{" "}
+              <strong>
+                만 {SCOPE_AGE_MIN}세부터 만 {SCOPE_AGE_MAX}세까지
+              </strong>
+              입니다.
+            </p>
+            <div className="hero-cta">
+              <a href="#step1" className="btn btn-primary">
+                상담 시작하기
               </a>
-            </li>
-          ))}
-        </ol>
-      </div>
+            </div>
+          </div>
+        </section>
 
-      <main id="main">
-        {/* ═══════ 1단계 · 조건 입력 ═══════ */}
+        <div className="figures">
+          <dl className="figure-row">
+            {FIGURES.map((f) => (
+              <div className="figure" key={f.key}>
+                <dt>{f.key}</dt>
+                <dd>
+                  {f.value}
+                  <span className="unit">{f.unit}</span>
+                </dd>
+                <p>{f.note}</p>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="quick">
+          <div className="quick-card">
+            <p className="quick-title">자주 찾는 서비스</p>
+            <nav className="quick-grid" aria-label="자주 찾는 서비스">
+              {QUICK.map((q) => (
+                <a href={q.href} className="quick-item" key={q.label}>
+                  <span className="quick-ic">
+                    <Icon name={q.icon} />
+                  </span>
+                  <span className="quick-label">{q.label}</span>
+                  <span className="quick-desc">{q.desc}</span>
+                </a>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        <div className="greeting">
+          <h2>담당자님, 안녕하세요.</h2>
+          <p>“소관이 달라도, 한 화면에서 확인하실 수 있습니다”</p>
+        </div>
+
+        <div className="page-head">
+          <div className="page-head-inner rel">
+            <p className="crumb">홈 &gt; 상담 지원 &gt; 특수교육 지원제도 확인</p>
+            <h1 className="h-xl">특수교육 지원제도 상담 지원</h1>
+            <p className="lead">
+              <strong>판정하지 않습니다. 확인 목록을 드립니다.</strong> 모든 항목에 근거 법령과 지침
+              출처가 붙고, 입력값은 저장되지 않습니다. 지금 정리된 제도와 마감일은 만{" "}
+              {SCOPE_AGE_MIN}세~만 {SCOPE_AGE_MAX}세 구간에 맞춰져 있습니다.
+            </p>
+          </div>
+          <ol className="steps">
+            {STEPS.map((s) => (
+              <li key={s.no}>
+                <a
+                  href={s.href}
+                  className={`step ${activeStep === s.no ? "step-on" : ""}`}
+                  onClick={() => setActiveStep(s.no)}
+                >
+                  <span className="step-num">{s.no}</span>
+                  <span>
+                    <strong>{s.title}</strong>
+                    <br />
+                    <span className="b-sm">{s.desc}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* ═══ 1단계 ═══ */}
         <section className="section wrap" id="step1">
           <div className="section-head">
             <h2 className="h-lg">1. 조건 입력</h2>
+            <span className="b-sm subtle right">상담 첫머리에 어차피 확인하는 정보만 받습니다</span>
           </div>
 
           <table className="form-table">
@@ -575,6 +774,7 @@ export default function Home() {
                   </span>
                 </td>
               </tr>
+
               <tr>
                 <th scope="row">
                   신청 상황<span className="req">*</span>
@@ -596,6 +796,7 @@ export default function Home() {
                   <span className="hint">{sheet.procedure.when}</span>
                 </td>
               </tr>
+
               <tr>
                 <th scope="row">
                   거주 지역<span className="req">*</span>
@@ -619,6 +820,7 @@ export default function Home() {
                   </span>
                 </td>
               </tr>
+
               <tr>
                 <th scope="row">
                   장애영역<span className="req">*</span>
@@ -641,7 +843,7 @@ export default function Home() {
                   {disabilityId === "other" && (
                     <div className="sub-field">
                       <label htmlFor="otherArea" className="sub-label">
-                        장애영역 직접 입력
+                        영역명 직접 입력
                       </label>
                       <input
                         id="otherArea"
@@ -652,8 +854,9 @@ export default function Home() {
                         placeholder="예: 정서·행동장애"
                       />
                       <span className="hint">
-                        특수교육법 시행령 제10조는 11개 영역을 정하고 있습니다. 아직 이 도구에 검사
-                        도구가 등록되지 않은 영역: {UNREGISTERED_AREAS}
+                        특수교육법상 11개 영역 가운데 위 세 가지가 아니면 「기타」를 고르고 영역명을
+                        적습니다. 적은 이름이 확인 시트와 학부모 안내문에 그대로 들어갑니다. 아직
+                        검사 도구가 등록되지 않은 영역: {UNREGISTERED_AREAS}
                       </span>
                     </div>
                   )}
@@ -671,8 +874,8 @@ export default function Home() {
                       placeholder={sheet.disability.detailPlaceholder}
                     />
                     <span className="hint">
-                      {sheet.disability.detailHint} 상담에서 들은 표현을 그대로 적으셔도 됩니다.
-                      확인 시트에만 참고로 표시되며 판정이나 검사 선택에는 쓰이지 않습니다.
+                      {sheet.disability.detailHint} 확인 시트에만 참고로 표시되며 판정이나 검사
+                      선택에는 쓰이지 않습니다.
                     </span>
                   </div>
 
@@ -690,6 +893,7 @@ export default function Home() {
                   </div>
                 </td>
               </tr>
+
               <tr>
                 <th scope="row">
                   학교급<span className="req">*</span>
@@ -710,6 +914,7 @@ export default function Home() {
                   </div>
                 </td>
               </tr>
+
               <tr>
                 <th scope="row">
                   <label htmlFor="birth">생년월일</label>
@@ -723,12 +928,17 @@ export default function Home() {
                   />
                   <span className="hint">
                     재선정 마감일 계산에만 사용하며 저장하지 않습니다. (발달지체는 만 9세 생일 기준)
+                    <span className="demo-key-inline">← 개인정보 아님 · 저장 안 함</span>
                   </span>
-                  <span className="demo-key-inline">
-                    ← 개인정보 아님 · 마감 계산용 · 저장 안 함
-                  </span>
+                  {outOfScope && (
+                    <span className="hint" style={{ color: "var(--amber)" }}>
+                      만 {sheet.age}세는 이 도구가 정리한 구간(만 {SCOPE_AGE_MIN}~{SCOPE_AGE_MAX}세)
+                      밖입니다. 절차와 서류는 같지만, 제도 목록과 마감일은 다시 확인해야 합니다.
+                    </span>
+                  )}
                 </td>
               </tr>
+
               <tr>
                 <th scope="row">현재 이용 중인 서비스</th>
                 <td>
@@ -748,21 +958,53 @@ export default function Home() {
                   <span className="hint">중복 이용 제한이 있는 조합을 확인해 드립니다.</span>
                 </td>
               </tr>
+
+              <tr>
+                <th scope="row">안내문 발신 정보</th>
+                <td>
+                  <div className="field-grid">
+                    <input
+                      type="text"
+                      className="text-input"
+                      value={senderOrg}
+                      onChange={(e) => setSenderOrg(e.target.value)}
+                      placeholder="기관명"
+                      aria-label="기관명"
+                    />
+                    <input
+                      type="text"
+                      className="text-input"
+                      value={senderName}
+                      onChange={(e) => setSenderName(e.target.value)}
+                      placeholder="담당자"
+                      aria-label="담당자"
+                    />
+                    <input
+                      type="text"
+                      className="text-input"
+                      value={senderTel}
+                      onChange={(e) => setSenderTel(e.target.value)}
+                      placeholder="연락처"
+                      aria-label="연락처"
+                    />
+                  </div>
+                  <span className="hint">
+                    안내문 맨 끝 줄에 그대로 들어갑니다. 비워 두면 기관명만 나옵니다. 담당자 본인
+                    정보이며 아동 정보와 마찬가지로 저장하지 않습니다.
+                  </span>
+                </td>
+              </tr>
             </tbody>
           </table>
 
           <div className="btn-row">
-            <a
-              href="#step2"
-              className="btn btn-primary"
-              onClick={() => setActiveStep(2)}
-            >
+            <a href="#step2" className="btn btn-primary" onClick={() => setActiveStep(2)}>
               결과 확인하기
             </a>
           </div>
         </section>
 
-        {/* ═══════ 2단계 · 결과 ═══════ */}
+        {/* ═══ 2단계 ═══ */}
         <section className="section section-gray" id="step2">
           <div className="wrap">
             <div className="section-head">
@@ -770,7 +1012,6 @@ export default function Home() {
               <span className="b-sm subtle right">조건을 바꾸면 결과가 바로 다시 계산됩니다</span>
             </div>
 
-            {/* 조건 요약 */}
             <div className="summary-bar">
               <span className="sum-label">현재 조건</span>
               <span className="sum-item">{sheet.region.name}</span>
@@ -789,9 +1030,8 @@ export default function Home() {
               </a>
             </div>
 
-            {/* 요약 카드 */}
             <div className="tint-card rel">
-              <DemoKey top={12} right={12}>
+              <DemoKey top={14} right={14}>
                 {`소관 밖 N건 ← 이 숫자가 값
 지금은 담당자가 손으로 찾는 몫
 
@@ -799,16 +1039,13 @@ export default function Home() {
               </DemoKey>
               <p className="tint-title">이번 상담에서 확인할 항목</p>
               <p className="tint-line">
-                {sheet.region.name} · {sheet.disabilityLabel} · {sheet.level.name}
+                {sheet.region.name} · {sheet.disabilityLabel} · {sheet.level.name} ·{" "}
+                {sheet.procedure.name}
               </p>
               <p className="tint-line">
                 진단·평가 제출처 : {sheet.level.submitTo} · 결정 : {sheet.level.decider}
+                {sheet.age !== null && ` · 만 ${sheet.age}세 (${sheet.ageBasis})`}
               </p>
-              {sheet.age !== null && (
-                <p className="tint-line">
-                  만 {sheet.age}세 · {sheet.ageBasis}
-                </p>
-              )}
 
               <div className="subcard-grid">
                 <div className="subcard">
@@ -855,21 +1092,20 @@ export default function Home() {
                 <button type="button" className="card-action" onClick={() => window.print()}>
                   인쇄하기
                 </button>
+                <span className="divider" />
                 <button type="button" className="card-action" onClick={copyLetter}>
                   {copied ? "복사했습니다" : "안내문 복사"}
                 </button>
               </div>
             </div>
 
-            {/* 상태 카드 — 가장 급한 것 하나만 크게 */}
             {age9Date ? (
               <div className="tint-card rel">
-                <DemoKey top={12} right={12}>
+                <DemoKey top={14} right={14}>
                   {`이미 받던 지원이 끊긴다
 만 9세 생일 = 종료 기준
 
-생년월일에서 계산되는 실제 날짜
-지침에 담당자 의무로 명시`}
+생년월일에서 계산되는 실제 날짜`}
                 </DemoKey>
                 <p className="tint-title">발달지체 지원 종료 예정일</p>
                 <p className="tint-status">{age9Date}</p>
@@ -881,7 +1117,8 @@ export default function Home() {
                   <a href="#deadlines" className="card-action">
                     마감일 전체 보기
                   </a>
-                    <a href="#step3" className="card-action">
+                  <span className="divider" />
+                  <a href="#step3" className="card-action">
                     안내문 확인
                   </a>
                 </div>
@@ -895,9 +1132,6 @@ export default function Home() {
                   <div className="card-actions">
                     <a href="#deadlines" className="card-action">
                       마감일 전체 보기
-                    </a>
-                        <a href="#step3" className="card-action">
-                      안내문 확인
                     </a>
                   </div>
                 </div>
@@ -919,7 +1153,7 @@ export default function Home() {
 그대로 출력해서 건넨다
 = 안내 기록이 남는다`}
               </DemoKey>
-              {/* ── 담당자용 ── */}
+
               <section className="panel">
                 <div className="panel-head">
                   <h3 className="h-sm">담당자용 확인 시트</h3>
@@ -1012,8 +1246,9 @@ export default function Home() {
                     <h4 className="block-title">이번 진단·평가에 들어가는 검사</h4>
                     {sheet.detailNote && (
                       <p className="detail-line">
-                        <strong>상세 유형 · 특성</strong> {sheet.detailNote}
-                        <span className="hint" style={{ marginTop: 4 }}>
+                        <strong>{sheet.disability.detailLabel}</strong>
+                        {sheet.detailNote}
+                        <span className="hint">
                           담당자가 입력한 참고 정보입니다. 검사 선택이나 판정에는 쓰이지 않습니다.
                         </span>
                       </p>
@@ -1024,37 +1259,35 @@ export default function Home() {
                         확인하세요.
                       </p>
                     ) : (
-                    <table className="tbl">
-                      <caption className="skip">장애영역별 검사 도구</caption>
-                      <thead>
-                        <tr>
-                          <th scope="col" style={{ width: 68 }}>
-                            구분
-                          </th>
-                          <th scope="col" style={{ width: "28%" }}>
-                            검사 영역
-                          </th>
-                          <th scope="col">검사 도구</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sheet.disability.tests.map((t, i) => (
-                          <tr key={i}>
-                            <td>
-                              <span className={`badge ${t.required ? "badge-req" : ""}`}>
-                                {t.required ? "필수" : "선택"}
-                              </span>
-                            </td>
-                            <th scope="row">{t.label}</th>
-                            <td className="td-sub">{t.items}</td>
+                      <table className="tbl">
+                        <caption className="skip">장애영역별 검사 도구</caption>
+                        <thead>
+                          <tr>
+                            <th scope="col" style={{ width: 68 }}>
+                              구분
+                            </th>
+                            <th scope="col" style={{ width: "28%" }}>
+                              검사 영역
+                            </th>
+                            <th scope="col">검사 도구</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {sheet.disability.tests.map((t, i) => (
+                            <tr key={i}>
+                              <td>
+                                <span className={`badge ${t.required ? "badge-req" : ""}`}>
+                                  {t.required ? "필수" : "선택"}
+                                </span>
+                              </td>
+                              <th scope="row">{t.label}</th>
+                              <td className="td-sub">{t.items}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     )}
-                    {sheet.disability.note && (
-                      <p className="hint">{sheet.disability.note}</p>
-                    )}
+                    {sheet.disability.note && <p className="hint">{sheet.disability.note}</p>}
                   </div>
 
                   <div className="block">
@@ -1103,7 +1336,7 @@ export default function Home() {
                     </div>
 
                     {trackFilter === "all" && viewMode === "all" && (
-                      <p className="hint" style={{ marginBottom: 16 }}>
+                      <p className="hint" style={{ marginTop: 0, marginBottom: 14 }}>
                         교육청·복지부·의료가 섞여 있습니다. 이 목록이 한 화면에 있다는 것이 이 도구의
                         핵심입니다.
                       </p>
@@ -1169,18 +1402,16 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* 빈칸을 AI가 웹에서 찾아본다 */}
                     <div className="fold-static">
                       <p className="h-xs">이 지역 정보를 AI가 찾아봅니다</p>
                       <p className="hint" style={{ marginTop: 4, marginBottom: 12 }}>
-                        우리 데이터에 없는 칸입니다. 제미나이가 웹을 검색해 후보를 찾고 출처를
-                        함께 보여줍니다. <strong>확정이 아니므로 담당자가 확인해야 합니다.</strong>
+                        우리 데이터에 없는 칸입니다. 제미나이가 웹을 검색해 후보를 찾고 출처를 함께
+                        보여줍니다. <strong>확정이 아니므로 담당자가 확인해야 합니다.</strong>
                       </p>
 
                       <div className="chip-row" style={{ marginBottom: 12 }}>
                         {LOOKUP_TARGETS.map((t) => {
-                          const cacheKey = `${regionId}:${t.id}`;
-                          const done = Boolean(lookupCache[cacheKey]);
+                          const done = Boolean(lookupCache[`${regionId}:${t.id}`]);
                           return (
                             <button
                               key={t.id}
@@ -1240,17 +1471,13 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="alert alert-info">
-                    <span className="alert-tag">유의</span>
-                    <p className="alert-detail" style={{ marginTop: 0 }}>
-                      이 시트는 자격을 판정하지 않습니다. 확인해야 할 항목과 근거만 제시하며, 최종
-                      판단은 담당자가 합니다.
-                    </p>
-                  </div>
+                  <p className="panel-foot">
+                    이 시트는 자격을 판정하지 않습니다. 확인해야 할 항목과 근거만 제시하며, 최종
+                    판단은 담당자가 합니다.
+                  </p>
                 </div>
               </section>
 
-              {/* ── 학부모용 ── */}
               <section className="panel letter" id="step3">
                 <div className="panel-head">
                   <h3 className="h-sm">3. 학부모용 안내문</h3>
@@ -1263,10 +1490,6 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="panel-body">
-                  <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
-                    출력해서 건네거나 문자로 보냅니다. 필터와 무관하게 항상 전체가 들어갑니다.
-                  </p>
-
                   <div className="ai-bar">
                     <span className={`badge ${aiLetter ? "badge-primary" : ""}`}>
                       {aiLetter ? "AI가 다시 씀" : "기본 서식"}
@@ -1277,11 +1500,7 @@ export default function Home() {
                       onClick={rewriteWithAi}
                       disabled={aiStatus === "loading"}
                     >
-                      {aiStatus === "loading"
-                        ? "쓰고 있습니다…"
-                        : aiLetter
-                          ? "AI로 다시 쓰기"
-                          : "AI로 쉽게 다시 쓰기"}
+                      {aiStatus === "loading" ? "쓰고 있습니다…" : "AI로 쉽게 다시 쓰기"}
                     </button>
                     {aiLetter && (
                       <button
@@ -1301,14 +1520,12 @@ export default function Home() {
                   </div>
 
                   {aiStatus === "error" && (
-                    <p className="ai-error">
-                      {aiError} 아래 기본 서식은 그대로 쓸 수 있습니다.
-                    </p>
+                    <p className="ai-error">{aiError} 아래 기본 서식은 그대로 쓸 수 있습니다.</p>
                   )}
 
-                  <p className="hint" style={{ marginTop: 0 }}>
-                    AI로 보낼 때 <strong>생년월일과 상세 메모는 보내지 않습니다.</strong> 지역·장애영역·학교급과
-                    규칙이 계산한 결과만 보냅니다.
+                  <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
+                    출력해서 건네거나 문자로 보냅니다. AI로 보낼 때{" "}
+                    <strong>생년월일·상세 메모·발신 정보는 보내지 않습니다.</strong>
                   </p>
 
                   <pre className="letter-body">{shownLetter}</pre>
@@ -1318,12 +1535,82 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ═══════ 참고 자료 ═══════ */}
+        {/* ═══ 알림 마당 ═══ */}
+        <section className="section wrap" id="notice-board">
+          <div className="section-head">
+            <h2 className="h-lg">알림 마당</h2>
+            <span className="b-sm subtle right">지침 개정과 서식 변경을 여기서 알립니다</span>
+          </div>
+
+          <div className="board-grid">
+            <div className="board">
+              <div className="board-head">
+                <h3>공지사항</h3>
+                <span className="board-more">전부 가상 데이터입니다</span>
+              </div>
+              <ul className="board-list">
+                {BOARD.map((b) => (
+                  <li key={b.title}>
+                    <a href="#notice-board">
+                      <span className="board-tag">{b.tag}</span>
+                      <span className="board-title">{b.title}</span>
+                      {b.isNew && <span className="board-new">N</span>}
+                      <span className="board-date">{b.date}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="board" id="forms">
+              <div className="board-head">
+                <h3>서식 자료실</h3>
+                <span className="board-more">전부 가상 파일입니다</span>
+              </div>
+              <div className="board-list">
+                <div className="file-grid">
+                  {FILES.map((f) => (
+                    <div className="file" key={f.name}>
+                      <span className="file-ic">{f.ext}</span>
+                      <span>
+                        <span className="file-name">{f.name}</span>
+                        <br />
+                        <span className="file-meta">{f.meta}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ FAQ ═══ */}
+        <section className="section section-gray" id="faq">
+          <div className="wrap">
+            <div className="section-head">
+              <h2 className="h-lg">자주 묻는 질문</h2>
+              <span className="b-sm subtle right">
+                두 시도 지침 Q&amp;A에 공통으로 실린 문항을 바탕으로 구성했습니다
+              </span>
+            </div>
+            {FAQ.map((f, i) => (
+              <details className="faq" key={f.q} open={i === 0}>
+                <summary>{f.q}</summary>
+                <div className="faq-a">
+                  <p>{f.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ 참고 자료 ═══ */}
         <section className="section wrap" id="reference">
           <div className="section-head rel">
             <h2 className="h-lg">참고 자료</h2>
             <span className="b-sm subtle right">이 도구가 필요한 이유</span>
-            <DemoKey top={48} right={0}>
+            <DemoKey top={52} right={0}>
               {`카드 이름 6개 = 지역마다 다름
 강원·경남 절차는 동일
 → 확장은 개발이 아니라 데이터 교체`}
@@ -1366,14 +1653,12 @@ export default function Home() {
 
           <div className="alert alert-danger" style={{ marginTop: 32 }}>
             <span className="alert-tag">중요</span>
-            <p className="alert-title">
-              2019년에 폐지된 용어가 2025년 지침에 열네 번 남아 있습니다
-            </p>
+            <p className="alert-title">2019년에 폐지된 용어가 2025년 지침에 열네 번 남아 있습니다</p>
             <p className="alert-detail">
-              장애등급제가 폐지되어 「장애등급」은 「장애정도」로 바뀌었습니다. 그런데 경상남도교육청
-              2025년 지침은 제출 서류로 「장애등급 결정서」를 반복해 요구합니다. 그대로 안내하면
-              보호자는 존재하지 않는 서류를 떼러 갑니다. (강원 1회 · 경남 14회 — 두 지침 원문 대조,
-              2026.08)
+              장애등급제가 폐지되어 「장애등급」은 「장애정도」로 바뀌었습니다. 그런데
+              경상남도교육청 2025년 지침은 제출 서류로 「장애등급 결정서」를 반복해 요구합니다.
+              그대로 안내하면 보호자는 존재하지 않는 서류를 떼러 갑니다. (강원 1회 · 경남 14회 — 두
+              지침 원문 대조, 2026.08)
             </p>
           </div>
 
@@ -1382,27 +1667,37 @@ export default function Home() {
               기획서 전문 보기
             </a>
           </div>
+
+          <div className="callout" style={{ marginTop: 32 }}>
+            <div>
+              <p className="callout-title">복지그루 상담지원실</p>
+              <p className="callout-tel">1600-0000</p>
+              <p className="callout-note">
+                평일 09:00 ~ 18:00 (점심 12:00 ~ 13:00) · 가상 번호입니다. 실제로 연결되지 않습니다.
+              </p>
+            </div>
+            <a href="#faq" className="btn btn-outline">
+              자주 묻는 질문 보기
+            </a>
+          </div>
         </section>
       </main>
 
-      {/* ═══════ 푸터 ═══════ */}
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-cols">
             <div>
               <h3>이름에 대하여</h3>
               <p>
-                강원특별자치도교육청이 담당자에게 배포하는 「특수교육대상자 선정·배치 업무
-                길잡이」에서 가져왔습니다. 담당자와 학부모가 같은 한 장을 본다는 뜻으로
-                「너도나도」를 붙였습니다.
+                「복지그루」는 교육청과 복지부로 흩어진 제도를 한 그루에 모아 본다는 뜻입니다.
+                담당자와 학부모가 같은 한 장을 보게 하는 것이 이 도구의 목표입니다.
               </p>
             </div>
             <div>
               <h3>데이터에 대하여</h3>
               <p>
                 절차·기한·카드 명칭·검사 도구는 강원·경남 교육청 지침 원문에서 확인한 내용입니다. 그
-                밖의 금액과 세부 절차는 화면 구성을 보여주기 위한 예시이며, 화면에 「예시」 표시가
-                붙습니다.
+                밖의 공지사항·서식 파일·문의처·금액은 화면 구성을 위한 가상 데이터입니다.
               </p>
             </div>
             <div>
@@ -1424,7 +1719,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
 
@@ -1479,6 +1774,12 @@ function ProgramItem({ program: p }: { program: ResolvedProgram }) {
               <th scope="row">기한</th>
               <td>{p.deadline}</td>
             </tr>
+            {p.ageNote && (
+              <tr>
+                <th scope="row">나이 조건</th>
+                <td className="td-sub">{p.ageNote}</td>
+              </tr>
+            )}
             <tr>
               <th scope="row">근거</th>
               <td className="td-sub">{p.legalBasis}</td>

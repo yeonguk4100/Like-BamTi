@@ -41,6 +41,8 @@ export type Input = {
   otherDisabilityLabel?: string;
   /** 상세 유형·원인 질환·지연 영역 등. 참고용이며 판정에 쓰지 않는다 */
   detailNote?: string;
+  /** 안내문 맨 끝에 들어가는 발신 정보. 담당자 본인 정보이며 저장하지 않는다 */
+  sender?: { org?: string; name?: string; tel?: string };
 };
 
 export type Warning = {
@@ -259,6 +261,7 @@ export function buildSheet(input: Input) {
     programs,
     deadlines,
     age9,
+    sender: input.sender,
   });
 
   return {
@@ -286,9 +289,20 @@ function buildParentLetter(args: {
   programs: ResolvedProgram[];
   deadlines: Deadline[];
   age9: string | null;
+  sender?: { org?: string; name?: string; tel?: string };
 }) {
-  const { region, disability, disabilityLabel, procedure, documents, level, programs, deadlines, age9 } =
-    args;
+  const {
+    region,
+    disability,
+    disabilityLabel,
+    procedure,
+    documents,
+    level,
+    programs,
+    deadlines,
+    age9,
+    sender,
+  } = args;
 
   const eduPrograms = programs.filter((p) => p.track === "education");
   const otherPrograms = programs.filter((p) => p.track !== "education");
@@ -344,7 +358,9 @@ function buildParentLetter(args: {
 
   lines.push("");
   lines.push("궁금한 점은 아래로 연락 주세요.");
-  lines.push(`${region.officeName} 특수교육지원센터 (담당자 연락처)`);
+  lines.push(sender?.org?.trim() || `${region.officeName} 특수교육지원센터`);
+  if (sender?.name?.trim()) lines.push(`담당자 ${sender.name.trim()}`);
+  if (sender?.tel?.trim()) lines.push(sender.tel.trim());
 
   return lines.join("\n");
 }

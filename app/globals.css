@@ -1,7 +1,7 @@
 :root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}
 
 /* ============================================================
-   너도나도 길잡이 — 공공기관 업무 화면
+   소예진의 복지그루 — 공공기관 업무 화면
 
    한국장학재단·교육청 계열 화면의 뼈대를 그대로 둔다.
      · 상단 유틸바 → 흰 GNB → 남색 안내 띠 → 지표 → 퀵메뉴 →
@@ -2377,4 +2377,11 @@ body.demo-on .demo-key-inline {
   .click-pill-row {
     display: none !important;
   }
+}
+
+/* 발표 키워드 끄기 — util-bar 버튼으로 토글한다 */
+.keys-off .demo-key,
+.keys-off .demo-key-inline,
+.keys-off .demo-terms {
+  display: none !important;
 }
