@@ -1,11 +1,12 @@
 {
-  "name": "bokjigru",
+  "name": "neodonado-giljabi",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "^15.5.4",
@@ -18,5 +19,5 @@
     "@types/react-dom": "^19.1.0",
     "typescript": "^5.7.0"
   },
-  "description": "소예진의 복지그루 — 특수교육 지원제도 상담 지원 도구"
+  "description": "너도나도 길잡이 — 특수교육 지원제도 상담 지원 도구"
 }

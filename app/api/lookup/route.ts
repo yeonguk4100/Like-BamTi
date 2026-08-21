@@ -7,9 +7,18 @@
 //  - 데이터베이스를 덮지 않는다. 화면에만 후보로 띄운다.
 //  - 서식 번호처럼 hwp·pdf 안에 있는 값은 검색으로 찾을 수 없다.
 //    그래서 「문서가 어디 있는지」를 찾게 목표를 잡았다.
+//  - 지역 이름을 클라이언트에서 받지 않는다. regionId 만 받아 서버가 REGIONS 에서
+//    이름을 꺼낸다. 프롬프트에 임의의 문장이 섞여 들어갈 자리를 없앤다.
+
+import { REGIONS, type RegionId } from "@/app/lib/data";
+import { fail, readJson } from "@/app/lib/validate";
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 const TIMEOUT_MS = 20_000;
+
+export const runtime = "nodejs";
+/** 검색을 붙이면 20초까지 걸린다. Vercel 기본 한도가 더 짧아 명시한다 */
+export const maxDuration = 30;
 
 const SYSTEM = `당신은 한국 특수교육 담당자를 돕는 조사 보조입니다.
 웹 검색으로 확인할 수 있는 사실만 답합니다.
@@ -23,7 +32,9 @@ const SYSTEM = `당신은 한국 특수교육 담당자를 돕는 조사 보조�
 6. 마크다운 기호(#, *, -, **)를 쓰지 않습니다. 번호와 「」 만 씁니다.
 7. 전체 400자 이내로 씁니다.`;
 
-const TARGETS: Record<string, (region: string, office: string) => string> = {
+type TargetPrompt = (region: string, office: string) => string;
+
+const TARGETS: Record<string, TargetPrompt> = {
   guide: (region, office) =>
     `${office}의 「특수교육대상자 선정·배치」 업무 지침 또는 안내 문서가 어디에 공개되어 있는지 찾아 주세요. ` +
     `문서 이름과 게시된 위치(어느 기관 홈페이지의 어느 게시판인지)를 알려 주세요. ` +
@@ -43,21 +54,30 @@ type Chunk = { web?: { uri?: string; title?: string } };
 export async function POST(request: Request) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
-    return Response.json({ error: "GEMINI_API_KEY 가 설정되지 않았습니다." }, { status: 503 });
+    return fail("GEMINI_API_KEY 가 설정되지 않았습니다.", 503);
   }
 
   const model = (process.env.GEMINI_MODEL || "gemini-3-flash-preview").replace(/^models\//, "");
 
-  let body: { target?: string; regionName?: string; officeName?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "요청 본문을 읽지 못했습니다." }, { status: 400 });
+  const parsed = await readJson(request);
+  if (!parsed.ok) return fail(parsed.error, 400);
+
+  const raw = parsed.value;
+  const body: { target?: unknown; regionId?: unknown } =
+    raw !== null && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as { target?: unknown; regionId?: unknown })
+      : {};
+
+  const make: TargetPrompt | undefined =
+    typeof body.target === "string" ? TARGETS[body.target] : undefined;
+  if (!make) {
+    return fail(`target 이 올바르지 않습니다. (${Object.keys(TARGETS).join(" / ")})`, 422);
   }
 
-  const make = TARGETS[body.target ?? ""];
-  if (!make || !body.regionName || !body.officeName) {
-    return Response.json({ error: "찾을 항목이나 지역이 지정되지 않았습니다." }, { status: 400 });
+  // 지역 이름은 우리 데이터에서만 꺼낸다. 클라이언트가 보낸 문장을 쓰지 않는다.
+  const region = REGIONS.find((r) => r.id === (body.regionId as RegionId));
+  if (!region) {
+    return fail(`regionId 가 올바르지 않습니다. (${REGIONS.map((r) => r.id).join(" / ")})`, 422);
   }
 
   try {
@@ -67,7 +87,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents: [
-          { role: "user", parts: [{ text: make(body.regionName, body.officeName) }] },
+          { role: "user", parts: [{ text: make(region.name, region.officeName) }] },
         ],
         tools: [{ google_search: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
@@ -107,18 +127,27 @@ export async function POST(request: Request) {
           sources: [],
           queries,
           note: "웹에서 근거를 찾지 못했습니다. 해당 교육청에 직접 문의해야 합니다.",
+          verified: false,
         },
-        { status: 200 }
+        { status: 200, headers: { "Cache-Control": "no-store" } }
       );
     }
 
-    return Response.json({ answer, sources, queries, model });
+    // verified 는 늘 false 다. 검색 결과는 확인 후보이고 데이터베이스를 덮지 않는다.
+    return Response.json(
+      {
+        answer,
+        sources,
+        queries,
+        model,
+        verified: false,
+        note: "검색으로 찾은 후보입니다. 출처를 열어 확인한 뒤 쓰세요.",
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
   } catch (e) {
     const message = e instanceof Error ? e.message : "알 수 없는 오류";
     const timedOut = message.includes("timed out") || message.includes("abort");
-    return Response.json(
-      { error: timedOut ? "20초 안에 응답이 오지 않았습니다." : message },
-      { status: 504 }
-    );
+    return fail(timedOut ? "20초 안에 응답이 오지 않았습니다." : message, 504);
   }
 }
