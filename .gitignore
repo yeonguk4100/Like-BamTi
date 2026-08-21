@@ -7,3 +7,9 @@ build/
 .DS_Store
 next-env.d.ts
 *.tsbuildinfo
+
+# 도구 설정 (로컬 전용)
+.claude/
+
+# 옛 빌드 산출물
+web-preview/

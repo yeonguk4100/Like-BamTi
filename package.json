@@ -1,5 +1,5 @@
 {
-  "name": "campus-axton-starter",
+  "name": "bokjigru",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -17,5 +17,6 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "typescript": "^5.7.0"
-  }
+  },
+  "description": "소예진의 복지그루 — 특수교육 지원제도 상담 지원 도구"
 }

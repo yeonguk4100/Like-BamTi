@@ -1687,10 +1687,10 @@ export default function Home() {
         <div className="footer-inner">
           <div className="footer-cols">
             <div>
-              <h3>이름에 대하여</h3>
+              <h3>만든 사람</h3>
               <p>
-                「복지그루」는 교육청과 복지부로 흩어진 제도를 한 그루에 모아 본다는 뜻입니다.
-                담당자와 학부모가 같은 한 장을 보게 하는 것이 이 도구의 목표입니다.
+                <strong>소예진</strong>이 만든 복지그루입니다. 교육청과 복지부로 흩어진 제도를 한
+                그루에 모아, 담당자와 학부모가 같은 한 장을 보게 하는 것이 이 도구의 목표입니다.
               </p>
             </div>
             <div>
