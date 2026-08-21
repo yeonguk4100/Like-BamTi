@@ -6,11 +6,15 @@
 
 import {
   APPEAL_DEADLINES,
+  BASE_DATE,
+  BASE_SCHOOL_YEAR,
   CURRENT_SERVICES,
   DISABILITIES,
   FORM_LABEL,
   FORM_NO,
   LEVELS,
+  LOCAL_PROGRAMS,
+  LOCAL_SOURCES,
   OVERLAP_RULES,
   PROCEDURES,
   PROGRAMS,
@@ -73,6 +77,20 @@ export function age9EndOfMonth(birthDate: string): string | null {
   return `${year}년 ${month}월 ${lastDay}일`;
 }
 
+/** 기준일(학년도 시작) 시점의 만 나이. 오늘 날짜를 쓰지 않아 렌더링이 어긋나지 않는다 */
+export function ageAtBase(birthDate: string): number | null {
+  const b = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
+  const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(BASE_DATE);
+  if (!b || !d) return null;
+  const [by, bm, bd] = [Number(b[1]), Number(b[2]), Number(b[3])];
+  const [ry, rm, rd] = [Number(d[1]), Number(d[2]), Number(d[3])];
+  let age = ry - by;
+  if (rm < bm || (rm === bm && rd < bd)) age -= 1;
+  return age < 0 ? null : age;
+}
+
+export const AGE_BASIS = `${BASE_SCHOOL_YEAR}학년도 기준 (${BASE_DATE})`;
+
 export function buildSheet(input: Input) {
   const region = REGIONS.find((r) => r.id === input.regionId)!;
   const disability = DISABILITIES.find((d) => d.id === input.disabilityId)!;
@@ -92,12 +110,31 @@ export function buildSheet(input: Input) {
   const detailNote = input.detailNote?.trim() || undefined;
 
   /* ── 1. 확인해야 할 제도 ── */
-  const programs: ResolvedProgram[] = PROGRAMS.filter((p) => {
-    if (p.appliesTo?.levels && !p.appliesTo.levels.includes(input.levelId)) return false;
-    if (p.appliesTo?.disabilities && !p.appliesTo.disabilities.includes(input.disabilityId))
-      return false;
+  const age = ageAtBase(input.birthDate);
+
+  /** 나이 조건에 걸려 목록에서 빠진 제도. 숨기지 않고 개수와 이름을 보여준다 */
+  const excludedByAge: { name: string; reason: string }[] = [];
+
+  const candidates = [...PROGRAMS, ...LOCAL_PROGRAMS].filter((p) => {
+    const a = p.appliesTo;
+    if (a?.levels && !a.levels.includes(input.levelId)) return false;
+    if (a?.disabilities && !a.disabilities.includes(input.disabilityId)) return false;
+    if (a?.regions && !a.regions.includes(input.regionId)) return false;
+
+    if (age !== null) {
+      if (a?.ageMin !== undefined && age < a.ageMin) {
+        excludedByAge.push({ name: p.name, reason: `만 ${a.ageMin}세부터` });
+        return false;
+      }
+      if (a?.ageMax !== undefined && age > a.ageMax) {
+        excludedByAge.push({ name: p.name, reason: `만 ${a.ageMax}세까지` });
+        return false;
+      }
+    }
     return true;
-  }).map((p) => {
+  });
+
+  const programs: ResolvedProgram[] = candidates.map((p) => {
     const fill = (s: string) =>
       s
         .replace(/\{\{submitTo\}\}/g, level.submitTo)
@@ -214,6 +251,11 @@ export function buildSheet(input: Input) {
     procedure,
     documents,
     level,
+    age,
+    ageBasis: AGE_BASIS,
+    excludedByAge,
+    localSources: LOCAL_SOURCES[input.regionId] ?? [],
+    hasLocalPrograms: programs.some((p) => p.local),
     programs,
     deadlines,
     age9,

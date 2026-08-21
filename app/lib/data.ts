@@ -5,6 +5,11 @@
 //   - source가 없는 항목: 화면 구성을 보여주기 위해 임의로 구성한 예시
 //   실제 서비스에서는 전 항목에 출처와 확인일이 붙습니다.
 
+/** 나이 판정 기준일. 오늘 날짜를 쓰면 서버와 브라우저 렌더링이 어긋난다.
+ *  학년도 시작일이 실제 행정 기준이기도 하다. */
+export const BASE_SCHOOL_YEAR = 2026;
+export const BASE_DATE = `${BASE_SCHOOL_YEAR}-03-01`;
+
 export type Sourced = {
   /** 근거를 확인한 항목인지 (false면 데모용 임의 데이터) */
   verified: boolean;
@@ -280,7 +285,19 @@ export type Program = {
   /** 신청처 */
   applyTo: string;
   /** 어떤 조건에서 목록에 뜨는지 */
-  appliesTo?: { levels?: LevelId[]; disabilities?: DisabilityId[] };
+  appliesTo?: {
+    levels?: LevelId[];
+    disabilities?: DisabilityId[];
+    /** 이 지역에서만 있는 제도. 비어 있으면 전국 공통 */
+    regions?: RegionId[];
+    /** 만 나이 하한·상한 (기준일 BASE_DATE) */
+    ageMin?: number;
+    ageMax?: number;
+  };
+  /** 나이 조건의 예외 규정 등 */
+  ageNote?: string;
+  /** 지자체·교육청 자체사업인지 (전국 공통 제도와 구분해 보여준다) */
+  local?: boolean;
   /** 지역 카드 이름으로 치환되는 항목인지 */
   usesRegionCard?: boolean;
   summary: string;
@@ -368,10 +385,12 @@ export const PROGRAMS: Program[] = [
     applyTo: "읍면동 행정복지센터",
     summary: "언어·미술·음악·행동 재활 등을 바우처로 지원합니다. 소득 기준 심사가 있습니다.",
     documents: ["사회보장급여 신청서", "발달재활서비스 의뢰서", "소득·재산 증빙"],
+    appliesTo: { ageMax: 17 },
+    ageNote: "만 18세 미만이 대상입니다. 재학 중이면 연장되는 규정이 있어 확인이 필요합니다.",
     deadline: "상시 신청. 제공기관이 부족한 지역은 대기 발생",
     legalBasis: "장애아동 복지지원법 제21조",
     verified: false,
-    source: "데모용 예시",
+    source: "데모용 예시 — 나이 상한과 연장 규정 확인 필요",
   },
   {
     id: "welfareAfterschool",
@@ -379,7 +398,8 @@ export const PROGRAMS: Program[] = [
     track: "welfare",
     authority: "보건복지부",
     applyTo: "읍면동 / 발달장애인지원센터",
-    appliesTo: { levels: ["middle", "high"] },
+    appliesTo: { levels: ["middle", "high"], ageMin: 6, ageMax: 17 },
+    ageNote: "청소년 발달장애인이 대상입니다. 나이 범위는 해당 연도 사업안내를 확인하세요.",
     summary:
       "청소년 발달장애인 대상 방과후 돌봄·활동 서비스입니다. **다른 돌봄 사업과 중복 이용이 제한될 수 있습니다.**",
     documents: ["사회보장급여 신청서", "장애인증명서"],
@@ -394,6 +414,8 @@ export const PROGRAMS: Program[] = [
     track: "welfare",
     authority: "보건복지부",
     applyTo: "읍면동 행정복지센터",
+    appliesTo: { ageMax: 17 },
+    ageNote: "18세 미만이 대상입니다. 재학 중인 경우의 예외를 확인하세요.",
     summary: "소득 기준을 충족하는 장애아동에게 수당을 지급합니다.",
     documents: ["사회보장급여 신청서", "소득·재산 증빙", "통장 사본"],
     deadline: "상시 신청 (예시)",
@@ -402,6 +424,40 @@ export const PROGRAMS: Program[] = [
     source: "데모용 예시",
   },
 ];
+
+/* ══════════════════════════════════════════════════════════
+   지역 자체사업 — 아직 조사하지 않았다
+   구조만 만들어 두고, 조사되는 대로 이 배열에 넣는다.
+   비어 있으면 화면이 「등록된 자체사업 없음」으로 표시한다.
+   ══════════════════════════════════════════════════════════ */
+
+export const LOCAL_PROGRAMS: Program[] = [
+  // 예) {
+  //   id: "wonju-something",
+  //   name: "원주시 장애아동 ○○ 지원",
+  //   track: "welfare",
+  //   authority: "원주시",
+  //   applyTo: "원주시청 / 읍면동 행정복지센터",
+  //   appliesTo: { regions: ["gangwon"], ageMax: 17 },
+  //   local: true,
+  //   summary: "...",
+  //   documents: ["..."],
+  //   deadline: "...",
+  //   legalBasis: "원주시 조례 제○호",
+  //   verified: true,
+  //   source: "원주시 홈페이지 (확인일)",
+  // },
+];
+
+/** 조사해야 할 곳 — 화면에 그대로 띄워 무엇이 비었는지 보여준다 */
+export const LOCAL_SOURCES: Partial<Record<RegionId, string[]>> = {
+  gangwon: [
+    "강원특별자치도교육청 특수교육과 공고",
+    "강원특별자치도 장애인복지 조례",
+    "원주시청 장애인복지 · 아동복지 안내",
+    "원주시 장애인가족지원센터",
+  ],
+};
 
 /* ─────────────────── 현재 이용 중인 서비스 (중복 확인용) ─────────────────── */
 

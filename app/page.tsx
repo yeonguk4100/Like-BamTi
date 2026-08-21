@@ -732,6 +732,12 @@ export default function Home() {
               <span className="sum-item">{sheet.disabilityLabel}</span>
               <span className="sum-sep">|</span>
               <span className="sum-item">{sheet.level.name}</span>
+              {sheet.age !== null && (
+                <>
+                  <span className="sum-sep">|</span>
+                  <span className="sum-item">만 {sheet.age}세</span>
+                </>
+              )}
               <a href="#step1" onClick={() => setActiveStep(1)}>
                 조건 수정
               </a>
@@ -752,6 +758,11 @@ export default function Home() {
               <p className="tint-line">
                 진단·평가 제출처 : {sheet.level.submitTo} · 결정 : {sheet.level.decider}
               </p>
+              {sheet.age !== null && (
+                <p className="tint-line">
+                  만 {sheet.age}세 · {sheet.ageBasis}
+                </p>
+              )}
 
               <div className="subcard-grid">
                 <div className="subcard">
@@ -1079,6 +1090,37 @@ export default function Home() {
 
                     {visiblePrograms.length === 0 && (
                       <p className="hint">이 조건에 해당하는 제도가 없습니다.</p>
+                    )}
+
+                    {sheet.excludedByAge.length > 0 && (
+                      <details className="fold">
+                        <summary>
+                          나이 조건으로 목록에서 빠진 제도 {sheet.excludedByAge.length}건
+                        </summary>
+                        <ul className="notes">
+                          {sheet.excludedByAge.map((x, i) => (
+                            <li key={i}>
+                              {x.name} — {x.reason} (만 {sheet.age}세, {sheet.ageBasis})
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="hint">
+                          나이 상한에는 재학 중 연장 같은 예외 규정이 있습니다. 해당 연도 사업안내를
+                          확인하세요.
+                        </p>
+                      </details>
+                    )}
+
+                    {!sheet.hasLocalPrograms && (
+                      <div className="fold-static">
+                        <p className="h-xs">{sheet.region.name} 자체사업 0건</p>
+                        <p className="hint" style={{ marginTop: 4 }}>
+                          위 목록은 전국 공통 제도입니다. 지자체·교육청 자체사업은 아직 등록되지
+                          않았습니다.
+                          {sheet.localSources.length > 0 && " 조사할 곳: "}
+                          {sheet.localSources.join(" · ")}
+                        </p>
+                      </div>
                     )}
                   </div>
 

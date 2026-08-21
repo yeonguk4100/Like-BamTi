@@ -1385,3 +1385,36 @@ input::placeholder {
   color: var(--danger);
   margin-bottom: var(--sp-md);
 }
+
+/* 접히는 보조 정보 */
+.fold {
+  border-top: 1px solid var(--border);
+  margin-top: var(--sp-base);
+  padding-top: var(--sp-md);
+}
+
+.fold summary {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-deep);
+  cursor: pointer;
+  list-style: none;
+}
+
+.fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold summary::before {
+  content: "＋ ";
+}
+
+.fold[open] summary::before {
+  content: "－ ";
+}
+
+.fold-static {
+  border-top: 1px solid var(--border);
+  margin-top: var(--sp-base);
+  padding-top: var(--sp-md);
+}
