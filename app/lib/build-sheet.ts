@@ -253,16 +253,15 @@ export function buildSheet(input: Input) {
     procedure,
     documents,
     level,
-    age,
-    ageBasis: AGE_BASIS,
-    excludedByAge,
-    localSources: LOCAL_SOURCES[input.regionId] ?? [],
-    hasLocalPrograms: programs.some((p) => p.local),
     programs,
     deadlines,
     age9,
     sender: input.sender,
   });
+
+  /* 조사되지 않은 지역 자체사업 — 무엇이 비었는지 화면에 그대로 보여준다 */
+  const localSources = LOCAL_SOURCES[input.regionId] ?? [];
+  const hasLocalPrograms = programs.some((p) => p.local);
 
   return {
     region,
@@ -272,12 +271,22 @@ export function buildSheet(input: Input) {
     procedure,
     documents,
     level,
+    /** 기준일 시점의 만 나이. 오늘 날짜를 쓰지 않는다 */
+    age,
+    ageBasis: AGE_BASIS,
+    excludedByAge,
+    localSources,
+    hasLocalPrograms,
+    age9,
     programs,
     deadlines,
     warnings,
     parentLetter,
   };
 }
+
+/** 규칙이 계산한 결과 한 벌. API 응답 타입이기도 하다 */
+export type Sheet = ReturnType<typeof buildSheet>;
 
 function buildParentLetter(args: {
   region: (typeof REGIONS)[number];
@@ -357,10 +366,25 @@ function buildParentLetter(args: {
   }
 
   lines.push("");
-  lines.push("궁금한 점은 아래로 연락 주세요.");
-  lines.push(sender?.org?.trim() || `${region.officeName} 특수교육지원센터`);
-  if (sender?.name?.trim()) lines.push(`담당자 ${sender.name.trim()}`);
-  if (sender?.tel?.trim()) lines.push(sender.tel.trim());
+  lines.push(...contactLines(region.officeName, sender));
 
   return lines.join("\n");
+}
+
+/**
+ * 안내문 맨 끝의 문의 안내.
+ *
+ * 별도 함수로 뺀 이유 — 담당자 발신 정보는 제미나이에 보내지 않는다.
+ * 그래서 AI 가 다시 쓴 안내문에는 이 줄이 없고, 서버가 규칙으로 만든 이 줄을
+ * 뒤에 붙인다. 기관명·이름·번호를 AI 가 고치게 두지 않는다.
+ */
+export function contactLines(
+  officeName: string,
+  sender?: { org?: string; name?: string; tel?: string }
+): string[] {
+  const lines = ["궁금한 점은 아래로 연락 주세요."];
+  lines.push(sender?.org?.trim() || `${officeName} 특수교육지원센터`);
+  if (sender?.name?.trim()) lines.push(`담당자 ${sender.name.trim()}`);
+  if (sender?.tel?.trim()) lines.push(sender.tel.trim());
+  return lines;
 }
