@@ -158,8 +158,14 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/build-sheet.ts` | **규칙 계층.** 조건으로 제도·서류·기한을 고른다. 순수 함수 |
 | `app/lib/validate.ts` | 요청 본문 검증. 모르는 id는 통과시키지 않는다 |
 | `app/lib/board.ts` | 알림 마당 · 서식 자료실 · FAQ 데이터 (공지·파일은 가상) |
-| `app/page.tsx` | 화면. 규칙 모듈을 브라우저에서 직접 부른다 |
+| `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
+| `app/lib/demo.ts` | ⚠ **데모용.** 가상 사례와 용어 목록. 발표 후 파일째 삭제 |
+| `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
+| `app/components/` | 아이콘 · 제도 항목 · 알림 마당 · FAQ · 푸터 · `DemoKey`(⚠ 데모용) |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
+
+`page.tsx`에는 최상위 선언이 `Home` 하나만 있다. 데이터·상수·정적 섹션은 위 모듈로 나갔다.
+새 상수를 화면에 쓸 때는 `page.tsx` 안에 두지 말고 `screen.ts`에 넣는다.
 
 ### 백엔드 라우트
 
@@ -193,6 +199,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 - 데이터를 추가할 때 `verified` 플래그와 `source`를 반드시 채운다. 확인 못 했으면 `false`
 - 나이 계산은 **오늘 날짜를 쓰지 않는다.** `BASE_DATE`(학년도 시작) 기준으로 계산한다.
   오늘 날짜를 쓰면 서버와 브라우저 렌더링이 어긋난다
-- **데모용 코드는 `데모용`이라고 주석을 달아 둔다.** 발표 후 검색해서 지운다
-  (`PRESETS`, `DEMO_TERMS`, `DemoKey`, `.demo-*` CSS)
+- **데모용 코드는 한곳에 모아 둔다.** 발표(2026-08-28) 후 지울 것은 이 네 가지다 —
+  `app/lib/demo.ts` 삭제 · `app/components/DemoKey.tsx` 삭제 ·
+  `page.tsx`의 두 import와 쓰는 곳 · `globals.css`의 `.demo-*` / `.keys-off` / `.preset*`
 - **커밋 전에 `npm run typecheck`를 돌린다.** Vercel 빌드는 타입 오류에서 멈춘다
