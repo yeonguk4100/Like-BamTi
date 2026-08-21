@@ -233,7 +233,6 @@ button {
 /* ── 알림 배너 ── */
 
 .notice {
-  background: var(--primary-subtle);
   border-bottom: 1px solid var(--border);
 }
 
@@ -249,12 +248,8 @@ button {
 }
 
 .notice-tag {
-  background: var(--primary-deep);
-  color: #fff;
   font-size: 13px;
   font-weight: 700;
-  border-radius: var(--r-sm);
-  padding: 1px var(--sp-md);
   white-space: nowrap;
 }
 
@@ -322,16 +317,14 @@ button {
 }
 
 .step-on {
-  border-color: var(--primary);
+  border-color: var(--primary-deep);
   border-width: 2px;
   color: var(--primary-deep);
-  background: var(--primary-subtle);
 }
 
 .step-on .step-num {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
+  border-color: var(--primary-deep);
+  color: var(--primary-deep);
 }
 
 /* ── 레이아웃 ── */
@@ -494,10 +487,9 @@ input[type="date"] {
   position: sticky;
   top: 78px;
   z-index: 15;
-  background: var(--primary-deep);
-  color: #fff;
-  border-radius: var(--r);
-  padding: var(--sp-md) var(--sp-base);
+  background: var(--canvas);
+  border-bottom: 1px solid var(--border-strong);
+  padding: var(--sp-md) 0;
   display: flex;
   align-items: center;
   gap: var(--sp-md);
@@ -508,9 +500,7 @@ input[type="date"] {
 .summary-bar .sum-label {
   font-size: 13px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: var(--r-sm);
-  padding: 1px var(--sp-md);
+  color: var(--text-subtle);
 }
 
 .summary-bar .sum-item {
@@ -523,7 +513,6 @@ input[type="date"] {
 }
 
 .summary-bar a {
-  color: #fff;
   margin-left: auto;
   font-size: 15px;
 }
@@ -630,49 +619,40 @@ input[type="date"] {
 /* ── 알림(경고) ── */
 
 .alert {
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--border-strong);
-  border-radius: var(--r-sm);
-  padding: var(--sp-base);
-  margin-bottom: var(--sp-md);
-  background: var(--canvas);
+  border-left: 3px solid var(--border-strong);
+  padding: var(--sp-sm) 0 var(--sp-sm) var(--sp-base);
+  margin-bottom: var(--sp-base);
 }
 
 .alert-danger {
   border-left-color: var(--danger);
-  background: #fdf2f0;
 }
 
 .alert-danger .alert-tag {
-  background: var(--danger);
+  color: var(--danger);
 }
 
 .alert-warning {
-  border-left-color: var(--warning);
-  background: #fff9ec;
+  border-left-color: #8a5a00;
 }
 
 .alert-warning .alert-tag {
-  background: #8a5a00;
+  color: #8a5a00;
 }
 
 .alert-info {
-  border-left-color: var(--info);
-  background: var(--primary-subtle);
+  border-left-color: var(--border-strong);
 }
 
 .alert-info .alert-tag {
-  background: var(--info);
+  color: var(--text-subtle);
 }
 
 .alert-tag {
   display: inline-block;
-  color: #fff;
   font-size: 13px;
   font-weight: 700;
-  border-radius: var(--r-sm);
-  padding: 1px var(--sp-md);
-  margin-bottom: var(--sp-md);
+  margin-bottom: var(--sp-xs);
 }
 
 .alert-title {
@@ -714,9 +694,8 @@ input[type="date"] {
   white-space: nowrap;
 }
 
-.tbl tr.row-urgent td,
 .tbl tr.row-urgent th {
-  background: #fff9ec;
+  color: var(--danger);
 }
 
 .tbl .td-sub {
@@ -737,21 +716,18 @@ input[type="date"] {
 }
 
 .badge-primary {
-  background: var(--primary-subtle);
-  border-color: var(--primary);
+  border-color: var(--primary-deep);
   color: var(--primary-deep);
   font-weight: 700;
 }
 
 .badge-req {
-  background: var(--primary-deep);
-  border-color: var(--primary-deep);
-  color: #fff;
+  border-color: var(--text);
+  color: var(--text);
   font-weight: 700;
 }
 
 .badge-danger {
-  background: #fdf2f0;
   border-color: var(--danger);
   color: var(--danger);
   font-weight: 700;
@@ -810,10 +786,8 @@ input[type="date"] {
   align-items: center;
   gap: var(--sp-md);
   flex-wrap: wrap;
-  background: var(--surface-gray);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: var(--sp-md) var(--sp-base);
+  border-bottom: 1px solid var(--border-strong);
+  padding: var(--sp-md) 0;
   margin-bottom: var(--sp-md);
 }
 
@@ -1012,20 +986,9 @@ input[type="date"] {
 }
 
 /* ============================================================
-   장학재단 앱 계열 — 파스텔 카드 · 중첩 서브카드 · 상태 강조
-   KRDS 토큰 위에 얹는다. 색은 KRDS 계열에서 톤만 낮췄다.
+   요약 · 상태 · 탭 — 색 채운 박스를 쓰지 않는다.
+   구분은 헤어라인과 활자 크기로만 한다.
    ============================================================ */
-
-:root {
-  --tint-blue: #cfe6f7;
-  --tint-blue-line: #a9d1ec;
-  --tint-blue-ink: #12508f;
-  --tint-green: #d3ebdc;
-  --tint-green-line: #a9d4bb;
-  --tint-green-ink: #146c3a;
-  --subcard: #eef4f9;
-  --subcard-green: #e6f3ec;
-}
 
 /* ── 탭형 주 메뉴 ── */
 
@@ -1077,103 +1040,79 @@ input[type="date"] {
   font-size: 15px;
 }
 
-/* ── 파스텔 카드 ── */
+/* ── 요약 블록 — 배경 없이 위아래 규칙선만 ── */
 
 .tint-card {
-  background: var(--tint-blue);
-  border: 1px solid var(--tint-blue-line);
-  border-radius: var(--r-xl);
-  padding: var(--sp-lg);
-  margin-bottom: var(--sp-base);
-}
-
-.tint-card-green {
-  background: var(--tint-green);
-  border-color: var(--tint-green-line);
+  border-top: 2px solid var(--text);
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-lg) 0;
+  margin-bottom: var(--sp-lg);
 }
 
 .tint-title {
-  text-align: center;
   font-size: 19px;
   font-weight: 700;
-  color: var(--tint-blue-ink);
-  margin-bottom: var(--sp-md);
-}
-
-.tint-card-green .tint-title {
-  color: var(--tint-green-ink);
-}
-
-.tint-line {
-  text-align: center;
-  font-size: 15px;
-  color: var(--tint-blue-ink);
   margin-bottom: var(--sp-sm);
 }
 
-.tint-card-green .tint-line {
-  color: var(--tint-green-ink);
-}
-
-/* 상태 강조 — 사진의 "심사중" 자리 */
-.tint-status {
-  text-align: center;
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--tint-green-ink);
-  margin: var(--sp-sm) 0;
-}
-
-.tint-note {
-  text-align: center;
-  font-size: 13px;
+.tint-line {
+  font-size: 15px;
   color: var(--text-subtle);
 }
 
-/* ── 중첩 서브카드 ── */
+/* 상태 — 배경 대신 큰 활자로만 세운다 */
+.tint-status {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: var(--sp-md) 0 var(--sp-sm);
+}
+
+.tint-note {
+  font-size: 15px;
+  color: var(--text-subtle);
+  max-width: 80ch;
+}
+
+/* ── 숫자 네 칸 — 세로 구분선만 ── */
 
 .subcard-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--sp-md);
-  margin-top: var(--sp-base);
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: var(--sp-lg);
 }
 
 .subcard {
-  background: var(--subcard);
-  border-radius: var(--r-md);
-  padding: var(--sp-md);
+  padding: 0 var(--sp-base);
+  border-left: 1px solid var(--border);
+}
+
+.subcard:first-child {
+  padding-left: 0;
+  border-left: none;
 }
 
 .subcard-label {
   display: block;
-  background: var(--canvas);
-  border-radius: var(--r-sm);
-  text-align: center;
   font-size: 15px;
-  font-weight: 700;
-  color: var(--tint-blue-ink);
-  padding: var(--sp-sm) var(--sp-md);
-  margin-bottom: var(--sp-md);
+  color: var(--text-subtle);
+  margin-bottom: var(--sp-sm);
 }
 
 .subcard-val {
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 700;
-  line-height: 1.2;
-  color: var(--tint-blue-ink);
-  text-align: center;
+  line-height: 1.1;
 }
 
 .subcard-val .unit {
-  font-size: 15px;
+  font-size: 17px;
+  font-weight: 400;
   margin-left: 2px;
 }
 
 .subcard-sub {
   display: block;
-  text-align: center;
   font-size: 13px;
   color: var(--text-subtle);
   margin-top: var(--sp-sm);
@@ -1183,66 +1122,57 @@ input[type="date"] {
   color: var(--danger);
 }
 
-/* ── 카드 하단 분할 액션 ── */
+/* ── 하단 액션 — 분할 바 대신 평범한 버튼 줄 ── */
 
 .card-actions {
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  display: flex;
+  gap: var(--sp-md);
   align-items: center;
-  margin-top: var(--sp-base);
-  padding-top: var(--sp-base);
-  border-top: 1px solid var(--tint-blue-line);
-}
-
-.tint-card-green .card-actions {
-  border-top-color: var(--tint-green-line);
+  margin-top: var(--sp-lg);
 }
 
 .card-actions .divider {
-  height: 20px;
-  background: var(--tint-blue-line);
-}
-
-.tint-card-green .card-actions .divider {
-  background: var(--tint-green-line);
+  display: none;
 }
 
 .card-action {
-  background: transparent;
-  border: none;
-  font-size: 17px;
+  background: var(--canvas);
+  border: 1px solid var(--primary-deep);
+  border-radius: var(--r-md);
+  color: var(--primary-deep);
+  font-family: inherit;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--tint-blue-ink);
-  text-align: center;
+  padding: var(--sp-md) var(--sp-base);
+  min-height: 40px;
   text-decoration: none;
-  padding: var(--sp-md);
-  min-height: 44px;
-}
-
-.tint-card-green .card-action {
-  color: var(--tint-green-ink);
-}
-
-/* ── 작은 안내 알약 ── */
-
-.click-pill {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-sm);
-  background: var(--tint-blue-ink);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-pill);
-  font-size: 13px;
-  font-weight: 700;
-  padding: var(--sp-sm) var(--sp-md);
-  min-height: 28px;
 }
 
+.card-action:active {
+  background: var(--surface-gray);
+}
+
+/* 「이 숫자가 무슨 뜻인가요」는 평범한 텍스트 링크로 */
 .click-pill-row {
-  display: flex;
-  justify-content: flex-end;
   margin-top: var(--sp-md);
+}
+
+.click-pill {
+  font-size: 15px;
+  color: var(--primary-deep);
+}
+
+@media (max-width: 1024px) {
+  .subcard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: var(--sp-lg);
+  }
+  .subcard:nth-child(3) {
+    padding-left: 0;
+    border-left: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1252,6 +1182,10 @@ input[type="date"] {
   }
   .subcard-grid {
     grid-template-columns: 1fr;
+  }
+  .subcard {
+    padding-left: 0;
+    border-left: none;
   }
   .tint-status {
     font-size: 28px;
@@ -1264,10 +1198,6 @@ input[type="date"] {
   .card-actions,
   .click-pill-row {
     display: none !important;
-  }
-  .tint-card {
-    border-color: #000;
-    background: #fff;
   }
 }
 

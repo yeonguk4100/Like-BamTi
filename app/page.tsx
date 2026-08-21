@@ -517,7 +517,7 @@ export default function Home() {
 
               <div className="click-pill-row">
                 <a href="#reference" className="click-pill">
-                  이 숫자가 무슨 뜻인가요 ⓘ
+                  이 숫자가 무슨 뜻인가요 →
                 </a>
               </div>
 
@@ -525,7 +525,6 @@ export default function Home() {
                 <button type="button" className="card-action" onClick={() => window.print()}>
                   인쇄하기
                 </button>
-                <span className="divider" />
                 <button type="button" className="card-action" onClick={copyLetter}>
                   {copied ? "복사했습니다" : "안내문 복사"}
                 </button>
@@ -534,7 +533,7 @@ export default function Home() {
 
             {/* 상태 카드 — 가장 급한 것 하나만 크게 */}
             {age9Date ? (
-              <div className="tint-card tint-card-green rel">
+              <div className="tint-card rel">
                 <DemoKey top={12} right={12}>
                   {`이미 받던 지원이 끊긴다
 만 9세 생일 = 종료 기준
@@ -552,15 +551,14 @@ export default function Home() {
                   <a href="#deadlines" className="card-action">
                     마감일 전체 보기
                   </a>
-                  <span className="divider" />
-                  <a href="#step3" className="card-action">
+                    <a href="#step3" className="card-action">
                     안내문 확인
                   </a>
                 </div>
               </div>
             ) : (
               firstUrgent && (
-                <div className="tint-card tint-card-green">
+                <div className="tint-card">
                   <p className="tint-title">{firstUrgent.label}</p>
                   <p className="tint-status">기한 확인 필요</p>
                   <p className="tint-note">{firstUrgent.when}</p>
@@ -568,8 +566,7 @@ export default function Home() {
                     <a href="#deadlines" className="card-action">
                       마감일 전체 보기
                     </a>
-                    <span className="divider" />
-                    <a href="#step3" className="card-action">
+                        <a href="#step3" className="card-action">
                       안내문 확인
                     </a>
                   </div>
