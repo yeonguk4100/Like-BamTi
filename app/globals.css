@@ -619,29 +619,21 @@ input[type="date"] {
 /* ── 알림(경고) ── */
 
 .alert {
-  border-left: 3px solid var(--border-strong);
-  padding: var(--sp-sm) 0 var(--sp-sm) var(--sp-base);
-  margin-bottom: var(--sp-base);
+  padding: var(--sp-base) 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.alert-danger {
-  border-left-color: var(--danger);
+.alert:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .alert-danger .alert-tag {
   color: var(--danger);
 }
 
-.alert-warning {
-  border-left-color: #8a5a00;
-}
-
 .alert-warning .alert-tag {
   color: #8a5a00;
-}
-
-.alert-info {
-  border-left-color: var(--border-strong);
 }
 
 .alert-info .alert-tag {
