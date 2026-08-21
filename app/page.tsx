@@ -105,6 +105,119 @@ const PRESETS: Preset[] = [
   },
 ];
 
+/* ⚠ 데모용 — 장애영역별 실제 진단·증후군 용어. 상세 칸에 무엇을 적는지 보여주는
+   참고 목록이다. 발표 후 삭제하거나, 남긴다면 입력 자동완성 사전으로 쓴다. */
+const DEMO_TERMS: Record<DisabilityId, { group: string; items: string }[]> = {
+  autism: [
+    {
+      group: "DSM-5 통합 이전 하위 유형",
+      items:
+        "자폐성 장애 · 아스퍼거 증후군 · 소아기 붕괴성 장애 · 비전형 자폐(PDD-NOS) · 레트 장애",
+    },
+    {
+      group: "정도 표현",
+      items:
+        "지원 요구 1·2·3단계(DSM-5) · 고기능 / 저기능(임상 통용, 공식 진단명 아님) · 지적장애 동반 / 비동반",
+    },
+    {
+      group: "자주 동반되는 것",
+      items: "ADHD · 감각처리 어려움 · 표현언어 지연 · 뇌전증 · 수면 문제 · 편식·섭식 문제",
+    },
+    {
+      group: "유전 배경이 밝혀진 경우",
+      items: "취약 X 증후군(FMR1) · 결절성 경화증 · 15q11-13 중복 · 22q13 결실(펠란-맥더미드)",
+    },
+    {
+      group: "혼동하기 쉬운 다른 진단",
+      items: "사회적 의사소통장애(SCD) · 선택적 함묵증 · 반응성 애착장애",
+    },
+  ],
+  intellectual: [
+    {
+      group: "염색체·유전 질환",
+      items:
+        "다운 증후군(21 삼염색체) · 취약 X 증후군(FMR1, 유전성 지적장애 최다 원인) · 프래더-윌리 증후군 · 엔젤만 증후군 · 윌리엄스 증후군 · 레트 증후군(MECP2) · 스미스-마제니스 증후군 · 코넬리아 드 랑게 증후군 · 묘성 증후군(5p 결실) · 22q11.2 결실 증후군(디조지) · 결절성 경화증",
+    },
+    {
+      group: "⚠ 같은 병을 여러 이름으로 부르는 예",
+      items:
+        "엔젤만 증후군 = 엔젤 증후군 = 행복한 인형 증후군(happy puppet) = 속칭 「스마일 증후군」. 진단서에는 Angelman syndrome으로 적힙니다. 보호자가 말한 이름과 서류의 이름이 다를 수 있습니다.",
+    },
+    {
+      group: "대사·내분비 질환",
+      items: "페닐케톤뇨증(PKU) · 갈락토스혈증 · 선천성 갑상선기능저하증 · 뮤코다당증",
+    },
+    {
+      group: "후천·환경 요인",
+      items:
+        "태아알코올증후군(FAS) · 저산소성 허혈성 뇌손상 · 뇌수막염·뇌염 후유증 · 조산·극저체중 출생 · 납 중독",
+    },
+    {
+      group: "정도 표현",
+      items:
+        "경도 · 중등도 · 중도 · 최중도 (DSM-5는 IQ 수치보다 개념·사회·실행 적응기능을 기준으로 봅니다)",
+    },
+  ],
+  developmentalDelay: [
+    {
+      group: "지연 영역 (시행령이 정한 다섯 가지)",
+      items: "신체(대근육·소근육) · 인지 · 의사소통(수용·표현) · 사회·정서 · 적응행동",
+    },
+    {
+      group: "묶어 부르는 진단",
+      items:
+        "전반적 발달지연(GDD) · 언어발달지체 · 말소리장애(조음음운) · 아동기 발병 유창성장애 · 발달성 협응장애(DCD)",
+    },
+    {
+      group: "배경으로 적히는 것",
+      items:
+        "조산·극저체중 출생 · 뇌성마비 초기 소견 · 유전 검사 진행 중 · 원인 미확인 · 감각처리 어려움",
+    },
+    {
+      group: "⚠ 확인할 것",
+      items:
+        "만 9세가 되기 전에 재선정해야 지원이 이어집니다. 다문화 배경 아동은 최근 6개월간 언어치료·학습지도 등 사전 중재를 받았는지 먼저 확인합니다(경남 지침).",
+    },
+  ],
+  other: [
+    {
+      group: "시각장애",
+      items:
+        "저시력 · 전맹 · 망막색소변성 · 시신경 위축 · 백색증 · 선천성 녹내장 · 레베르 선천성 흑암시 · 미숙아 망막병증",
+    },
+    {
+      group: "청각장애",
+      items:
+        "감각신경성 난청 · 전음성 난청 · 혼합성 난청 · 일측성 난청 · 인공와우 이식 · 보청기 착용 · 청신경병증",
+    },
+    {
+      group: "지체장애",
+      items:
+        "뇌성마비(경직형·무정위형·혼합형) · 이분척추 · 듀센형 근이영양증 · 척수성 근위축(SMA) · 골형성부전증 · 선천성 사지결손 · 관절굽음증 · 척수손상",
+    },
+    {
+      group: "정서·행동장애",
+      items:
+        "우울 · 불안 · 반항성 도전장애(ODD) · 품행장애 · 선택적 함묵증 · 애착 문제 · 틱·뚜렛. ⚠ ADHD와 정신질환은 정서·행동장애 선정 대상이 아니라고 경남 지침에 명시돼 있습니다",
+    },
+    {
+      group: "의사소통장애",
+      items: "조음음운장애 · 말더듬(유창성) · 음성장애 · 수용·표현 언어장애 · 아동기 말실행증",
+    },
+    { group: "학습장애", items: "난독증(읽기) · 난서증(쓰기) · 난산증(수학) · 주의집중 어려움" },
+    {
+      group: "건강장애",
+      items:
+        "소아암·백혈병 · 만성신부전(투석) · 선천성 심장질환 · 1형 당뇨 · 재생불량성빈혈 · 크론병 · 뇌전증 · 장기이식 후 관리. ⚠ 3개월 이상 장기 의료처치가 필요하다는 소견이 진단서에 있어야 합니다",
+    },
+    {
+      group: "두 가지 이상 중복된 장애",
+      items:
+        "중도중복장애(지적 또는 자폐성 + 시각·청각·지체·정서행동 중 하나, 각각 정도가 심한 경우) · 시청각장애(deafblind)",
+    },
+  ],
+};
+
 /* ⚠ 데모용 — 발표자 키워드. 빈 자리에 초록으로 띄운다. 발표 후 삭제. */
 function DemoKey({
   children,
@@ -133,7 +246,7 @@ export default function Home() {
   const [birthDate, setBirthDate] = useState("2019-03-14");
   const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>(["localChildCenter"]);
   const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
-  const [autismDetail, setAutismDetail] = useState("");
+  const [detailNote, setDetailNote] = useState("");
   const [copied, setCopied] = useState(false);
 
   const [activeStep, setActiveStep] = useState(1);
@@ -150,7 +263,7 @@ export default function Home() {
     setBirthDate(p.birthDate);
     setCurrentServices(p.currentServices);
     setOtherDisabilityLabel("");
-    setAutismDetail("");
+    setDetailNote("");
   }
 
   const sheet = useMemo(
@@ -162,7 +275,7 @@ export default function Home() {
         birthDate,
         currentServices,
         otherDisabilityLabel,
-        autismDetail,
+        detailNote,
       }),
     [
       regionId,
@@ -171,7 +284,7 @@ export default function Home() {
       birthDate,
       currentServices,
       otherDisabilityLabel,
-      autismDetail,
+      detailNote,
     ]
   );
 
@@ -411,25 +524,36 @@ export default function Home() {
                     </div>
                   )}
 
-                  {disabilityId === "autism" && (
-                    <div className="sub-field">
-                      <label htmlFor="autismDetail" className="sub-label">
-                        상세 유형 · 특성 <span className="opt">선택</span>
-                      </label>
-                      <input
-                        id="autismDetail"
-                        type="text"
-                        className="text-input"
-                        value={autismDetail}
-                        onChange={(e) => setAutismDetail(e.target.value)}
-                        placeholder="예: 아스퍼거 진단 이력 있음, 언어 표현 제한"
-                      />
-                      <span className="hint">
-                        상담에서 들은 표현을 그대로 적으셔도 됩니다. 확인 시트에만 참고로 표시되며
-                        판정이나 검사 선택에는 쓰이지 않습니다.
-                      </span>
-                    </div>
-                  )}
+                  <div className="sub-field">
+                    <label htmlFor="detailNote" className="sub-label">
+                      {sheet.disability.detailLabel} <span className="opt">선택</span>
+                    </label>
+                    <input
+                      id="detailNote"
+                      type="text"
+                      className="text-input"
+                      value={detailNote}
+                      onChange={(e) => setDetailNote(e.target.value)}
+                      placeholder={sheet.disability.detailPlaceholder}
+                    />
+                    <span className="hint">
+                      {sheet.disability.detailHint} 상담에서 들은 표현을 그대로 적으셔도 됩니다.
+                      확인 시트에만 참고로 표시되며 판정이나 검사 선택에는 쓰이지 않습니다.
+                    </span>
+                  </div>
+
+                  {/* ⚠ 데모용 참고 용어 — 발표 후 삭제 */}
+                  <div className="demo-terms">
+                    <p className="demo-terms-head">
+                      참고 용어 · {sheet.disability.name} — 아래 표현을 위 칸에 적을 수 있습니다
+                    </p>
+                    {DEMO_TERMS[disabilityId].map((g) => (
+                      <p key={g.group} className="demo-terms-row">
+                        <strong>{g.group}</strong>
+                        {g.items}
+                      </p>
+                    ))}
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -704,9 +828,9 @@ export default function Home() {
 
                   <div className="block">
                     <h4 className="block-title">이번 진단·평가에 들어가는 검사</h4>
-                    {sheet.autismDetail && (
+                    {sheet.detailNote && (
                       <p className="detail-line">
-                        <strong>상세 유형 · 특성</strong> {sheet.autismDetail}
+                        <strong>상세 유형 · 특성</strong> {sheet.detailNote}
                         <span className="hint" style={{ marginTop: 4 }}>
                           담당자가 입력한 참고 정보입니다. 검사 선택이나 판정에는 쓰이지 않습니다.
                         </span>

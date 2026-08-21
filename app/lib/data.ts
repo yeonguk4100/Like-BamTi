@@ -124,6 +124,10 @@ export type Disability = {
   /** 재선정이 필요한 조건 (있으면 마감일 계산 대상) */
   reselection?: "age9" | "middleSchool";
   note?: string;
+  /** 상세 입력 칸의 이름. 영역마다 적을 것이 다르다 */
+  detailLabel: string;
+  detailPlaceholder: string;
+  detailHint: string;
 };
 
 export const DISABILITIES: Disability[] = [
@@ -148,6 +152,10 @@ export const DISABILITIES: Disability[] = [
       },
     ],
     note: "최근 6개월 이내 병원 검사 결과를 활용할 수 있습니다. 병원 진단을 우선 안내합니다.",
+    detailLabel: "상세 유형 · 특성",
+    detailPlaceholder: "예: 아스퍼거 진단 이력, 지원 요구 2단계, 언어 표현 제한",
+    detailHint:
+      "DSM-5에서 하위 유형이 자폐스펙트럼장애로 통합됐지만, 지침의 검사 도구에는 아스퍼거 척도(ASDS)가 남아 있어 현장에서는 구분이 통용됩니다.",
   },
   {
     id: "intellectual",
@@ -170,6 +178,10 @@ export const DISABILITIES: Disability[] = [
       },
     ],
     note: "최근 6개월 이내 병원 검사 결과를 활용할 수 있습니다.",
+    detailLabel: "원인 질환 · 정도",
+    detailPlaceholder: "예: 다운 증후군, 중등도, 적응행동 지원 필요",
+    detailHint:
+      "지적장애는 원인 질환이 여러 갈래입니다. 진단서에 적힌 질환명과 정도(경도·중등도·중도·최중도)를 그대로 적으셔도 됩니다.",
   },
   {
     id: "developmentalDelay",
@@ -193,12 +205,19 @@ export const DISABILITIES: Disability[] = [
       },
     ],
     note: "만 9세 미만 아동에게만 적용되는 영역입니다. 만 9세가 되기 전에 재진단·재선정이 필요합니다.",
+    detailLabel: "지연 영역 · 관련 진단",
+    detailPlaceholder: "예: 표현언어 지연, 대근육 운동 지연, 전반적 발달지연(GDD)",
+    detailHint:
+      "발달지체는 신체·인지·의사소통·사회정서·적응행동 중 어느 영역이 지체됐는지에 따라 이후 선정될 장애영역이 달라집니다.",
   },
   {
     id: "other",
     name: "기타 (직접 입력)",
     tests: [],
     note: `이 도구에는 아직 검사 도구가 등록되지 않은 영역입니다. 검사 항목은 소속 교육청 지침에서 확인하세요. (미등록: ${UNREGISTERED_AREAS})`,
+    detailLabel: "상세 특성 · 관련 진단",
+    detailPlaceholder: "예: 감각신경성 난청, 인공와우 이식, 좌측 일측성",
+    detailHint: "진단서나 상담에서 확인한 표현을 그대로 적으셔도 됩니다.",
   },
 ];
 

@@ -1317,3 +1317,34 @@ input::placeholder {
 .preset-on span {
   color: var(--primary-deep);
 }
+
+/* ⚠ 데모용 참고 용어 목록 — 발표 후 삭제 (.demo-terms) */
+.demo-terms {
+  margin-top: var(--sp-base);
+  padding-top: var(--sp-md);
+  border-top: 1px dashed #0b8a2f;
+  color: #0b8a2f;
+}
+
+.demo-terms-head {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: var(--sp-md);
+}
+
+.demo-terms-row {
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: var(--sp-md);
+}
+
+.demo-terms-row strong {
+  display: block;
+  font-weight: 700;
+}
+
+@media print {
+  .demo-terms {
+    display: none !important;
+  }
+}

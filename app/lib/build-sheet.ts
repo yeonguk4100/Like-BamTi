@@ -28,8 +28,8 @@ export type Input = {
   currentServices: CurrentServiceId[];
   /** 장애영역을 「기타」로 골랐을 때 담당자가 적은 영역 이름 */
   otherDisabilityLabel?: string;
-  /** 자폐성장애 상세 유형·특성. 참고용이며 판정에 쓰지 않는다 */
-  autismDetail?: string;
+  /** 상세 유형·원인 질환·지연 영역 등. 참고용이며 판정에 쓰지 않는다 */
+  detailNote?: string;
 };
 
 export type Warning = {
@@ -75,8 +75,7 @@ export function buildSheet(input: Input) {
   const typed = input.otherDisabilityLabel?.trim();
   const disabilityLabel =
     disability.id === "other" ? (typed ? typed : "기타 (미입력)") : disability.name;
-  const autismDetail =
-    disability.id === "autism" ? input.autismDetail?.trim() || undefined : undefined;
+  const detailNote = input.detailNote?.trim() || undefined;
 
   /* ── 1. 확인해야 할 제도 ── */
   const programs: ResolvedProgram[] = PROGRAMS.filter((p) => {
@@ -214,7 +213,7 @@ export function buildSheet(input: Input) {
     region,
     disability,
     disabilityLabel,
-    autismDetail,
+    detailNote,
     level,
     programs,
     deadlines,
