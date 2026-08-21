@@ -21,6 +21,7 @@ import {
   TRACK_LABEL,
   type ResolvedProgram,
 } from "./lib/build-sheet";
+import { FAQ, FILES, NOTICES } from "./lib/board";
 
 const REPO = "https://github.com/yeonguk4100/Like-BamTi";
 const REPO_DOCS = `${REPO}/tree/main/docs`;
@@ -109,62 +110,6 @@ const QUICK = [
   { href: "#forms", icon: "folder", label: "서식 자료실", desc: "제출 서류" },
   { href: "#faq", icon: "help", label: "자주 묻는 질문", desc: "상담 FAQ" },
   { href: "#notice-board", icon: "bell", label: "공지사항", desc: "지침 개정" },
-];
-
-/** 가상 공지 — 화면 구성용 */
-const BOARD = [
-  {
-    tag: "공지",
-    title: "2027학년도 특수교육대상자 선정·배치 신청 일정 안내",
-    date: "2026.08.18",
-    isNew: true,
-  },
-  {
-    tag: "개정",
-    title: "「장애등급」 표기 정비 요청 — 시도 지침 대조표 v2 배포",
-    date: "2026.08.11",
-    isNew: true,
-  },
-  { tag: "안내", title: "강원 마음모아카드 가맹 치료기관 확대 안내", date: "2026.08.04" },
-  { tag: "협조", title: "발달지체 만 9세 도래 대상자 사전 안내 협조 요청", date: "2026.07.29" },
-  { tag: "자료", title: "진단·평가 의뢰서 서식 지역 대조표 (6개 시도)", date: "2026.07.22" },
-];
-
-/** 가상 파일 — 화면 구성용 */
-const FILES = [
-  { ext: "HWP", name: "진단·평가 의뢰서 [서식 3]", meta: "82KB · 2026.08.18 갱신" },
-  { ext: "HWP", name: "기초조사 카드 (보호자용)", meta: "64KB · 2026.08.18 갱신" },
-  { ext: "HWP", name: "기초조사 카드 (담임교사용)", meta: "61KB · 2026.08.18 갱신" },
-  { ext: "HWP", name: "특수교육대상자 배치 신청서", meta: "48KB · 2026.07.22 갱신" },
-  { ext: "HWP", name: "개인정보 수집·이용 동의서", meta: "37KB · 2026.07.22 갱신" },
-  { ext: "XLSX", name: "선정·배치 신청자 명단", meta: "26KB · 2026.07.22 갱신" },
-];
-
-const FAQ = [
-  {
-    q: "장애인 등록이 되어 있으면 특수교육대상자로 자동 선정되나요?",
-    a: "아닙니다. 복지부의 장애인 등록과 교육청의 특수교육대상자 선정은 별개 절차입니다. 등록이 되어 있어도 진단·평가를 따로 의뢰해야 하고, 반대로 선정되어도 복지 지원은 읍면동에 따로 신청해야 합니다.",
-  },
-  {
-    q: "진단·평가는 얼마나 걸리나요?",
-    a: "교육장이 특수교육지원센터에 회부한 날로부터 30일 이내에 진단·평가를 마치고, 결과보고 후 2주 이내에 선정·배치 결과를 통보합니다.",
-  },
-  {
-    q: "배치 희망교는 몇 곳까지 적어야 하나요?",
-    a: "1지망부터 3지망까지 적습니다. 적지 않으면 특수교육운영위원회 심사에 따라 임의 배치될 수 있어, 상담 중에 반드시 짚어야 하는 항목입니다.",
-  },
-  {
-    q: "발달지체는 언제까지 지원되나요?",
-    a: "만 9세가 되는 생일이 속한 달의 말일까지 유지된 뒤 종료됩니다. 그 전에 재진단·재선정을 해야 방과후 교육활동과 치료지원이 끊기지 않습니다.",
-  },
-  {
-    q: "보호자가 「장애등급 결정서」를 요구받았다고 합니다.",
-    a: "2019년 7월 1일 장애등급제가 폐지되어 그 이후 등록한 보호자에게는 그런 서류가 없습니다. 「장애정도」(심한 / 심하지 않은) 표기로 안내하세요.",
-  },
-  {
-    q: "다른 시도로 이사하면 받던 지원이 이어지나요?",
-    a: "제도의 실질은 이어지지만 이름이 달라집니다. 강원 마음모아카드는 경기에서 꿈이든카드, 충남에서 디딤카드로 불립니다.",
-  },
 ];
 
 const LOOKUP_TARGETS = [
@@ -466,33 +411,31 @@ export default function Home() {
   const outOfScope =
     sheet.age !== null && (sheet.age < SCOPE_AGE_MIN || sheet.age > SCOPE_AGE_MAX);
 
-  /* AI로 보내는 내용. 생년월일·상세 메모·발신 정보는 넣지 않는다 */
+  /* 서버로 보내는 조건. 규칙 계산은 서버가 다시 하고, 그 결과만 AI 에 넘어간다.
+     생년월일은 마감일 계산에 필요해 서버까지 가지만 AI 에는 넘기지 않는다 (app/api/letter) */
   const aiPayload = useMemo(
     () => ({
-      지역: sheet.region.name,
-      교육청: sheet.region.officeName,
-      장애영역: sheet.disabilityLabel,
-      학교급: sheet.level.name,
-      제출처: sheet.level.submitTo,
-      심사기구: sheet.level.committee,
-      결정권자: sheet.level.decider,
-      신청상황: sheet.procedure.name,
-      상황설명: sheet.procedure.when,
-      제출서류: sheet.documents.map((d) => `${d.label} [${d.formNo}]`),
-      상황주의사항: sheet.procedure.notes,
-      마감일: sheet.deadlines.map((d) => ({
-        항목: d.label,
-        기한: d.when,
-        긴급: Boolean(d.urgent),
-      })),
-      확인할제도: sheet.programs.map((pg) => ({
-        이름: pg.resolvedName,
-        소관: TRACK_LABEL[pg.track],
-        신청처: pg.resolvedApplyTo,
-      })),
-      확인이필요한항목: sheet.warnings.map((w) => ({ 제목: w.title, 내용: w.detail })),
+      regionId,
+      disabilityId,
+      levelId,
+      procedureId,
+      birthDate,
+      currentServices,
+      otherDisabilityLabel,
+      sender: { org: senderOrg, name: senderName, tel: senderTel },
     }),
-    [sheet]
+    [
+      regionId,
+      disabilityId,
+      levelId,
+      procedureId,
+      birthDate,
+      currentServices,
+      otherDisabilityLabel,
+      senderOrg,
+      senderName,
+      senderTel,
+    ]
   );
 
   const aiKey = useMemo(() => JSON.stringify(aiPayload), [aiPayload]);
@@ -532,11 +475,7 @@ export default function Home() {
       const res = await fetch("/api/lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          target,
-          regionName: sheet.region.name,
-          officeName: sheet.region.officeName,
-        }),
+        body: JSON.stringify({ target, regionId }),
       });
       const data = await res.json();
       if (!res.ok) setLookupError(data.error ?? "검색에 실패했습니다.");
@@ -589,7 +528,7 @@ export default function Home() {
         <div className="gnb-inner">
           <a href="#main" className="logo">
             <span className="logo-mark">특수교육</span>
-            <span className="logo-name">소예진의 복지그루</span>
+            <span className="logo-name">너도나도 길잡이</span>
           </a>
           <nav className="gnb-menu" aria-label="주 메뉴">
             <a href="#step1" className="gnb-link">
@@ -634,8 +573,8 @@ export default function Home() {
           <span className="notice-tag">안내</span>
           <p>
             이 도구는 <strong>개인정보를 저장하지 않습니다.</strong> 이름·연락처를 받지 않으며,
-            입력값은 화면 계산에만 쓰이고 서버로 전송되지 않습니다. 화면의 아동 정보는 전부
-            가상입니다.
+            제도와 마감일 계산은 이 화면 안에서 끝납니다. AI 안내문 버튼을 누를 때만 조건이 서버로
+            가고, 그때도 저장하거나 기록하지 않습니다. 화면의 아동 정보는 전부 가상입니다.
           </p>
         </div>
       </div>
@@ -1549,7 +1488,7 @@ export default function Home() {
                 <span className="board-more">전부 가상 데이터입니다</span>
               </div>
               <ul className="board-list">
-                {BOARD.map((b) => (
+                {NOTICES.map((b) => (
                   <li key={b.title}>
                     <a href="#notice-board">
                       <span className="board-tag">{b.tag}</span>
@@ -1670,7 +1609,7 @@ export default function Home() {
 
           <div className="callout" style={{ marginTop: 32 }}>
             <div>
-              <p className="callout-title">복지그루 상담지원실</p>
+              <p className="callout-title">너도나도 길잡이 상담지원실</p>
               <p className="callout-tel">1600-0000</p>
               <p className="callout-note">
                 평일 09:00 ~ 18:00 (점심 12:00 ~ 13:00) · 가상 번호입니다. 실제로 연결되지 않습니다.
@@ -1687,10 +1626,11 @@ export default function Home() {
         <div className="footer-inner">
           <div className="footer-cols">
             <div>
-              <h3>만든 사람</h3>
+              <h3>이름에 대하여</h3>
               <p>
-                <strong>소예진</strong>이 만든 복지그루입니다. 교육청과 복지부로 흩어진 제도를 한
-                그루에 모아, 담당자와 학부모가 같은 한 장을 보게 하는 것이 이 도구의 목표입니다.
+                강원특별자치도교육청이 담당자에게 배포하는 「특수교육대상자 선정·배치 업무
+                길잡이」에서 가져왔습니다. 담당자와 학부모가 같은 한 장을 본다는 뜻으로
+                「너도나도」를 붙였습니다.
               </p>
             </div>
             <div>
@@ -1703,8 +1643,9 @@ export default function Home() {
             <div>
               <h3>개인정보</h3>
               <p>
-                이름·연락처를 받지 않습니다. 입력값은 화면 계산에만 쓰이고 서버로 전송되거나
-                저장되지 않습니다. 아동 명단을 보관하는 기능이 없습니다.
+                이름·연락처를 받지 않습니다. 규칙 계산은 화면 안에서 끝나고, AI 안내문을 만들 때만
+                조건이 서버를 거칩니다. 그때도 저장하거나 기록하지 않고, 생년월일과 담당자 연락처는
+                AI에 넘기지 않습니다. 아동 명단을 보관하는 기능이 없습니다.
               </p>
             </div>
           </div>

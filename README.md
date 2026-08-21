@@ -1,4 +1,4 @@
-# 소예진의 복지그루
+# 너도나도 길잡이
 
 **멋쟁이사자처럼 Campus AX-Ton 강원대 · 팀 프로젝트**
 팀명: **멋쟁이 밤티들**
@@ -8,6 +8,9 @@
 > **학부모에게 그대로 건넬 안내문**까지 함께 만들어 주는 업무 도구.
 
 **한 번 입력 → 두 장 출력** · 과제 트랙: 업무 효율화
+
+이름은 강원특별자치도교육청이 담당자에게 배포하는 「특수교육대상자 선정·배치 업무 길잡이」에서
+가져왔습니다. 담당자와 학부모가 **같은 한 장**을 본다는 뜻으로 「너도나도」를 붙였습니다.
 
 ---
 
@@ -73,6 +76,7 @@
 | [docs/복지그루-기획서.md](docs/복지그루-기획서.md) | **메인.** 문제 정의 · 신청 절차 구조도 · 솔루션 · B2G 사업 모델 · 예상 질문 |
 | [docs/복지그루-기획서-요약.md](docs/복지그루-기획서-요약.md) | 3장 분량 요약본 |
 | [docs/강원-경남-지침-분석.md](docs/강원-경남-지침-분석.md) | 두 시도 지침 원문 대조 작업 기록 |
+| [docs/백엔드-API.md](docs/백엔드-API.md) | 라우트 명세 · 요청/응답 형식 · 층 구조 |
 
 ---
 
@@ -99,22 +103,74 @@ http://localhost:3000
 
 ## 기술 구성
 
-- Next.js 15 (App Router) · React 19 · TypeScript. 새 npm 의존성 없음
-- `app/lib/data.ts` — 지역 · 장애영역 · 신청 상황 · 서식 · 제도 데이터
-- `app/lib/build-sheet.ts` — 규칙 계층. 조건으로 제도·서류·기한을 고른다
-- `app/page.tsx` — 화면
-- `app/api/letter/route.ts` — 제미나이가 학부모용 안내문을 다시 쓴다 (검색 안 씀)
-- `app/api/lookup/route.ts` — 제미나이가 빈칸을 웹에서 찾는다 (Google Search grounding)
+Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** (SDK 대신 `fetch`, 검증도 손으로)
+
+| 층 | 파일 | 하는 일 |
+|---|---|---|
+| 데이터 | `app/lib/data.ts` | 지역 · 장애영역 · 학교급 · 신청 상황 · 서식 · 제도 |
+| 규칙 | `app/lib/build-sheet.ts` | 조건 → 제도·마감일·서류·경고·안내문. 순수 함수 |
+| 검증 | `app/lib/validate.ts` | 요청 본문 검사. 모르는 id는 통과시키지 않는다 |
+| 게시판 | `app/lib/board.ts` | 알림 마당 · 서식 자료실 · FAQ 데이터 |
+| 화면 | `app/page.tsx` · `app/globals.css` | 규칙 모듈을 브라우저에서 직접 부른다 |
+
+### 백엔드
+
+| 라우트 | 하는 일 | AI |
+|---|---|---|
+| `POST /api/sheet` | 조건 → 확인 시트 한 벌. **교육청 시스템이 붙는 자리** | ❌ |
+| `GET /api/options` | 넣을 수 있는 id 목록 | ❌ |
+| `GET /api/reference` | 지역별 카드 명칭 · 서식 번호 대조표 | ❌ |
+| `GET /api/notices` | 알림 마당 · 서식 자료실 · FAQ | ❌ |
+| `GET /api/health` | 배포 확인. 키 값은 응답에 넣지 않는다 | ❌ |
+| `POST /api/letter` | 학부모용 안내문 문장화 | ⭕ 검색 끔 |
+| `POST /api/lookup` | 우리 데이터에 없는 칸을 웹에서 찾기 | ⭕ Google Search |
 
 **규칙이 고르고 AI가 쓴다.** 제도를 고르는 것은 규칙이다. 같은 조건에 같은 결과가 나와야
 담당자가 신뢰할 수 있기 때문이다. AI는 규칙이 못 하는 두 가지만 한다 —
 우리 데이터에 없는 칸을 웹에서 찾는 것, 그리고 학부모가 읽을 문장으로 옮기는 것.
 
+화면과 API가 **같은 규칙 모듈**을 쓴다. 그래서 화면에 뜬 시트와 `/api/sheet` 응답이 어긋날 수 없다.
+`/api/letter`는 조건만 받아 서버에서 규칙을 다시 돌리고 그 결과만 제미나이에 넘긴다 —
+화면을 우회해 아무 내용이나 안내문에 밀어 넣을 수 없다. 생년월일과 담당자 연락처는 AI에 넘기지 않는다.
+
+자세한 명세는 [docs/백엔드-API.md](docs/백엔드-API.md).
+
 ### 환경변수
 
 | 이름 | 용도 |
 |---|---|
-| `GEMINI_API_KEY` | 필수. 없으면 AI 버튼이 안내 메시지를 낸다 |
+| `GEMINI_API_KEY` | 없으면 AI 버튼만 안내 메시지를 낸다 |
 | `GEMINI_MODEL` | 선택. 기본값 `gemini-3-flash-preview` |
 
-키가 없어도 화면과 규칙 계산은 그대로 동작합니다.
+`.env.example`을 `.env.local`로 복사해 채웁니다.
+**키가 없어도 화면과 규칙 계산은 그대로 동작합니다.**
+
+---
+
+## Vercel 배포
+
+1. [vercel.com/new](https://vercel.com/new) → 이 저장소(`yeonguk4100/Like-BamTi`)를 가져온다
+2. Framework Preset이 **Next.js**로 잡히는지 확인한다. 빌드 명령·출력 경로는 그대로 둔다
+3. **Environment Variables**에 `GEMINI_API_KEY`를 넣는다 (`GEMINI_MODEL`은 생략 가능).
+   Production · Preview · Development 세 곳에 모두 넣어야 미리보기 배포에서도 AI가 돈다
+4. Deploy
+
+설정 파일(`vercel.json`)은 두지 않습니다. Next.js 프로젝트는 Vercel이 그대로 알아봅니다.
+
+배포된 뒤 `/api/health`를 열어 확인합니다.
+
+```
+{ "ok": true, "ai": { "configured": true } }
+```
+
+`configured`가 `false`면 환경변수가 안 들어간 것입니다. 넣은 뒤 **다시 배포**해야 반영됩니다.
+
+올리기 전에 로컬에서 확인:
+
+```bash
+npm run typecheck
+```
+
+```bash
+npm run build
+```
