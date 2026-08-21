@@ -577,17 +577,24 @@ export default function Home() {
               )
             )}
 
-            <div className="result-grid">
-              {/* ── 담당자용 ── */}
-              <section className="panel">
-                <div className="panel-head rel">
-                  <DemoKey top={-2} left={-260}>
-                    {`한꺼번에 보기 = 부처를 넘는 증거
+            <div className="result-grid rel">
+              <DemoKey top={0} left={-260}>
+                {`한꺼번에 보기 = 부처를 넘는 증거
 소관별 보기 = 어디로 보낼지
 
 판정하지 않는다
 확인 목록만 준다`}
-                  </DemoKey>
+              </DemoKey>
+              <DemoKey top={0} right={-260}>
+                {`한 번 입력 → 두 장
+담당자용 · 학부모용
+
+그대로 출력해서 건넨다
+= 안내 기록이 남는다`}
+              </DemoKey>
+              {/* ── 담당자용 ── */}
+              <section className="panel">
+                <div className="panel-head">
                   <h3 className="h-sm">담당자용 확인 시트</h3>
                   <span className="b-sm subtle right">{sheet.region.officeName}</span>
                 </div>
@@ -765,14 +772,7 @@ export default function Home() {
 
               {/* ── 학부모용 ── */}
               <section className="panel letter" id="step3">
-                <div className="panel-head rel">
-                  <DemoKey top={-2} right={-260}>
-                    {`한 번 입력 → 두 장
-담당자용 · 학부모용
-
-그대로 출력해서 건넨다
-= 안내 기록이 남는다`}
-                  </DemoKey>
+                <div className="panel-head">
                   <h3 className="h-sm">3. 학부모용 안내문</h3>
                   <button
                     type="button"
