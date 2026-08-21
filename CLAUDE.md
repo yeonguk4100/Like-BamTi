@@ -161,11 +161,27 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 가상 사례와 용어 목록. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
-| `app/components/` | 아이콘 · 제도 항목 · 알림 마당 · FAQ · 푸터 · `DemoKey`(⚠ 데모용) |
+| `app/components/` | 화면 조각 12개 (아래) |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
 
-`page.tsx`에는 최상위 선언이 `Home` 하나만 있다. 데이터·상수·정적 섹션은 위 모듈로 나갔다.
+`page.tsx`에는 최상위 선언이 `Home` 하나만 있다. 데이터·상수·화면 조각은 위 모듈로 나갔다.
 새 상수를 화면에 쓸 때는 `page.tsx` 안에 두지 말고 `screen.ts`에 넣는다.
+
+| 컴포넌트 | props |
+|---|---|
+| `Icon` · `NoticeBoard` · `Faq` · `SiteFooter` | 없음 (또는 모듈 상수만) |
+| `Reference` | `regionId` |
+| `ProgramItem` | `program` |
+| `DeadlineTable` | `deadlines` · `urgentCount` |
+| `TestTable` | `disability` · `detailNote` |
+| `LookupPanel` | `regionId` · `cache` · `busy` · `error` · `onLookup` |
+| `LetterPanel` | `letter` · `isAi` · `aiStatus` · `aiError` · `copied` + 콜백 3개 |
+| `ProgramList` | `sheet` · `visible` · `counts` · `viewMode` · `trackFilter` + 콜백 2개 + `children` |
+| `DemoKey` | ⚠ 데모용 |
+
+**섹션이 아니라 데이터 단위로 쪼갰다.** 1단계·2단계를 섹션째 떼면 상태 27~28개를 props로
+넘겨야 해서 오히려 읽기 어려워진다. `ProgramList`가 「AI 빈칸 찾기」를 `children`으로 받는 것도
+같은 이유다 — DOM 구조(`.block` 안에 들어간다)를 바꾸지 않으려고 그렇게 했다.
 
 ### 백엔드 라우트
 

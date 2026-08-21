@@ -1,0 +1,89 @@
+// 참고 자료 — 이 도구가 필요한 이유를 데이터로 보여주는 자리.
+//
+// 「같은 지원인데 지역마다 이름이 다르다」와 「폐지된 용어가 지침에 남아 있다」.
+// 현재 고른 지역의 줄을 강조해 담당자가 자기 지역을 바로 찾게 한다.
+
+import { REGIONS, type RegionId } from "../lib/data";
+import { REPO_DOCS } from "../lib/screen";
+/* ⚠ 데모용 — 발표 후 아래 줄과 <DemoKey> 를 지운다 */
+import { DemoKey } from "./DemoKey";
+
+export function Reference({ regionId }: { regionId: RegionId }) {
+  return (
+    <section className="section wrap" id="reference">
+      <div className="section-head rel">
+        <h2 className="h-lg">참고 자료</h2>
+        <span className="b-sm subtle right">이 도구가 필요한 이유</span>
+        <DemoKey top={52} right={0}>
+          {`카드 이름 6개 = 지역마다 다름
+강원·경남 절차는 동일
+→ 확장은 개발이 아니라 데이터 교체`}
+        </DemoKey>
+      </div>
+
+      <h3 className="h-sm" style={{ marginBottom: 12 }}>
+        같은 지원인데 시도마다 이름이 다릅니다
+      </h3>
+      <p className="b-sm subtle" style={{ marginBottom: 16 }}>
+        치료비와 방과후활동비를 지급하는 교육청 바우처 카드입니다. 제도의 실질은 같은데 명칭이
+        전부 다릅니다. 이사하면 이전 지역에서 쓰던 이름은 통하지 않습니다.
+      </p>
+      <table className="tbl">
+        <caption className="skip">시도별 교육청 바우처 카드 명칭</caption>
+        <thead>
+          <tr>
+            <th scope="col" style={{ width: "22%" }}>
+              시도
+            </th>
+            <th scope="col" style={{ width: "26%" }}>
+              카드 명칭
+            </th>
+            <th scope="col">진단·평가 의뢰서 서식</th>
+          </tr>
+        </thead>
+        <tbody>
+          {REGIONS.map((r) => (
+            <tr key={r.id} className={r.id === regionId ? "row-urgent" : ""}>
+              <th scope="row">{r.name}</th>
+              <td>
+                <strong>{r.cardName}</strong>{" "}
+                {!r.cardVerified && <span className="badge">출처 확인 필요</span>}
+              </td>
+              <td className="td-sub">{r.requestFormNo}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="alert alert-danger" style={{ marginTop: 32 }}>
+        <span className="alert-tag">중요</span>
+        <p className="alert-title">2019년에 폐지된 용어가 2025년 지침에 열네 번 남아 있습니다</p>
+        <p className="alert-detail">
+          장애등급제가 폐지되어 「장애등급」은 「장애정도」로 바뀌었습니다. 그런데
+          경상남도교육청 2025년 지침은 제출 서류로 「장애등급 결정서」를 반복해 요구합니다.
+          그대로 안내하면 보호자는 존재하지 않는 서류를 떼러 갑니다. (강원 1회 · 경남 14회 — 두
+          지침 원문 대조, 2026.08)
+        </p>
+      </div>
+
+      <div className="btn-row">
+        <a href={REPO_DOCS} target="_blank" rel="noreferrer" className="btn btn-outline">
+          기획서 전문 보기
+        </a>
+      </div>
+
+      <div className="callout" style={{ marginTop: 32 }}>
+        <div>
+          <p className="callout-title">너도나도 길잡이 상담지원실</p>
+          <p className="callout-tel">1600-0000</p>
+          <p className="callout-note">
+            평일 09:00 ~ 18:00 (점심 12:00 ~ 13:00) · 가상 번호입니다. 실제로 연결되지 않습니다.
+          </p>
+        </div>
+        <a href="#faq" className="btn btn-outline">
+          자주 묻는 질문 보기
+        </a>
+      </div>
+    </section>
+  );
+}
