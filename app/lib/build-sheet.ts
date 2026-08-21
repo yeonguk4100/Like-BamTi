@@ -5,15 +5,20 @@
 //  - 입력값을 어디에도 저장하지 않는다. 이 함수는 순수 계산만 한다.
 
 import {
+  APPEAL_DEADLINES,
   CURRENT_SERVICES,
   DISABILITIES,
+  FORM_LABEL,
+  FORM_NO,
   LEVELS,
   OVERLAP_RULES,
+  PROCEDURES,
   PROGRAMS,
   REGIONS,
   type CurrentServiceId,
   type DisabilityId,
   type LevelId,
+  type ProcedureId,
   type Program,
   type RegionId,
   type Track,
@@ -26,6 +31,8 @@ export type Input = {
   /** yyyy-mm-dd. 마감일 계산에만 쓰고 저장하지 않는다 */
   birthDate: string;
   currentServices: CurrentServiceId[];
+  /** 신청 상황. 상황이 바뀌면 제출 서류가 통째로 바뀐다 */
+  procedureId: ProcedureId;
   /** 장애영역을 「기타」로 골랐을 때 담당자가 적은 영역 이름 */
   otherDisabilityLabel?: string;
   /** 상세 유형·원인 질환·지연 영역 등. 참고용이며 판정에 쓰지 않는다 */
@@ -70,7 +77,14 @@ export function buildSheet(input: Input) {
   const region = REGIONS.find((r) => r.id === input.regionId)!;
   const disability = DISABILITIES.find((d) => d.id === input.disabilityId)!;
   const level = LEVELS.find((l) => l.id === input.levelId)!;
+  const procedure = PROCEDURES.find((x) => x.id === input.procedureId)!;
 
+  /* 서류 목록 — 서식 번호는 지역마다 다르다 */
+  const formNos = FORM_NO[input.regionId];
+  const documents = procedure.forms.map((key) => {
+    const no = formNos[key];
+    return { key, label: FORM_LABEL[key], formNo: no ?? "서식 번호 미확인" };
+  });
   /* 「기타」를 골랐으면 담당자가 적은 이름을 쓴다 */
   const typed = input.otherDisabilityLabel?.trim();
   const disabilityLabel =
@@ -98,11 +112,8 @@ export function buildSheet(input: Input) {
     };
   });
 
-  /* ── 2. 마감일 ── */
-  const deadlines: Deadline[] = [
-    { label: "진단·평가 실시", when: "교육장이 회부한 날로부터 30일 이내" },
-    { label: "선정·배치 결과 통보", when: "진단·평가 결과보고 후 2주 이내" },
-  ];
+  /* ── 2. 마감일 — 상황별 기한이 먼저 온다 ── */
+  const deadlines: Deadline[] = procedure.deadlines.map((d) => ({ ...d }));
 
   if (input.levelId === "elementary") {
     deadlines.unshift({
@@ -135,10 +146,7 @@ export function buildSheet(input: Input) {
     });
   }
 
-  deadlines.push(
-    { label: "심사청구 결정 통보", when: "청구를 받은 날로부터 30일 이내" },
-    { label: "행정심판 제기", when: "심사결정 통보를 받은 날로부터 90일 이내" }
-  );
+  deadlines.push(...APPEAL_DEADLINES.map((d) => ({ ...d })));
 
   /* ── 3. 확인이 필요한 항목 ── */
   const warnings: Warning[] = [];
@@ -203,6 +211,8 @@ export function buildSheet(input: Input) {
     region,
     disability,
     disabilityLabel,
+    procedure,
+    documents,
     level,
     programs,
     deadlines,
@@ -214,6 +224,8 @@ export function buildSheet(input: Input) {
     disability,
     disabilityLabel,
     detailNote,
+    procedure,
+    documents,
     level,
     programs,
     deadlines,
@@ -226,12 +238,15 @@ function buildParentLetter(args: {
   region: (typeof REGIONS)[number];
   disability: (typeof DISABILITIES)[number];
   disabilityLabel: string;
+  procedure: (typeof PROCEDURES)[number];
+  documents: { label: string; formNo: string }[];
   level: (typeof LEVELS)[number];
   programs: ResolvedProgram[];
   deadlines: Deadline[];
   age9: string | null;
 }) {
-  const { region, disability, disabilityLabel, level, programs, deadlines, age9 } = args;
+  const { region, disability, disabilityLabel, procedure, documents, level, programs, deadlines, age9 } =
+    args;
 
   const eduPrograms = programs.filter((p) => p.track === "education");
   const otherPrograms = programs.filter((p) => p.track !== "education");
@@ -240,11 +255,15 @@ function buildParentLetter(args: {
   const lines: string[] = [];
 
   lines.push(`${region.name}에 사는 ${level.name} 아동의 보호자께 드리는 안내입니다.`);
+  lines.push(`이 안내는 「${procedure.name}」 기준입니다. (${procedure.when})`);
+  lines.push("");
+  lines.push("■ 준비하실 서류");
+  for (const d of documents) {
+    lines.push(`· ${d.label} [${d.formNo}]`);
+  }
   lines.push("");
   lines.push("■ 먼저 하실 일");
-  lines.push(
-    `1. ${level.submitTo}에 진단·평가를 신청합니다. 신청서는 [${region.requestFormNo}]이고, ${region.basicSurveyName}을 함께 냅니다.`
-  );
+  lines.push(`1. ${level.submitTo}에 서류를 제출합니다.`);
   lines.push(
     disability.tests.length > 0
       ? `2. 신청하면 ${region.officeName} 특수교육지원센터가 30일 안에 검사를 진행합니다. ${disabilityLabel} 검사가 포함됩니다.`

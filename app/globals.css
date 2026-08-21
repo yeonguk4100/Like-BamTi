@@ -1348,3 +1348,23 @@ input::placeholder {
     display: none !important;
   }
 }
+
+/* 상황별 주의사항 목록 */
+.notes {
+  list-style: none;
+  margin-top: var(--sp-md);
+}
+
+.notes li {
+  font-size: 15px;
+  color: var(--text-subtle);
+  padding-left: var(--sp-base);
+  position: relative;
+  margin-bottom: var(--sp-sm);
+}
+
+.notes li::before {
+  content: "※";
+  position: absolute;
+  left: 0;
+}

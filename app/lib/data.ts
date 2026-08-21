@@ -298,14 +298,7 @@ export const PROGRAMS: Program[] = [
     applyTo: "{{submitTo}}",
     summary:
       "특수교육대상자로 선정되어야 아래 교육청 지원제도를 받을 수 있습니다. 모든 절차의 출발점입니다.",
-    documents: [
-      "선정·배치 신청자 명단 (엑셀)",
-      "진단·평가 의뢰서 [{{requestFormNo}}]",
-      "{{basicSurveyName}}",
-      "배치 신청서",
-      "개인정보 수집·이용 동의서",
-      "학교장 의견서 또는 장애인증명서·복지카드 중 택 1",
-    ],
+    documents: ["위 「제출 서류」 표를 그대로 씁니다 — 신청 상황에 따라 달라집니다"],
     deadline: "회부일로부터 30일 이내 진단·평가 → 결과보고 후 2주 이내 선정·배치 통보",
     legalBasis: "장애인 등에 대한 특수교육법 제15조·제16조·제17조",
     verified: true,
@@ -451,4 +444,203 @@ export const OVERLAP_RULES: {
     message:
       "교육청 치료지원과 복지부 발달재활서비스는 같은 치료를 중복 지원하지 않도록 확인이 필요합니다.",
   },
+];
+
+/* ══════════════════════════════════════════════════════════
+   서식 — 같은 서류인데 번호가 지역마다 다르다
+   강원·경남 지침 원문에서 확인한 번호다 (2026.08 대조)
+   ══════════════════════════════════════════════════════════ */
+
+export type FormKey =
+  | "applicantList"
+  | "requestForm"
+  | "basicSurvey"
+  | "placementRequest"
+  | "principalOpinion"
+  | "privacyConsent"
+  | "ldRecord"
+  | "placementResultCopy"
+  | "advanceList"
+  | "advanceRequest"
+  | "reassignRequest"
+  | "deferralRequest"
+  | "reenrollRequest"
+  | "medicalCertificate";
+
+export const FORM_LABEL: Record<FormKey, string> = {
+  applicantList: "선정·배치 신청자 명단 (엑셀)",
+  requestForm: "진단·평가 의뢰서",
+  basicSurvey: "기초조사 서류",
+  placementRequest: "배치 신청서",
+  principalOpinion: "학교장 의견서 또는 장애인증명서·복지카드 중 택 1",
+  privacyConsent: "개인정보 수집·이용 및 제공 동의서",
+  ldRecord: "학습장애 선정을 위한 기초조사서 · 중재반응 기록지",
+  placementResultCopy: "이전 배치 결과통지서 사본",
+  advanceList: "상급학교 배치 의뢰자 명단 (엑셀)",
+  advanceRequest: "상급학교 배치 신청서",
+  reassignRequest: "재배치(배치변경) 신청서",
+  deferralRequest: "취학유예·면제 승인 신청서",
+  reenrollRequest: "재취학 신청서",
+  medicalCertificate: "의사 진단서 (최근 3개월 이내)",
+};
+
+/** 지역별 서식 번호. 확인하지 못한 지역은 비워 두고 화면에서 「서식 미확인」으로 보여준다 */
+export const FORM_NO: Record<RegionId, Partial<Record<FormKey, string>>> = {
+  gangwon: {
+    applicantList: "서식 1",
+    advanceList: "서식 2",
+    requestForm: "서식 3",
+    basicSurvey: "서식 4·5 (보호자용 / 담임교사용)",
+    advanceRequest: "서식 8",
+    reassignRequest: "서식 7",
+    deferralRequest: "서식 10",
+    reenrollRequest: "서식 11",
+    privacyConsent: "서식 12",
+    ldRecord: "서식 25·26",
+  },
+  gyeongnam: {
+    applicantList: "서식 1-❶",
+    advanceList: "서식 1-❷",
+    requestForm: "서식 2",
+    basicSurvey: "서식 3 (일반) / 서식 4 (건강장애)",
+    placementRequest: "서식 5",
+    reassignRequest: "서식 6",
+    deferralRequest: "서식 8",
+    reenrollRequest: "서식 9",
+    principalOpinion: "서식 10",
+    privacyConsent: "서식 11",
+    ldRecord: "서식 12",
+  },
+  chungnam: {},
+  gyeonggi: {},
+  incheon: {},
+  seoul: {},
+};
+
+/* ══════════════════════════════════════════════════════════
+   신청 상황 — 상황이 바뀌면 서류가 통째로 바뀐다
+   ══════════════════════════════════════════════════════════ */
+
+export type ProcedureId = "new" | "advance" | "reassign" | "deferral" | "reenroll";
+
+export type Procedure = {
+  id: ProcedureId;
+  name: string;
+  /** 어떤 문의일 때 고르는지 */
+  when: string;
+  forms: FormKey[];
+  /** 서류 목록에 덧붙일 주의사항 */
+  notes: string[];
+  deadlines: { label: string; when: string; urgent?: boolean }[];
+} & Sourced;
+
+export const PROCEDURES: Procedure[] = [
+  {
+    id: "new",
+    name: "신규 선정",
+    when: "특수교육대상자로 처음 선정받으려는 경우",
+    forms: [
+      "applicantList",
+      "requestForm",
+      "basicSurvey",
+      "placementRequest",
+      "principalOpinion",
+      "privacyConsent",
+    ],
+    notes: [
+      "학습장애로 의뢰할 때는 최소 6개월 이상 사전 중재를 거친 뒤 신청하고, 중재 기록지를 함께 냅니다.",
+      "정서·행동장애로 의뢰할 때는 기초조사서 비고란에 의학적 처치·상담 내역·치료 경험을 적습니다.",
+      "건강장애는 3개월 이상 장기 의료처치가 필요하다는 소견이 담긴 진단서가 필요합니다.",
+      "학적이 없는 아동은 보호자가 직접 해당 특수교육지원센터로 상담·신청합니다.",
+    ],
+    deadlines: [
+      { label: "진단·평가 실시", when: "교육장이 회부한 날로부터 30일 이내" },
+      { label: "선정·배치 결과 통보", when: "진단·평가 결과보고 후 2주 이내" },
+    ],
+    verified: true,
+    source: "강원·경남 교육청 지침 (2026.08 대조)",
+  },
+  {
+    id: "advance",
+    name: "상급학교 진학 배치",
+    when: "이미 선정된 아동이 유→초, 초→중, 중→고로 올라가는 경우",
+    forms: ["advanceList", "advanceRequest", "privacyConsent", "placementResultCopy"],
+    notes: [
+      "건강장애는 상급학교 진학 시, 학습장애·정서·행동장애는 중학교 진학 시 신규 선정 서류를 다시 제출해 재선정을 받아야 합니다.",
+      "당해 연도에 선정된 학생은 진학 배치 서류만 냅니다.",
+      "배치일은 다음 학년도 3월 1일입니다.",
+      "특수학급 배치를 희망하면 거주지에서 가까운 설치교를 1~3지망까지 적습니다.",
+    ],
+    deadlines: [
+      {
+        label: "배치 희망교 작성",
+        when: "3지망까지 작성 — 미작성 시 특수교육운영위원회 심사에 따라 임의 배치",
+        urgent: true,
+      },
+      { label: "배치일", when: "다음 학년도 3월 1일" },
+    ],
+    verified: true,
+    source: "강원·경남 교육청 지침 (2026.08 대조)",
+  },
+  {
+    id: "reassign",
+    name: "전학 · 재배치",
+    when: "이사나 배치 유형 변경으로 학교를 옮기는 경우",
+    forms: ["reassignRequest", "privacyConsent", "placementResultCopy"],
+    notes: [
+      "같은 유형으로 옮기는 것은 재배치, 다른 유형으로 옮기는 것은 배치변경입니다. 둘 다 특수교육운영위원회 심의 사항입니다.",
+      "거주지 이전으로 인한 재배치는 심의 없이 먼저 배치하고 나중에 추인할 수 있습니다.",
+      "거주지 이사로 인한 타 시·군·도 재배치는 개별화교육지원팀 회의를 생략합니다.",
+      "주민등록등본은 서류 접수일 기준 1개월 이내 발급본이어야 합니다.",
+    ],
+    deadlines: [
+      {
+        label: "개별화교육계획(IEP) 송부",
+        when: "전출일로부터 14일 이내에 전출교가 전입교로 송부",
+        urgent: true,
+      },
+      {
+        label: "고등학교 계열 변경 전·편입학",
+        when: "2학년 1학기 성적산출 직전까지 가능 — 교육과정 미이수 시 불이익을 보호자에게 안내",
+      },
+    ],
+    verified: true,
+    source: "강원·경남 교육청 지침 (2026.08 대조)",
+  },
+  {
+    id: "deferral",
+    name: "취학유예 · 면제",
+    when: "질병이나 장기입원 등으로 취학을 미루려는 경우",
+    forms: ["deferralRequest", "medicalCertificate", "privacyConsent"],
+    notes: [
+      "취학유예 기간은 1년 이내입니다. 연장하려면 특수교육운영위원회 심의를 거쳐야 합니다.",
+      "특수교육대상자는 고등학교까지 의무교육이므로 유예·면제는 예외적으로만 인정됩니다.",
+      "유예·면제 기간에도 다음 학년도 재취학 여부를 학교장·교육장이 확인합니다.",
+    ],
+    deadlines: [
+      { label: "다음 학년도 재취학 여부 확인", when: "12월 말", urgent: true },
+      { label: "취학유예 기간", when: "1년 이내 — 연장은 운영위원회 심의" },
+    ],
+    verified: true,
+    source: "강원 교육청 지침 (2026.08 확인)",
+  },
+  {
+    id: "reenroll",
+    name: "재취학",
+    when: "유예·면제 중이던 아동이 다시 학교에 다니려는 경우",
+    forms: ["reenrollRequest", "privacyConsent", "placementResultCopy"],
+    notes: [
+      "유예·면제로 학년 차이가 생긴 경우, 의무교육 해당 연수를 더한 연령까지 교육받을 권리가 있습니다.",
+      "보호자는 소속 학교와 해당 특수교육지원센터에 먼저 상담한 뒤 학교를 통해 신청합니다.",
+    ],
+    deadlines: [{ label: "재취학 여부 확인", when: "각급학교장·교육장이 12월 말에 보호자에게 확인" }],
+    verified: true,
+    source: "강원 교육청 지침 (2026.08 확인)",
+  },
+];
+
+/** 심사에 이의가 있을 때의 기한 — 상황과 무관하게 늘 붙는다 */
+export const APPEAL_DEADLINES = [
+  { label: "심사청구 결정 통보", when: "청구를 받은 날로부터 30일 이내" },
+  { label: "행정심판 제기", when: "심사결정 통보를 받은 날로부터 90일 이내" },
 ];

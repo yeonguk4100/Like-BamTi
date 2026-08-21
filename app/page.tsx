@@ -5,11 +5,13 @@ import {
   CURRENT_SERVICES,
   DISABILITIES,
   LEVELS,
+  PROCEDURES,
   REGIONS,
   UNREGISTERED_AREAS,
   type CurrentServiceId,
   type DisabilityId,
   type LevelId,
+  type ProcedureId,
   type RegionId,
   type Track,
 } from "./lib/data";
@@ -243,6 +245,7 @@ export default function Home() {
   const [regionId, setRegionId] = useState<RegionId>("gangwon");
   const [disabilityId, setDisabilityId] = useState<DisabilityId>("autism");
   const [levelId, setLevelId] = useState<LevelId>("elementary");
+  const [procedureId, setProcedureId] = useState<ProcedureId>("new");
   const [birthDate, setBirthDate] = useState("2019-03-14");
   const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>(["localChildCenter"]);
   const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
@@ -272,6 +275,7 @@ export default function Home() {
         regionId,
         disabilityId,
         levelId,
+        procedureId,
         birthDate,
         currentServices,
         otherDisabilityLabel,
@@ -281,6 +285,7 @@ export default function Home() {
       regionId,
       disabilityId,
       levelId,
+      procedureId,
       birthDate,
       currentServices,
       otherDisabilityLabel,
@@ -460,6 +465,27 @@ export default function Home() {
                       시연 순서 ① 기본 → ② 경고 → ③ 만9세 → ④ 지역차 → ⑤ 고교
                     </span>
                   </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">
+                  신청 상황<span className="req">*</span>
+                </th>
+                <td>
+                  <div className="chip-row">
+                    {PROCEDURES.map((x) => (
+                      <button
+                        key={x.id}
+                        type="button"
+                        className={`chip ${x.id === procedureId ? "chip-on" : ""}`}
+                        aria-pressed={x.id === procedureId}
+                        onClick={() => setProcedureId(x.id)}
+                      >
+                        {x.name}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="hint">{sheet.procedure.when}</span>
                 </td>
               </tr>
               <tr>
@@ -796,6 +822,43 @@ export default function Home() {
                       ))}
                     </div>
                   )}
+
+                  <div className="block">
+                    <h4 className="block-title">
+                      제출 서류
+                      <span className="count">
+                        {sheet.procedure.name} · {sheet.documents.length}종
+                      </span>
+                    </h4>
+                    <table className="tbl">
+                      <caption className="skip">신청 상황별 제출 서류</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">서류</th>
+                          <th scope="col" style={{ width: "34%" }}>
+                            {sheet.region.officeName} 서식
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sheet.documents.map((d) => (
+                          <tr key={d.key}>
+                            <th scope="row">{d.label}</th>
+                            <td className={d.formNo.includes("미확인") ? "td-sub" : ""}>
+                              {d.formNo}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {sheet.procedure.notes.length > 0 && (
+                      <ul className="notes">
+                        {sheet.procedure.notes.map((n, i) => (
+                          <li key={i}>{n}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
 
                   <div className="block" id="deadlines">
                     <h4 className="block-title">
