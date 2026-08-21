@@ -39,6 +39,92 @@ const STEPS = [
   { no: 3, title: "안내문 전달", desc: "학부모용 안내문을 출력해 건넵니다", href: "#step3" },
 ];
 
+/* ⚠ 데모용 — 발표 후 삭제. 전부 가상 사례다. */
+type Preset = {
+  id: string;
+  label: string;
+  note: string;
+  regionId: RegionId;
+  disabilityId: DisabilityId;
+  levelId: LevelId;
+  birthDate: string;
+  currentServices: CurrentServiceId[];
+};
+
+const PRESETS: Preset[] = [
+  {
+    id: "a",
+    label: "강원 · 자폐성장애 · 취학 예정",
+    note: "가장 흔한 문의",
+    regionId: "gangwon",
+    disabilityId: "autism",
+    levelId: "elementary",
+    birthDate: "2019-03-14",
+    currentServices: ["localChildCenter"],
+  },
+  {
+    id: "b",
+    label: "경남 · 지적장애 · 중학교",
+    note: "폐지 용어 경고가 뜸",
+    regionId: "gyeongnam",
+    disabilityId: "intellectual",
+    levelId: "middle",
+    birthDate: "2013-05-20",
+    currentServices: ["rehabVoucher"],
+  },
+  {
+    id: "c",
+    label: "강원 · 발달지체 · 유치원",
+    note: "만 9세 종료일 계산",
+    regionId: "gangwon",
+    disabilityId: "developmentalDelay",
+    levelId: "kinder",
+    birthDate: "2021-08-02",
+    currentServices: [],
+  },
+  {
+    id: "d",
+    label: "충남 · 발달지체 · 취학 예정",
+    note: "지역만 바뀌면 카드 이름이 바뀜",
+    regionId: "chungnam",
+    disabilityId: "developmentalDelay",
+    levelId: "elementary",
+    birthDate: "2019-11-27",
+    currentServices: ["localChildCenter", "rehabVoucher"],
+  },
+  {
+    id: "e",
+    label: "서울 · 자폐성장애 · 고등학교",
+    note: "도교육청 결정 · 중복 확인",
+    regionId: "seoul",
+    disabilityId: "autism",
+    levelId: "high",
+    birthDate: "2010-02-11",
+    currentServices: ["togetherCare"],
+  },
+];
+
+/* ⚠ 데모용 — 발표자 키워드. 빈 자리에 초록으로 띄운다. 발표 후 삭제. */
+function DemoKey({
+  children,
+  top,
+  right,
+  left,
+  bottom,
+}: {
+  children: React.ReactNode;
+  top?: number | string;
+  right?: number | string;
+  left?: number | string;
+  bottom?: number | string;
+}) {
+  return (
+    <span className="demo-key" style={{ top, right, left, bottom }} aria-hidden="true">
+      {children}
+    </span>
+  );
+}
+
 export default function Home() {
   const [regionId, setRegionId] = useState<RegionId>("gangwon");
   const [disabilityId, setDisabilityId] = useState<DisabilityId>("autism");
@@ -50,6 +136,17 @@ export default function Home() {
   const [activeStep, setActiveStep] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("grouped");
   const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
+  /* ⚠ 데모용 — 발표 후 삭제 */
+  const [presetId, setPresetId] = useState<string>("a");
+
+  function applyPreset(p: Preset) {
+    setPresetId(p.id);
+    setRegionId(p.regionId);
+    setDisabilityId(p.disabilityId);
+    setLevelId(p.levelId);
+    setBirthDate(p.birthDate);
+    setCurrentServices(p.currentServices);
+  }
 
   const sheet = useMemo(
     () => buildSheet({ regionId, disabilityId, levelId, birthDate, currentServices }),
@@ -159,7 +256,14 @@ export default function Home() {
 
       {/* ═══════ 페이지 머리 ═══════ */}
       <div className="page-head">
-        <div className="page-head-inner">
+        <div className="page-head-inner rel">
+          <DemoKey top={72} right={0}>
+            {`소관이 네 갈래
+교육 · 복지 · 의료 · 고용
+
+전 과정이 신청주의
+알려주는 주체가 없다`}
+          </DemoKey>
           <p className="crumb">홈 &gt; 상담 지원 &gt; 특수교육 지원제도 확인</p>
           <h1 className="h-xl">특수교육 지원제도 상담 지원</h1>
           <p className="lead">
@@ -199,6 +303,31 @@ export default function Home() {
           <table className="form-table">
             <caption className="skip">아동 조건 입력</caption>
             <tbody>
+              {/* ⚠ 데모용 행 — 발표 후 삭제 */}
+              <tr>
+                <th scope="row">데모 사례</th>
+                <td className="rel">
+                  <div className="preset-row">
+                    {PRESETS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className={`preset ${presetId === p.id ? "preset-on" : ""}`}
+                        onClick={() => applyPreset(p)}
+                      >
+                        <strong>{p.label}</strong>
+                        <span>{p.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <span className="hint">
+                    전부 가상 사례입니다. 실제 아동 정보가 아닙니다.
+                    <span className="demo-key-inline">
+                      시연 순서 ① 기본 → ② 경고 → ③ 만9세 → ④ 지역차 → ⑤ 고교
+                    </span>
+                  </span>
+                </td>
+              </tr>
               <tr>
                 <th scope="row">
                   거주 지역<span className="req">*</span>
@@ -276,6 +405,9 @@ export default function Home() {
                   <span className="hint">
                     재선정 마감일 계산에만 사용하며 저장하지 않습니다. (발달지체는 만 9세 생일 기준)
                   </span>
+                  <span className="demo-key-inline">
+                    ← 개인정보 아님 · 마감 계산용 · 저장 안 함
+                  </span>
                 </td>
               </tr>
               <tr>
@@ -333,7 +465,13 @@ export default function Home() {
             </div>
 
             {/* 요약 카드 */}
-            <div className="tint-card">
+            <div className="tint-card rel">
+              <DemoKey top={12} right={12}>
+                {`소관 밖 N건 ← 이 숫자가 값
+지금은 담당자가 손으로 찾는 몫
+
+첫 사용에서 바로 세지는 0차 지표`}
+              </DemoKey>
               <p className="tint-title">이번 상담에서 확인할 항목</p>
               <p className="tint-line">
                 {sheet.region.name} · {sheet.disability.name} · {sheet.level.name}
@@ -396,7 +534,14 @@ export default function Home() {
 
             {/* 상태 카드 — 가장 급한 것 하나만 크게 */}
             {age9Date ? (
-              <div className="tint-card tint-card-green">
+              <div className="tint-card tint-card-green rel">
+                <DemoKey top={12} right={12}>
+                  {`이미 받던 지원이 끊긴다
+만 9세 생일 = 종료 기준
+
+생년월일에서 계산되는 실제 날짜
+지침에 담당자 의무로 명시`}
+                </DemoKey>
                 <p className="tint-title">발달지체 지원 종료 예정일</p>
                 <p className="tint-status">{age9Date}</p>
                 <p className="tint-note">
@@ -435,7 +580,14 @@ export default function Home() {
             <div className="result-grid">
               {/* ── 담당자용 ── */}
               <section className="panel">
-                <div className="panel-head">
+                <div className="panel-head rel">
+                  <DemoKey top={-2} left={-260}>
+                    {`한꺼번에 보기 = 부처를 넘는 증거
+소관별 보기 = 어디로 보낼지
+
+판정하지 않는다
+확인 목록만 준다`}
+                  </DemoKey>
                   <h3 className="h-sm">담당자용 확인 시트</h3>
                   <span className="b-sm subtle right">{sheet.region.officeName}</span>
                 </div>
@@ -613,7 +765,14 @@ export default function Home() {
 
               {/* ── 학부모용 ── */}
               <section className="panel letter" id="step3">
-                <div className="panel-head">
+                <div className="panel-head rel">
+                  <DemoKey top={-2} right={-260}>
+                    {`한 번 입력 → 두 장
+담당자용 · 학부모용
+
+그대로 출력해서 건넨다
+= 안내 기록이 남는다`}
+                  </DemoKey>
                   <h3 className="h-sm">3. 학부모용 안내문</h3>
                   <button
                     type="button"
@@ -636,9 +795,14 @@ export default function Home() {
 
         {/* ═══════ 참고 자료 ═══════ */}
         <section className="section wrap" id="reference">
-          <div className="section-head">
+          <div className="section-head rel">
             <h2 className="h-lg">참고 자료</h2>
             <span className="b-sm subtle right">이 도구가 필요한 이유</span>
+            <DemoKey top={48} right={0}>
+              {`카드 이름 6개 = 지역마다 다름
+강원·경남 절차는 동일
+→ 확장은 개발이 아니라 데이터 교체`}
+            </DemoKey>
           </div>
 
           <h3 className="h-sm" style={{ marginBottom: 12 }}>

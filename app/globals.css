@@ -1270,3 +1270,87 @@ input[type="date"] {
     background: #fff;
   }
 }
+
+/* ============================================================
+   ⚠ 데모용 임시 스타일 — 발표 후 삭제
+   초록 키워드는 발표자 힌트다. .demo-key 와 .rel 만 지우면 된다.
+   ============================================================ */
+
+.rel {
+  position: relative;
+}
+
+.demo-key {
+  position: absolute;
+  color: #0b8a2f;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  max-width: 240px;
+  pointer-events: none;
+  z-index: 5;
+  white-space: pre-line;
+}
+
+.demo-key-inline {
+  color: #0b8a2f;
+  font-size: 13px;
+  font-weight: 700;
+  margin-left: var(--sp-md);
+  white-space: pre-line;
+}
+
+/* 좁은 화면과 인쇄에서는 감춘다 */
+@media (max-width: 1320px) {
+  .demo-key {
+    display: none;
+  }
+}
+
+@media print {
+  .demo-key,
+  .demo-key-inline {
+    display: none !important;
+  }
+}
+
+/* 데모 사례 선택 */
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-md);
+}
+
+.preset {
+  text-align: left;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-md) var(--sp-base);
+  min-height: 44px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.preset strong {
+  display: block;
+  font-size: 15px;
+}
+
+.preset span {
+  display: block;
+  font-size: 13px;
+  color: var(--text-subtle);
+  margin-top: 2px;
+}
+
+.preset-on {
+  border: 2px solid var(--primary);
+  background: var(--primary-subtle);
+  padding: 7px 15px;
+}
+
+.preset-on span {
+  color: var(--primary-deep);
+}
