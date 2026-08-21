@@ -252,6 +252,11 @@ export default function Home() {
   const [detailNote, setDetailNote] = useState("");
   const [copied, setCopied] = useState(false);
 
+  /* AI 안내문 — 조건별로 캐시한다. 조건이 바뀌면 자동으로 템플릿으로 돌아간다 */
+  const [aiCache, setAiCache] = useState<Record<string, string>>({});
+  const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [aiError, setAiError] = useState("");
+
   const [activeStep, setActiveStep] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("grouped");
   const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
@@ -312,6 +317,63 @@ export default function Home() {
   const age9Date =
     sheet.disability.reselection === "age9" ? age9EndOfMonth(birthDate) : null;
 
+  /* AI로 보내는 내용. 생년월일과 상세 메모는 넣지 않는다 */
+  const aiPayload = useMemo(
+    () => ({
+      지역: sheet.region.name,
+      교육청: sheet.region.officeName,
+      장애영역: sheet.disabilityLabel,
+      학교급: sheet.level.name,
+      제출처: sheet.level.submitTo,
+      심사기구: sheet.level.committee,
+      결정권자: sheet.level.decider,
+      신청상황: sheet.procedure.name,
+      상황설명: sheet.procedure.when,
+      제출서류: sheet.documents.map((d) => `${d.label} [${d.formNo}]`),
+      상황주의사항: sheet.procedure.notes,
+      마감일: sheet.deadlines.map((d) => ({
+        항목: d.label,
+        기한: d.when,
+        긴급: Boolean(d.urgent),
+      })),
+      확인할제도: sheet.programs.map((pg) => ({
+        이름: pg.resolvedName,
+        소관: TRACK_LABEL[pg.track],
+        신청처: pg.resolvedApplyTo,
+      })),
+      확인이필요한항목: sheet.warnings.map((w) => ({ 제목: w.title, 내용: w.detail })),
+    }),
+    [sheet]
+  );
+
+  const aiKey = useMemo(() => JSON.stringify(aiPayload), [aiPayload]);
+  const aiLetter = aiCache[aiKey];
+  const shownLetter = aiLetter ?? sheet.parentLetter;
+
+  async function rewriteWithAi() {
+    if (aiStatus === "loading") return;
+    setAiStatus("loading");
+    setAiError("");
+    try {
+      const res = await fetch("/api/letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(aiPayload),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.letter) {
+        setAiError(data.error ?? "안내문을 받지 못했습니다.");
+        setAiStatus("error");
+        return;
+      }
+      setAiCache((prev) => ({ ...prev, [aiKey]: data.letter }));
+      setAiStatus("idle");
+    } catch {
+      setAiError("요청을 보내지 못했습니다. 네트워크를 확인하세요.");
+      setAiStatus("error");
+    }
+  }
+
   function toggleService(id: CurrentServiceId) {
     setCurrentServices((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -320,7 +382,7 @@ export default function Home() {
 
   async function copyLetter() {
     try {
-      await navigator.clipboard.writeText(sheet.parentLetter);
+      await navigator.clipboard.writeText(shownLetter);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -1046,7 +1108,52 @@ export default function Home() {
                   <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
                     출력해서 건네거나 문자로 보냅니다. 필터와 무관하게 항상 전체가 들어갑니다.
                   </p>
-                  <pre className="letter-body">{sheet.parentLetter}</pre>
+
+                  <div className="ai-bar">
+                    <span className={`badge ${aiLetter ? "badge-primary" : ""}`}>
+                      {aiLetter ? "AI가 다시 씀" : "기본 서식"}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      onClick={rewriteWithAi}
+                      disabled={aiStatus === "loading"}
+                    >
+                      {aiStatus === "loading"
+                        ? "쓰고 있습니다…"
+                        : aiLetter
+                          ? "AI로 다시 쓰기"
+                          : "AI로 쉽게 다시 쓰기"}
+                    </button>
+                    {aiLetter && (
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm"
+                        onClick={() =>
+                          setAiCache((prev) => {
+                            const next = { ...prev };
+                            delete next[aiKey];
+                            return next;
+                          })
+                        }
+                      >
+                        기본 서식으로
+                      </button>
+                    )}
+                  </div>
+
+                  {aiStatus === "error" && (
+                    <p className="ai-error">
+                      {aiError} 아래 기본 서식은 그대로 쓸 수 있습니다.
+                    </p>
+                  )}
+
+                  <p className="hint" style={{ marginTop: 0 }}>
+                    AI로 보낼 때 <strong>생년월일과 상세 메모는 보내지 않습니다.</strong> 지역·장애영역·학교급과
+                    규칙이 계산한 결과만 보냅니다.
+                  </p>
+
+                  <pre className="letter-body">{shownLetter}</pre>
                 </div>
               </section>
             </div>

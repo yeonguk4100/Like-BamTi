@@ -1368,3 +1368,20 @@ input::placeholder {
   position: absolute;
   left: 0;
 }
+
+/* AI 안내문 전환 줄 */
+.ai-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  flex-wrap: wrap;
+  padding-bottom: var(--sp-md);
+  margin-bottom: var(--sp-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.ai-error {
+  font-size: 15px;
+  color: var(--danger);
+  margin-bottom: var(--sp-md);
+}
