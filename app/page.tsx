@@ -269,7 +269,7 @@ export default function Home() {
           <p className="lead">
             학부모 문의를 받았을 때 아동의 조건을 입력하면, <strong>교육청·복지부·의료로 갈라진
             제도</strong>를 한 화면에 모아 확인할 제도와 마감일·준비 서류·근거를 정리해 드립니다.
-            학부모에게 그대로 건넬 안내문도 함께 만들어집니다.
+            학부모용 안내문을 작성합니다.
           </p>
         </div>
         <ol className="steps">
@@ -297,7 +297,6 @@ export default function Home() {
         <section className="section wrap" id="step1">
           <div className="section-head">
             <h2 className="h-lg">1. 조건 입력</h2>
-            <span className="b-sm subtle right">상담 첫머리에 어차피 확인하는 정보만 받습니다</span>
           </div>
 
           <table className="form-table">
