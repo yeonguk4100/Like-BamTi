@@ -415,7 +415,8 @@ button {
   cursor: not-allowed;
 }
 
-input[type="date"] {
+input[type="date"],
+input[type="text"] {
   font-family: inherit;
   font-size: 17px;
   color: var(--text);
@@ -424,6 +425,46 @@ input[type="date"] {
   border-radius: var(--r-md);
   padding: var(--sp-md) var(--sp-base);
   min-height: 44px;
+}
+
+input[type="text"].text-input {
+  width: 100%;
+  max-width: 420px;
+}
+
+input::placeholder {
+  color: var(--border);
+}
+
+/* 칩 아래에 딸려 나오는 직접입력 칸 */
+.sub-field {
+  margin-top: var(--sp-base);
+  padding-top: var(--sp-base);
+  border-top: 1px solid var(--border);
+}
+
+.sub-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: var(--sp-md);
+}
+
+.sub-label .opt {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-subtle);
+  margin-left: var(--sp-sm);
+}
+
+/* 확인 시트에 참고로 표시되는 한 줄 */
+.detail-line {
+  font-size: 15px;
+  margin-bottom: var(--sp-base);
+}
+
+.detail-line strong {
+  margin-right: var(--sp-md);
 }
 
 .hint {

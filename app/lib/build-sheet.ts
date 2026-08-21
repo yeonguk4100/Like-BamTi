@@ -26,10 +26,14 @@ export type Input = {
   /** yyyy-mm-dd. 마감일 계산에만 쓰고 저장하지 않는다 */
   birthDate: string;
   currentServices: CurrentServiceId[];
+  /** 장애영역을 「기타」로 골랐을 때 담당자가 적은 영역 이름 */
+  otherDisabilityLabel?: string;
+  /** 자폐성장애 상세 유형·특성. 참고용이며 판정에 쓰지 않는다 */
+  autismDetail?: string;
 };
 
 export type Warning = {
-  kind: "term" | "overlap" | "crossTrack" | "easyToMiss";
+  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered";
   title: string;
   detail: string;
 };
@@ -66,6 +70,13 @@ export function buildSheet(input: Input) {
   const region = REGIONS.find((r) => r.id === input.regionId)!;
   const disability = DISABILITIES.find((d) => d.id === input.disabilityId)!;
   const level = LEVELS.find((l) => l.id === input.levelId)!;
+
+  /* 「기타」를 골랐으면 담당자가 적은 이름을 쓴다 */
+  const typed = input.otherDisabilityLabel?.trim();
+  const disabilityLabel =
+    disability.id === "other" ? (typed ? typed : "기타 (미입력)") : disability.name;
+  const autismDetail =
+    disability.id === "autism" ? input.autismDetail?.trim() || undefined : undefined;
 
   /* ── 1. 확인해야 할 제도 ── */
   const programs: ResolvedProgram[] = PROGRAMS.filter((p) => {
@@ -133,6 +144,18 @@ export function buildSheet(input: Input) {
   /* ── 3. 확인이 필요한 항목 ── */
   const warnings: Warning[] = [];
 
+  if (disability.id === "other") {
+    warnings.push({
+      kind: "unregistered",
+      title: typed
+        ? `「${typed}」의 검사 도구는 이 도구에 등록돼 있지 않습니다`
+        : "장애영역을 직접 입력해 주세요",
+      detail:
+        "선정 절차와 기한, 제출 서류는 장애영역과 무관하게 같습니다. " +
+        "다만 진단·평가에 들어가는 검사 도구는 영역마다 달라, 소속 교육청 지침에서 확인해야 합니다.",
+    });
+  }
+
   if (region.legacyTermInGuide) {
     warnings.push({
       kind: "term",
@@ -177,20 +200,39 @@ export function buildSheet(input: Input) {
   }
 
   /* ── 4. 학부모용 안내문 ── */
-  const parentLetter = buildParentLetter({ region, disability, level, programs, deadlines, age9 });
+  const parentLetter = buildParentLetter({
+    region,
+    disability,
+    disabilityLabel,
+    level,
+    programs,
+    deadlines,
+    age9,
+  });
 
-  return { region, disability, level, programs, deadlines, warnings, parentLetter };
+  return {
+    region,
+    disability,
+    disabilityLabel,
+    autismDetail,
+    level,
+    programs,
+    deadlines,
+    warnings,
+    parentLetter,
+  };
 }
 
 function buildParentLetter(args: {
   region: (typeof REGIONS)[number];
   disability: (typeof DISABILITIES)[number];
+  disabilityLabel: string;
   level: (typeof LEVELS)[number];
   programs: ResolvedProgram[];
   deadlines: Deadline[];
   age9: string | null;
 }) {
-  const { region, disability, level, programs, deadlines, age9 } = args;
+  const { region, disability, disabilityLabel, level, programs, deadlines, age9 } = args;
 
   const eduPrograms = programs.filter((p) => p.track === "education");
   const otherPrograms = programs.filter((p) => p.track !== "education");
@@ -205,7 +247,9 @@ function buildParentLetter(args: {
     `1. ${level.submitTo}에 진단·평가를 신청합니다. 신청서는 [${region.requestFormNo}]이고, ${region.basicSurveyName}을 함께 냅니다.`
   );
   lines.push(
-    `2. 신청하면 ${region.officeName} 특수교육지원센터가 30일 안에 검사를 진행합니다. ${disability.name} 검사가 포함됩니다.`
+    disability.tests.length > 0
+      ? `2. 신청하면 ${region.officeName} 특수교육지원센터가 30일 안에 검사를 진행합니다. ${disabilityLabel} 검사가 포함됩니다.`
+      : `2. 신청하면 ${region.officeName} 특수교육지원센터가 30일 안에 검사를 진행합니다. 어떤 검사를 하는지는 담당자에게 확인하세요.`
   );
   lines.push(
     `3. 검사 결과가 나오면 ${level.committee}가 심사하고, 2주 안에 ${level.decider}이(가) 결과를 알려 드립니다.`

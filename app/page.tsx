@@ -6,6 +6,7 @@ import {
   DISABILITIES,
   LEVELS,
   REGIONS,
+  UNREGISTERED_AREAS,
   type CurrentServiceId,
   type DisabilityId,
   type LevelId,
@@ -131,6 +132,8 @@ export default function Home() {
   const [levelId, setLevelId] = useState<LevelId>("elementary");
   const [birthDate, setBirthDate] = useState("2019-03-14");
   const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>(["localChildCenter"]);
+  const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
+  const [autismDetail, setAutismDetail] = useState("");
   const [copied, setCopied] = useState(false);
 
   const [activeStep, setActiveStep] = useState(1);
@@ -146,11 +149,30 @@ export default function Home() {
     setLevelId(p.levelId);
     setBirthDate(p.birthDate);
     setCurrentServices(p.currentServices);
+    setOtherDisabilityLabel("");
+    setAutismDetail("");
   }
 
   const sheet = useMemo(
-    () => buildSheet({ regionId, disabilityId, levelId, birthDate, currentServices }),
-    [regionId, disabilityId, levelId, birthDate, currentServices]
+    () =>
+      buildSheet({
+        regionId,
+        disabilityId,
+        levelId,
+        birthDate,
+        currentServices,
+        otherDisabilityLabel,
+        autismDetail,
+      }),
+    [
+      regionId,
+      disabilityId,
+      levelId,
+      birthDate,
+      currentServices,
+      otherDisabilityLabel,
+      autismDetail,
+    ]
   );
 
   const counts = useMemo(() => {
@@ -368,6 +390,46 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
+
+                  {disabilityId === "other" && (
+                    <div className="sub-field">
+                      <label htmlFor="otherArea" className="sub-label">
+                        장애영역 직접 입력
+                      </label>
+                      <input
+                        id="otherArea"
+                        type="text"
+                        className="text-input"
+                        value={otherDisabilityLabel}
+                        onChange={(e) => setOtherDisabilityLabel(e.target.value)}
+                        placeholder="예: 정서·행동장애"
+                      />
+                      <span className="hint">
+                        특수교육법 시행령 제10조는 11개 영역을 정하고 있습니다. 아직 이 도구에 검사
+                        도구가 등록되지 않은 영역: {UNREGISTERED_AREAS}
+                      </span>
+                    </div>
+                  )}
+
+                  {disabilityId === "autism" && (
+                    <div className="sub-field">
+                      <label htmlFor="autismDetail" className="sub-label">
+                        상세 유형 · 특성 <span className="opt">선택</span>
+                      </label>
+                      <input
+                        id="autismDetail"
+                        type="text"
+                        className="text-input"
+                        value={autismDetail}
+                        onChange={(e) => setAutismDetail(e.target.value)}
+                        placeholder="예: 아스퍼거 진단 이력 있음, 언어 표현 제한"
+                      />
+                      <span className="hint">
+                        상담에서 들은 표현을 그대로 적으셔도 됩니다. 확인 시트에만 참고로 표시되며
+                        판정이나 검사 선택에는 쓰이지 않습니다.
+                      </span>
+                    </div>
+                  )}
                 </td>
               </tr>
               <tr>
@@ -455,7 +517,7 @@ export default function Home() {
               <span className="sum-label">현재 조건</span>
               <span className="sum-item">{sheet.region.name}</span>
               <span className="sum-sep">|</span>
-              <span className="sum-item">{sheet.disability.name}</span>
+              <span className="sum-item">{sheet.disabilityLabel}</span>
               <span className="sum-sep">|</span>
               <span className="sum-item">{sheet.level.name}</span>
               <a href="#step1" onClick={() => setActiveStep(1)}>
@@ -473,7 +535,7 @@ export default function Home() {
               </DemoKey>
               <p className="tint-title">이번 상담에서 확인할 항목</p>
               <p className="tint-line">
-                {sheet.region.name} · {sheet.disability.name} · {sheet.level.name}
+                {sheet.region.name} · {sheet.disabilityLabel} · {sheet.level.name}
               </p>
               <p className="tint-line">
                 진단·평가 제출처 : {sheet.level.submitTo} · 결정 : {sheet.level.decider}
@@ -642,6 +704,20 @@ export default function Home() {
 
                   <div className="block">
                     <h4 className="block-title">이번 진단·평가에 들어가는 검사</h4>
+                    {sheet.autismDetail && (
+                      <p className="detail-line">
+                        <strong>상세 유형 · 특성</strong> {sheet.autismDetail}
+                        <span className="hint" style={{ marginTop: 4 }}>
+                          담당자가 입력한 참고 정보입니다. 검사 선택이나 판정에는 쓰이지 않습니다.
+                        </span>
+                      </p>
+                    )}
+                    {sheet.disability.tests.length === 0 ? (
+                      <p className="hint" style={{ marginTop: 0 }}>
+                        이 영역의 검사 도구는 아직 등록되지 않았습니다. 소속 교육청 지침에서
+                        확인하세요.
+                      </p>
+                    ) : (
                     <table className="tbl">
                       <caption className="skip">장애영역별 검사 도구</caption>
                       <thead>
@@ -669,6 +745,7 @@ export default function Home() {
                         ))}
                       </tbody>
                     </table>
+                    )}
                     {sheet.disability.note && (
                       <p className="hint">{sheet.disability.note}</p>
                     )}
@@ -901,7 +978,8 @@ export default function Home() {
 
 function alertClass(kind: string) {
   if (kind === "term") return "alert-danger";
-  if (kind === "overlap" || kind === "easyToMiss") return "alert-warning";
+  if (kind === "overlap" || kind === "easyToMiss" || kind === "unregistered")
+    return "alert-warning";
   return "alert-info";
 }
 
@@ -909,6 +987,7 @@ function alertTag(kind: string) {
   if (kind === "term") return "중요";
   if (kind === "overlap") return "중복 확인";
   if (kind === "easyToMiss") return "놓치기 쉬움";
+  if (kind === "unregistered") return "미등록 영역";
   return "안내";
 }
 

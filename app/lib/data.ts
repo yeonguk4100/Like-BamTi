@@ -110,7 +110,11 @@ export const REGIONS: Region[] = [
 
 /* ────────────────────────── 장애영역 ────────────────────────── */
 
-export type DisabilityId = "autism" | "intellectual" | "developmentalDelay";
+export type DisabilityId = "autism" | "intellectual" | "developmentalDelay" | "other";
+
+/** 특수교육법 시행령 제10조가 정한 11개 영역 중 이 도구에 아직 없는 것 */
+export const UNREGISTERED_AREAS =
+  "시각장애 · 청각장애 · 지체장애 · 정서·행동장애 · 의사소통장애 · 학습장애 · 건강장애 · 두 가지 이상 중복된 장애";
 
 export type Disability = {
   id: DisabilityId;
@@ -189,6 +193,12 @@ export const DISABILITIES: Disability[] = [
       },
     ],
     note: "만 9세 미만 아동에게만 적용되는 영역입니다. 만 9세가 되기 전에 재진단·재선정이 필요합니다.",
+  },
+  {
+    id: "other",
+    name: "기타 (직접 입력)",
+    tests: [],
+    note: `이 도구에는 아직 검사 도구가 등록되지 않은 영역입니다. 검사 항목은 소속 교육청 지침에서 확인하세요. (미등록: ${UNREGISTERED_AREAS})`,
   },
 ];
 
