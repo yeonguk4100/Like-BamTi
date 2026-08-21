@@ -171,12 +171,6 @@ a.skip:focus {
   letter-spacing: -0.022em;
 }
 
-.h-md {
-  font-size: 19px;
-  line-height: 1.45;
-  font-weight: 700;
-}
-
 .h-sm {
   font-size: 17.5px;
   line-height: 1.45;
@@ -189,16 +183,8 @@ a.skip:focus {
   font-weight: 700;
 }
 
-.b-lg {
-  font-size: 17px;
-}
-
 .b-sm {
   font-size: 14px;
-}
-
-.b-xs {
-  font-size: 13px;
 }
 
 .lead {
@@ -897,24 +883,6 @@ input::placeholder {
   color: #9aa5b1;
 }
 
-.field-inline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.field-inline label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-sub);
-}
-
-.field-inline input {
-  flex: 1;
-  max-width: 340px;
-}
-
 /* 안내문 발신 정보 3칸 */
 .field-grid {
   display: grid;
@@ -1033,11 +1001,6 @@ input::placeholder {
   margin-bottom: 14px;
 }
 
-.tint-card-green {
-  background: var(--amber-tint);
-  border-color: var(--amber-line);
-}
-
 .tint-title {
   font-size: 14px;
   font-weight: 700;
@@ -1065,19 +1028,6 @@ input::placeholder {
   letter-spacing: -0.03em;
   color: var(--amber);
   font-variant-numeric: tabular-nums;
-}
-
-.tint-dday {
-  display: inline-block;
-  margin-left: 12px;
-  padding: 4px 13px;
-  border-radius: var(--r);
-  background: #fff;
-  border: 1px solid var(--amber-line);
-  font-size: 14.5px;
-  font-weight: 700;
-  color: var(--amber);
-  vertical-align: 5px;
 }
 
 .tint-note {
@@ -1204,12 +1154,6 @@ input::placeholder {
   color: var(--text);
 }
 
-/* 조부모가 보호자인 경우가 많다. 인쇄해서 건넬 때 쓴다 */
-.letter-big {
-  font-size: 17.5px;
-  line-height: 2.1;
-}
-
 /* 블록 */
 
 .block + .block {
@@ -1237,40 +1181,6 @@ input::placeholder {
 }
 
 /* ─────────── 확인이 필요한 항목 — 상자 없이 목록으로 ─────────── */
-
-.notes {
-  border-top: 1px solid var(--line);
-}
-
-.notes li {
-  padding: 15px 0;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.note-title {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 15.5px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-.note-tag {
-  flex: none;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--danger);
-}
-
-.note-detail {
-  margin-top: 5px;
-  font-size: 14px;
-  line-height: 1.75;
-  color: var(--text-sub);
-}
 
 /* ───────────────────────── 표 ───────────────────────── */
 
@@ -1359,29 +1269,6 @@ input::placeholder {
 .badge-req {
   border-color: var(--primary);
   color: var(--primary);
-  font-weight: 700;
-}
-
-/* 선정 결과를 기다리는 동안에도 신청할 수 있는 제도 */
-.badge-open {
-  background: var(--go-tint);
-  border-color: var(--go-line);
-  color: var(--go);
-  font-weight: 700;
-}
-
-/* 누가 움직여야 하는 일인가 — 보호자 몫만 눈에 띄게 한다 */
-.who-guardian {
-  background: var(--amber-tint);
-  border-color: var(--amber-line);
-  color: var(--amber);
-  font-weight: 700;
-}
-
-.who-both {
-  background: var(--primary-tint);
-  border-color: var(--primary);
-  color: var(--primary-dark);
   font-weight: 700;
 }
 
@@ -1779,39 +1666,6 @@ input::placeholder {
   text-decoration: underline;
 }
 
-/* ───────────────── 발표용 키워드 (발표 후 삭제) ───────────────── */
-
-.demo-key,
-.demo-key-inline {
-  display: none;
-}
-
-body.demo-on .demo-key {
-  display: block;
-  position: absolute;
-  z-index: 5;
-  max-width: 250px;
-  padding: 10px 13px;
-  border-radius: var(--r);
-  background: #fff;
-  border: 1px dashed var(--primary);
-  color: var(--primary-dark);
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-line;
-  pointer-events: none;
-}
-
-body.demo-on .demo-key-inline {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 1px 9px;
-  border-radius: var(--r-sm);
-  border: 1px dashed var(--primary);
-  color: var(--primary-dark);
-  font-size: 12.5px;
-}
-
 /* ───────────────────────── 반응형 ───────────────────────── */
 
 @media (max-width: 1180px) {
@@ -1950,26 +1804,9 @@ body.demo-on .demo-key-inline {
     border-top: 0;
   }
 
-  .field-inline {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-  }
-
-  .field-inline input {
-    max-width: none;
-  }
-
   .panel-body,
   .tint-card {
     padding: 18px 16px;
-  }
-
-  .tint-dday {
-    display: block;
-    margin: 8px 0 0;
-    width: fit-content;
-    vertical-align: baseline;
   }
 
   .subcard-grid {
@@ -2013,9 +1850,7 @@ body.demo-on .demo-key-inline {
   .card-actions,
   .board-grid,
   .callout,
-  .footer,
-  .demo-key,
-  .demo-key-inline {
+  .footer {
     display: none !important;
   }
 

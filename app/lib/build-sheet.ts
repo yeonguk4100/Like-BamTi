@@ -80,7 +80,7 @@ export function age9EndOfMonth(birthDate: string): string | null {
 }
 
 /** 기준일(학년도 시작) 시점의 만 나이. 오늘 날짜를 쓰지 않아 렌더링이 어긋나지 않는다 */
-export function ageAtBase(birthDate: string): number | null {
+function ageAtBase(birthDate: string): number | null {
   const b = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
   const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(BASE_DATE);
   if (!b || !d) return null;

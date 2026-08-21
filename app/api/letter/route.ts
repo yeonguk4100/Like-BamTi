@@ -13,7 +13,7 @@
 //  - API 키는 헤더로만 보낸다. URL 에 넣으면 로그에 남는다.
 //  - 요청 내용을 로그로 남기지 않는다 (설계 원칙 2번).
 
-import { buildSheet, contactLines, TRACK_LABEL } from "@/app/lib/build-sheet";
+import { buildSheet, contactLines, TRACK_LABEL, type Sheet } from "@/app/lib/build-sheet";
 import { fail, parseConditions, readJson } from "@/app/lib/validate";
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -46,7 +46,7 @@ type Part = { text?: string; thought?: boolean };
  * 제미나이에 넘길 내용. 규칙 결과에서 필요한 칸만 골라 담는다.
  * 생년월일·상세 메모·발신 정보는 여기에 넣지 않는다.
  */
-function promptPayload(sheet: ReturnType<typeof buildSheet>) {
+function promptPayload(sheet: Sheet) {
   return {
     지역: sheet.region.name,
     교육청: sheet.region.officeName,

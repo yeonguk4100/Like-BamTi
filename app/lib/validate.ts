@@ -26,7 +26,7 @@ const MAX_NOTE = 500;
 const MAX_SENDER = 100;
 
 /** 요청 본문 최대 크기 (바이트). 넘으면 읽지 않는다 */
-export const MAX_BODY_BYTES = 8_000;
+const MAX_BODY_BYTES = 8_000;
 
 export type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };
 
