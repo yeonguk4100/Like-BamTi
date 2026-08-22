@@ -81,6 +81,16 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "f",
+    label: "강원 · 어린이집 · 자폐성",
+    note: "★ 공문이 안 가서 누락됨",
+    regionId: "gangwon",
+    disabilityId: "autism",
+    levelId: "daycare",
+    birthDate: "2020-04-10",
+    currentServices: [],
+  },
+  {
+    id: "g",
     label: "강원 · 지적장애 · 전학·재배치",
     note: "상황이 바뀌면 서류가 통째로 바뀜",
     regionId: "gangwon",

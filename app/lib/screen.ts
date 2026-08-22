@@ -64,7 +64,7 @@ export type LookupResult = {
 /* ─── 확인이 필요한 항목의 색과 라벨 ─── */
 
 export function alertClass(kind: string) {
-  if (kind === "term" || kind === "age9Cross") return "alert-danger";
+  if (kind === "term" || kind === "age9Cross" || kind === "noticeGap") return "alert-danger";
   if (kind === "overlap" || kind === "easyToMiss" || kind === "unregistered")
     return "alert-warning";
   return "alert-info";
@@ -72,6 +72,7 @@ export function alertClass(kind: string) {
 
 export function alertTag(kind: string) {
   if (kind === "age9Cross") return "만 9세 마감";
+  if (kind === "noticeGap") return "공문 안 감";
   if (kind === "term") return "중요";
   if (kind === "overlap") return "중복 확인";
   if (kind === "easyToMiss") return "놓치기 쉬움";

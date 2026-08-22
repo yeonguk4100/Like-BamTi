@@ -48,7 +48,7 @@ export type Input = {
 };
 
 export type Warning = {
-  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered" | "age9Cross";
+  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered" | "age9Cross" | "noticeGap";
   title: string;
   detail: string;
 };
@@ -180,7 +180,7 @@ export function buildSheet(input: Input) {
       urgent: true,
     });
   }
-  if (input.levelId === "kinder") {
+  if (input.levelId === "kinder" || input.levelId === "daycare") {
     deadlines.unshift({
       label: "유치원 배치 (처음학교로)",
       when: "10월 말까지 선배치자 입력 · 11월 시행계획 안내",
@@ -203,6 +203,16 @@ export function buildSheet(input: Input) {
       urgent: true,
     });
   }
+
+  /* 담당자 인터뷰 Q2 — 지침에는 없지만 실제 대기 기간을 좌우하는 사실.
+     「특수교육운영위원회를 거치게 되어있음. 한달에 한번. 회의 끝나고 바로 신청 들어오면
+     한달 걸리시는거고 회의임박해서 신청하신 분들은 바로 결과나옴」 */
+  deadlines.push({
+    label: "특수교육운영위원회 심사",
+    when:
+      `${level.committee}가 월 1회 열립니다 — 회의 직후에 신청하면 다음 회의까지 최대 한 달을 ` +
+      "기다리고, 회의 직전에 신청하면 바로 심의됩니다. 다음 회의 날짜를 확인해 안내하세요",
+  });
 
   deadlines.push(...APPEAL_DEADLINES.map((d) => ({ ...d })));
 
@@ -229,6 +239,22 @@ export function buildSheet(input: Input) {
         `${region.officeName} 지침에는 제출 서류로 「장애등급 결정서」가 적혀 있습니다. ` +
         "그러나 2019년 7월 1일 장애등급제가 폐지되어, 그 이후 등록한 보호자에게는 해당 서류가 없습니다. " +
         "「장애정도」(심한 / 심하지 않은) 표기로 안내하세요.",
+    });
+  }
+
+  /* 담당자 인터뷰 Q4 — 「부처가 갈려서 정보가 안 흐른다」의 살아 있는 사례.
+     유치원·초·중은 공문이 가서 놓치는 일이 거의 없지만, 어린이집은 교육청 소속이 아니라
+     공문을 보낼 수 없고 행정복지센터를 거쳐야 해서 누락이 많다. */
+  if (input.levelId === "daycare") {
+    warnings.push({
+      kind: "noticeGap",
+      title: "어린이집 아동에게는 교육청 공문이 가지 않습니다 — 신청 시기를 직접 안내하세요",
+      detail:
+        "유치원·초·중학교에는 공문을 보내기 때문에 신청 시기를 놓치는 일이 거의 없습니다. " +
+        "그런데 어린이집은 교육청 소속이 아니어서 공문을 보낼 수 없고 행정복지센터를 거쳐야 해서 " +
+        "누락이 많습니다. 취학 직전이 가장 중요한 시기인데 그 시기 아동 상당수가 어린이집에 있습니다. " +
+        "보호자에게 다음 운영위원회 날짜와 신청 마감을 직접 알려 주세요. " +
+        "놓치면 특수학급 정원(TO)이 남아 있는지에 따라 달라지고, 정원이 없으면 대응이 지역마다 다릅니다.",
     });
   }
 
@@ -288,7 +314,8 @@ export function buildSheet(input: Input) {
       w.kind === "term" ||
       w.kind === "overlap" ||
       w.kind === "unregistered" ||
-      w.kind === "age9Cross"
+      w.kind === "age9Cross" ||
+      w.kind === "noticeGap"
   );
   const generalNotes = warnings.filter(
     (w) => w.kind === "crossTrack" || w.kind === "easyToMiss"
@@ -391,6 +418,14 @@ function buildParentLetter(args: {
   for (const d of documentsAtOffice) {
     lines.push(`· ${d.label} [${d.formNo}]`);
   }
+  lines.push("");
+  lines.push("■ 서류를 쓰실 때 — 이것 때문에 다시 연락드리는 일이 가장 많습니다");
+  lines.push("  기초조사서에 아이의 행동특성과 발달사항을 적는 칸이 있습니다.");
+  lines.push("  「발달이 느림」처럼 짧게 적으면 정보가 부족해 다시 여쭤보게 됩니다.");
+  lines.push("  · 언제부터 그런지 (예: 두 돌 무렵부터)");
+  lines.push("  · 어떤 상황에서 나타나는지 (예: 낯선 사람이 많은 곳에서)");
+  lines.push("  · 어떻게 나타나는지 (예: 눈을 맞추지 않고 같은 말을 반복합니다)");
+  lines.push("  이렇게 예를 들어 적어 주시면 한 번에 끝납니다.");
   lines.push("");
   lines.push("■ 그다음 어떻게 되나요");
   lines.push(`1. ${level.submitTo}에 서류를 제출합니다.`);
