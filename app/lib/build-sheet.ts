@@ -51,6 +51,13 @@ export type Warning = {
   kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered" | "age9Cross" | "noticeGap";
   title: string;
   detail: string;
+  /**
+   * 근거를 확인한 경고인지. false 면 1면에 올리지 않고 「자세히 보기」로 내린다.
+   *
+   * 1면은 담당자가 읽는 유일한 곳이라 **확실한 것만** 있어야 한다. 「공식 목록에는
+   * 없지만 겹칠 수 있다」 수준을 1면에 올리면 담당자가 그 숫자를 안 보게 된다.
+   */
+  verified?: boolean;
 };
 
 export type Deadline = {
@@ -302,6 +309,7 @@ export function buildSheet(input: Input) {
       kind: "overlap",
       title: `${program.name} ↔ ${serviceName(rule.withService)}`,
       detail: rule.message,
+      verified: rule.verified,
     });
   }
 
@@ -309,17 +317,17 @@ export function buildSheet(input: Input) {
      담당자가 검수할 항목이 많으면 이 도구가 시간을 줄이지 못한다.
      1면에는 담당자가 모를 수 있는 것과 이 아동에 대한 판단만 남기고,
      조건과 무관하게 늘 뜨는 일반 안내는 「자세히 보기」로 내린다. */
-  const keyWarnings = warnings.filter(
-    (w) =>
-      w.kind === "term" ||
+  const onFrontPage = (w: Warning) =>
+    (w.kind === "term" ||
       w.kind === "overlap" ||
       w.kind === "unregistered" ||
       w.kind === "age9Cross" ||
-      w.kind === "noticeGap"
-  );
-  const generalNotes = warnings.filter(
-    (w) => w.kind === "crossTrack" || w.kind === "easyToMiss"
-  );
+      w.kind === "noticeGap") &&
+    // 근거를 확인하지 못한 것은 1면에 올리지 않는다. verified 를 안 쓰는 종류는 통과
+    w.verified !== false;
+
+  const keyWarnings = warnings.filter(onFrontPage);
+  const generalNotes = warnings.filter((w) => !onFrontPage(w));
 
   /* ── 4. 학부모용 안내문 ── */
   const parentLetter = buildParentLetter({
