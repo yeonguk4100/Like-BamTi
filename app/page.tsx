@@ -89,6 +89,7 @@ export default function Home() {
     setRegionId(p.regionId);
     setDisabilityId(p.disabilityId);
     setLevelId(p.levelId);
+    setProcedureId(p.procedureId ?? "new");
     setBirthDate(p.birthDate);
     setCurrentServices(p.currentServices);
     setOtherDisabilityLabel("");
@@ -489,13 +490,23 @@ export default function Home() {
                         className={`chip ${r.id === regionId ? "chip-on" : ""}`}
                         aria-pressed={r.id === regionId}
                         onClick={() => setRegionId(r.id)}
+                        disabled={!r.implemented}
+                        title={
+                          r.implemented
+                            ? undefined
+                            : `${r.name}은 지침 대조만 했고 아직 구현하지 않았습니다`
+                        }
                       >
                         {r.name}
+                        {!r.implemented && " (대조만)"}
                       </button>
                     ))}
                   </div>
                   <span className="hint">
-                    지역을 바꾸면 제도 명칭과 제출 서식 번호가 함께 바뀝니다.
+                    지금 구현된 지역은 <strong>강원특별자치도</strong>입니다. 나머지는 지침을 대조해
+                    「절차는 같고 명칭·서식만 다르다」는 것을 확인했을 뿐이라 아직 고를 수 없습니다 —
+                    확인하지 않은 서식 번호로 시트를 내면 안 되기 때문입니다. 대조 결과는 아래{" "}
+                    <a href="#reference">참고 자료</a>에 있습니다.
                   </span>
                 </td>
               </tr>

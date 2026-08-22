@@ -38,6 +38,17 @@ export type Region = {
   /** 지역 지침에 폐지된 용어 '장애등급'이 남아 있는지 */
   legacyTermInGuide: boolean;
   guideName: string;
+  /**
+   * MVP 구현 대상인지.
+   *
+   * false 인 지역은 **대조만 했고 구현하지 않았다.** 화면에서 고를 수 없고
+   * /api/sheet 도 거부한다. 서식 번호와 절차를 확인하지 않은 채 시트를 내면
+   * 「미확인」으로 가득한 반쯤 만든 결과가 나가기 때문이다.
+   *
+   * 대조 결과는 참고 자료(/api/reference)에 그대로 남는다 — 「같은 지원인데
+   * 이름이 다르다」는 근거이고, 절차가 동일하다는 것이 확장 가능성의 증거다.
+   */
+  implemented: boolean;
 };
 
 export const REGIONS: Region[] = [
@@ -52,6 +63,7 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사 카드(보호자용 / 담임교사용)",
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 업무 길잡이",
+    implemented: true,
   },
   {
     id: "gyeongnam",
@@ -64,6 +76,8 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사서(일반 / 건강장애)",
     legacyTermInGuide: true,
     guideName: "2025 특수교육대상자 선정·배치 업무 처리 지침",
+    // 서식 번호를 확인한 두 번째 지역. 구현 1순위지만 아직 대조만 했다
+    implemented: false,
   },
   {
     id: "chungnam",
@@ -76,6 +90,7 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사서",
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 지침",
+    implemented: false,
   },
   {
     id: "gyeonggi",
@@ -88,6 +103,7 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사서",
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 지침",
+    implemented: false,
   },
   {
     id: "incheon",
@@ -100,6 +116,7 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사서",
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 지침",
+    implemented: false,
   },
   {
     id: "seoul",
@@ -112,8 +129,12 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사서",
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 지침",
+    implemented: false,
   },
 ];
+
+/** 지금 구현된 지역. 화면의 선택지와 /api/sheet 가 받는 값은 이것뿐이다 */
+export const IMPLEMENTED_REGIONS = REGIONS.filter((r) => r.implemented);
 
 /* ────────────────────────── 장애영역 ────────────────────────── */
 

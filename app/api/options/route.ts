@@ -23,9 +23,11 @@ export const revalidate = 86400;
 export function GET() {
   return Response.json(
     {
+      // implemented 가 false 인 지역은 대조만 했고 /api/sheet 가 거부한다
       regions: REGIONS.map((r) => ({
         id: r.id,
         name: r.name,
+        implemented: r.implemented,
         officeName: r.officeName,
         cardName: r.cardName,
         cardVerified: r.cardVerified,

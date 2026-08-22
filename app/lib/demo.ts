@@ -6,7 +6,13 @@
 //
 // 같이 지울 것 — app/components/DemoKey.tsx · globals.css 의 .demo-* / .keys-off / .preset*
 
-import type { CurrentServiceId, DisabilityId, LevelId, RegionId } from "./data";
+import type {
+  CurrentServiceId,
+  DisabilityId,
+  LevelId,
+  ProcedureId,
+  RegionId,
+} from "./data";
 
 /* ⚠ 데모용 — 발표 후 삭제. 전부 가상 사례다. */
 export type Preset = {
@@ -16,6 +22,8 @@ export type Preset = {
   regionId: RegionId;
   disabilityId: DisabilityId;
   levelId: LevelId;
+  /** 생략하면 화면이 「신규 선정」을 유지한다 */
+  procedureId?: ProcedureId;
   birthDate: string;
   currentServices: CurrentServiceId[];
 };
@@ -23,7 +31,7 @@ export type Preset = {
 export const PRESETS: Preset[] = [
   {
     id: "a",
-    label: "강원 · 자폐성장애 · 취학 예정",
+    label: "자폐성장애 · 취학 예정 · 신규",
     note: "가장 흔한 문의",
     regionId: "gangwon",
     disabilityId: "autism",
@@ -33,18 +41,28 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "b",
-    label: "경남 · 지적장애 · 중학교",
-    note: "폐지 용어 경고가 뜸",
-    regionId: "gyeongnam",
-    disabilityId: "intellectual",
-    levelId: "middle",
-    birthDate: "2013-05-20",
-    currentServices: ["rehabVoucher"],
+    label: "발달지체 · 취학 예정 · 신규",
+    note: "★ 만 9세에 두 부처가 같이 끝남",
+    regionId: "gangwon",
+    disabilityId: "developmentalDelay",
+    levelId: "elementary",
+    birthDate: "2019-03-14",
+    currentServices: [],
   },
   {
     id: "c",
-    label: "강원 · 발달지체 · 유치원",
-    note: "만 9세 종료일 계산",
+    label: "자폐성장애 · 초등 · 온종일교실 이용",
+    note: "복지부 방과후활동과 중복 제한",
+    regionId: "gangwon",
+    disabilityId: "autism",
+    levelId: "elementary",
+    birthDate: "2019-03-14",
+    currentServices: ["allDayClass"],
+  },
+  {
+    id: "d",
+    label: "발달지체 · 유치원 · 신규",
+    note: "유치원 배치(처음학교로) 기한",
     regionId: "gangwon",
     disabilityId: "developmentalDelay",
     levelId: "kinder",
@@ -52,24 +70,15 @@ export const PRESETS: Preset[] = [
     currentServices: [],
   },
   {
-    id: "d",
-    label: "충남 · 발달지체 · 취학 예정",
-    note: "지역만 바뀌면 카드 이름이 바뀜",
-    regionId: "chungnam",
-    disabilityId: "developmentalDelay",
-    levelId: "elementary",
-    birthDate: "2019-11-27",
-    currentServices: ["localChildCenter", "rehabVoucher"],
-  },
-  {
     id: "e",
-    label: "서울 · 자폐성장애 · 고등학교",
-    note: "도교육청 결정 · 중복 확인",
-    regionId: "seoul",
-    disabilityId: "autism",
-    levelId: "high",
-    birthDate: "2010-02-11",
-    currentServices: ["togetherCare"],
+    label: "지적장애 · 초등 · 전학·재배치",
+    note: "상황이 바뀌면 서류가 통째로 바뀜",
+    regionId: "gangwon",
+    disabilityId: "intellectual",
+    levelId: "elementary",
+    procedureId: "reassign",
+    birthDate: "2019-05-20",
+    currentServices: ["rehabVoucher"],
   },
 ];
 

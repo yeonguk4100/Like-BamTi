@@ -27,6 +27,10 @@ export function Reference({ regionId }: { regionId: RegionId }) {
       <p className="b-sm subtle" style={{ marginBottom: 16 }}>
         치료비와 방과후활동비를 지급하는 교육청 바우처 카드입니다. 제도의 실질은 같은데 명칭이
         전부 다릅니다. 이사하면 이전 지역에서 쓰던 이름은 통하지 않습니다.
+        <br />
+        <strong>「대조만」은 지침을 확인해 절차가 같다는 것만 본 지역입니다.</strong> 지금 시트를 만들 수
+        있는 곳은 강원뿐이고, 확인하지 않은 서식 번호로 결과를 내지 않습니다. 절차가 동일하다는 것을
+        확인했기 때문에 확장은 개발이 아니라 데이터 추가입니다.
       </p>
       <table className="tbl">
         <caption className="skip">시도별 교육청 바우처 카드 명칭</caption>
@@ -44,7 +48,14 @@ export function Reference({ regionId }: { regionId: RegionId }) {
         <tbody>
           {REGIONS.map((r) => (
             <tr key={r.id} className={r.id === regionId ? "row-urgent" : ""}>
-              <th scope="row">{r.name}</th>
+              <th scope="row">
+                {r.name}{" "}
+                {r.implemented ? (
+                  <span className="badge badge-primary">구현</span>
+                ) : (
+                  <span className="badge">대조만</span>
+                )}
+              </th>
               <td>
                 <strong>{r.cardName}</strong>{" "}
                 {!r.cardVerified && <span className="badge">출처 확인 필요</span>}

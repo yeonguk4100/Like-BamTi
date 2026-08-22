@@ -8,6 +8,7 @@
 
 import {
   CURRENT_SERVICES,
+  IMPLEMENTED_REGIONS,
   DISABILITIES,
   LEVELS,
   PROCEDURES,
@@ -90,6 +91,17 @@ export function parseConditions(raw: unknown): Parsed<Input> {
   const regionId = pickId<RegionId>(body.regionId, REGION_IDS);
   if (!regionId) {
     return { ok: false, error: `regionId 가 올바르지 않습니다. (${REGION_IDS.join(" / ")})` };
+  }
+  // 대조만 한 지역으로 시트를 만들면 「서식 미확인」으로 가득한 반쯤 만든 결과가 나간다.
+  // 지역별 명칭·서식 대조표는 /api/reference 에서 그대로 볼 수 있다.
+  if (!IMPLEMENTED_REGIONS.some((r) => r.id === regionId)) {
+    return {
+      ok: false,
+      error:
+        `${regionId} 는 아직 구현되지 않았습니다. 지금 구현된 지역은 ` +
+        `${IMPLEMENTED_REGIONS.map((r) => r.id).join(" / ")} 뿐입니다. ` +
+        `지역별 명칭·서식 대조는 GET /api/reference 를 보세요.`,
+    };
   }
 
   const disabilityId = pickId<DisabilityId>(body.disabilityId, DISABILITY_IDS);
