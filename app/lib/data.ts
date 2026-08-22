@@ -493,11 +493,14 @@ export const LOCAL_PROGRAMS: Program[] = [
 
 /** 조사해야 할 곳 — 화면에 그대로 띄워 무엇이 비었는지 보여준다 */
 export const LOCAL_SOURCES: Partial<Record<RegionId, string[]>> = {
+  // MVP 대상은 원주·춘천 두 곳이다 (기획서 7장). 조사되는 대로 LOCAL_PROGRAMS 에 넣는다
   gangwon: [
     "강원특별자치도교육청 특수교육과 공고",
     "강원특별자치도 장애인복지 조례",
     "원주시청 장애인복지 · 아동복지 안내",
     "원주시 장애인가족지원센터",
+    "춘천시청 장애인복지 · 아동복지 안내",
+    "춘천시 장애인가족지원센터",
   ],
 };
 
