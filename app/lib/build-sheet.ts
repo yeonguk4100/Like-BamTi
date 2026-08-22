@@ -12,7 +12,7 @@ import {
   DISABILITIES,
   FORM_LABEL,
   FORM_NO,
-  FORM_SOURCE,
+  formSource,
   NEEDS_OTHER_OFFICE,
   LEVELS,
   LOCAL_PROGRAMS,
@@ -105,7 +105,7 @@ export function buildSheet(input: Input) {
   const formNos = FORM_NO[input.regionId];
   const documents = procedure.forms.map((key) => {
     const no = formNos[key];
-    const src = FORM_SOURCE[key];
+    const src = formSource(input.regionId, key);
     return {
       key,
       label: FORM_LABEL[key],

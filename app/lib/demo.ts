@@ -31,7 +31,7 @@ export type Preset = {
 export const PRESETS: Preset[] = [
   {
     id: "a",
-    label: "자폐성장애 · 취학 예정 · 신규",
+    label: "강원 · 자폐성장애 · 취학 예정",
     note: "가장 흔한 문의",
     regionId: "gangwon",
     disabilityId: "autism",
@@ -41,7 +41,7 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "b",
-    label: "발달지체 · 취학 예정 · 신규",
+    label: "강원 · 발달지체 · 취학 예정",
     note: "★ 만 9세에 두 부처가 같이 끝남",
     regionId: "gangwon",
     disabilityId: "developmentalDelay",
@@ -51,7 +51,7 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "c",
-    label: "자폐성장애 · 초등 · 온종일교실 이용",
+    label: "강원 · 자폐성 · 온종일교실 이용",
     note: "복지부 방과후활동과 중복 제한",
     regionId: "gangwon",
     disabilityId: "autism",
@@ -61,7 +61,7 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "d",
-    label: "발달지체 · 유치원 · 신규",
+    label: "강원 · 발달지체 · 유치원",
     note: "유치원 배치(처음학교로) 기한",
     regionId: "gangwon",
     disabilityId: "developmentalDelay",
@@ -71,7 +71,17 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "e",
-    label: "지적장애 · 초등 · 전학·재배치",
+    label: "경남 · 지적장애 · 초등",
+    note: "★ 「장애등급 결정서」 경고",
+    regionId: "gyeongnam",
+    disabilityId: "intellectual",
+    levelId: "elementary",
+    birthDate: "2019-05-20",
+    currentServices: [],
+  },
+  {
+    id: "f",
+    label: "강원 · 지적장애 · 전학·재배치",
     note: "상황이 바뀌면 서류가 통째로 바뀜",
     regionId: "gangwon",
     disabilityId: "intellectual",

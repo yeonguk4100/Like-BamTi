@@ -76,8 +76,8 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사서(일반 / 건강장애)",
     legacyTermInGuide: true,
     guideName: "2025 특수교육대상자 선정·배치 업무 처리 지침",
-    // 서식 번호를 확인한 두 번째 지역. 구현 1순위지만 아직 대조만 했다
-    implemented: false,
+    // 132쪽 지침 원문에서 서식 번호 11개를 확인했다. 강원보다 오히려 많다
+    implemented: true,
   },
   {
     id: "chungnam",
@@ -791,6 +791,34 @@ export const FORM_SOURCE: Record<FormKey, FormSourceInfo> = {
     source: "지침의 담당자 업무 항목 — 작성 주체 확인 필요",
   },
 };
+
+/**
+ * 지역마다 다른 발급처. FORM_SOURCE 를 덮는다.
+ *
+ * 기초조사 서류가 대표적이다 — 강원은 「보호자용 / 담임교사용」으로 갈라 **학교가 한 장을 쓴다.**
+ * 경남은 「일반 / 건강장애」로 갈라 **장애 유형에 따라 서식이 달라진다.** 이름이 비슷한 서류인데
+ * 누가 쓰는지가 다르다. 전역 문구를 그대로 쓰면 경남 학부모에게 「담임교사용을 학교에 요청하세요」라고
+ * 안내하게 되고, 그런 서식이 없으니 헛걸음한다. 반송을 줄이려고 만든 칸이 반송을 만드는 셈이다.
+ */
+export const FORM_SOURCE_BY_REGION: Partial<
+  Record<RegionId, Partial<Record<FormKey, FormSourceInfo>>>
+> = {
+  gyeongnam: {
+    basicSurvey: {
+      sources: ["eduForm"],
+      where: "신청처에서 서식을 받아 작성합니다 — 「일반」과 「건강장애」 두 가지로 나뉩니다",
+      verified: false,
+      source:
+        "서식 이름과 구분은 경남 지침에서 확인(기초조사서 일반/건강장애). " +
+        "누가 작성하는지는 확인 필요",
+    },
+  },
+};
+
+/** 그 지역의 발급처. 지역별 덮어쓰기가 있으면 그것을 쓴다 */
+export function formSource(regionId: RegionId, key: FormKey): FormSourceInfo {
+  return FORM_SOURCE_BY_REGION[regionId]?.[key] ?? FORM_SOURCE[key];
+}
 
 /* ══════════════════════════════════════════════════════════
    신청 상황 — 상황이 바뀌면 서류가 통째로 바뀐다
