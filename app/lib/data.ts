@@ -15,6 +15,8 @@ export type Sourced = {
   verified: boolean;
   /** 근거 출처 */
   source?: string;
+  /** 금액·소득 기준처럼 해마다 바뀌는 값의 기준 시점. 화면에 그대로 표시한다 */
+  asOf?: string;
 };
 
 /* ────────────────────────────── 지역 ────────────────────────────── */
@@ -367,61 +369,101 @@ export const PROGRAMS: Program[] = [
     id: "registration",
     name: "장애 진단 · 장애인 등록",
     track: "medical",
-    authority: "보건복지부 (의료기관 경유)",
-    applyTo: "병원 → 읍면동 행정복지센터",
+    authority: "보건복지부 (심사는 국민연금공단)",
+    applyTo: "읍면동 주민센터에 신청 → 의료기관 진단 → 국민연금공단 심사",
     summary:
-      "복지부 제도를 받으려면 필요합니다. **교육청의 특수교육대상자 선정과는 별개 절차입니다.**",
-    documents: ["의사 진단서", "장애 정도 심사용 진단서", "검사 결과지"],
-    deadline: "상시 신청. 심사에 통상 수 주 소요 (예시)",
+      "복지부 제도 대부분의 전제입니다. **교육청의 특수교육대상자 선정과는 별개 절차입니다.** " +
+      "① 읍면동에 신청 → ② 의료기관에서 「장애정도 심사용 진단서」 발급 → " +
+      "③ 국민연금공단이 2인 이상 전문의 의학자문회의로 심사 → ④ 시·군·구가 등록하고 결과를 통지합니다. " +
+      "등록이 끝나면 장애인증명서는 읍면동에서 즉시 발급됩니다.",
+    documents: [
+      "장애인등록 및 서비스 신청서",
+      "사진 1장 (3.5cm × 4.5cm)",
+      "장애정도 심사용 진단서 (의료기관 전문의 발급)",
+      "검사 결과지 · 진료기록",
+    ],
+    deadline: "상시 신청. 처리기간은 보건복지부 안내에 명시돼 있지 않아 읍면동에 확인해야 합니다",
     legalBasis: "장애인복지법 제32조",
-    verified: false,
-    source: "데모용 예시. 별개 절차라는 점은 경남 지침 Q&A에서 확인",
+    verified: true,
+    source:
+      "보건복지부 「장애인등록/장애정도 심사제도」 https://www.mohw.go.kr/menu.es?mid=a10710010900 " +
+      "· 별개 절차라는 점은 경남 지침 Q&A에서 확인",
+    asOf: "2026.08 확인",
   },
   {
     id: "rehab",
     name: "발달재활서비스 바우처",
     track: "welfare",
     authority: "보건복지부",
-    applyTo: "읍면동 행정복지센터",
-    summary: "언어·미술·음악·행동 재활 등을 바우처로 지원합니다. 소득 기준 심사가 있습니다.",
-    documents: ["사회보장급여 신청서", "발달재활서비스 의뢰서", "소득·재산 증빙"],
+    applyTo: "읍면동 주민센터 (온라인은 복지로)",
+    summary:
+      "언어·미술·음악·행동 재활 등을 바우처로 지원합니다. " +
+      "**장애 등록이 없어도 만 9세 미만이면 「발달재활서비스 의뢰서」와 전문의 검사자료로 신청할 수 있습니다.** " +
+      "등록 대상 유형은 뇌병변·지적·자폐성·청각·언어·시각입니다. 기준중위소득 180% 이하이며 소득 구간별로 월 18~26만원입니다.",
+    documents: [
+      "사회보장급여 신청서",
+      "신분증",
+      "소득 증명 자료",
+      "장애 등록 전이면 — 발달재활서비스 의뢰서 + 전문의 검사자료",
+    ],
     appliesTo: { ageMax: 17 },
-    ageNote: "만 18세 미만이 대상입니다. 재학 중이면 연장되는 규정이 있어 확인이 필요합니다.",
+    ageNote:
+      "신청일 현재 만 18세 미만이 대상이며 18세가 되는 달까지 지원합니다. " +
+      "장애 등록이 없는 경우에는 만 9세가 되는 달까지만 지원됩니다.",
     deadline: "상시 신청. 제공기관이 부족한 지역은 대기 발생",
     legalBasis: "장애아동 복지지원법 제21조",
-    verified: false,
-    source: "데모용 예시 — 나이 상한과 연장 규정 확인 필요",
+    verified: true,
+    source:
+      "사회서비스 전자바우처(한국사회보장정보원) 「발달재활서비스」 사업 안내 " +
+      "https://www.socialservice.or.kr:444/user/htmlEditor/view2.do?p_sn=11",
+    asOf: "2026.08 확인 — 금액·소득 기준은 해마다 바뀝니다",
   },
   {
     id: "welfareAfterschool",
-    name: "방과후활동서비스 (복지부)",
+    name: "청소년 발달장애인 방과후활동서비스",
     track: "welfare",
     authority: "보건복지부",
-    applyTo: "읍면동 / 발달장애인지원센터",
-    appliesTo: { levels: ["middle", "high"], ageMin: 6, ageMax: 17 },
-    ageNote: "청소년 발달장애인이 대상입니다. 나이 범위는 해당 연도 사업안내를 확인하세요.",
+    applyTo: "읍면동 주민센터",
+    // 「청소년」이라는 이름 때문에 중·고등학생만으로 잡아 두었는데 틀렸다.
+    // 만 6세부터가 대상이므로 초등학생도 해당된다 (보건복지부 안내 확인).
+    appliesTo: { disabilities: ["autism", "intellectual"], ageMin: 6, ageMax: 17 },
+    ageNote: "만 6세 이상 만 18세 미만이 대상입니다. 만 18세 이상 재학생은 주간활동서비스와 택 1입니다.",
     summary:
-      "청소년 발달장애인 대상 방과후 돌봄·활동 서비스입니다. **다른 돌봄 사업과 중복 이용이 제한될 수 있습니다.**",
+      "방과후 돌봄·활동과 성인기 자립준비를 지원합니다. " +
+      "**장애인복지법상 등록된 지적·자폐성 장애인만 대상입니다** — 발달지체로 특수교육대상자가 되어도 " +
+      "복지 쪽 등록 유형이 지적·자폐성이 아니면 신청할 수 없습니다. " +
+      "**온종일교실 · 청소년 방과후 아카데미 · 장애인 거주시설 입소자는 제외됩니다.**",
     documents: ["사회보장급여 신청서", "장애인증명서"],
-    deadline: "상시 신청 (예시)",
-    legalBasis: "발달장애인 권리보장 및 지원에 관한 법률",
-    verified: false,
-    source: "데모용 예시",
+    deadline: "상시 신청",
+    legalBasis: "발달장애인 권리보장 및 지원에 관한 법률 제29조의2 (주간활동·방과 후 활동 지원)",
+    verified: true,
+    source:
+      "보건복지부 「청소년 발달장애인 방과후활동서비스」 " +
+      "https://www.mohw.go.kr/menu.es?mid=a10710041200",
+    asOf: "2026.08 확인",
   },
   {
     id: "allowance",
     name: "장애아동수당",
     track: "welfare",
     authority: "보건복지부",
-    applyTo: "읍면동 행정복지센터",
+    applyTo: "읍면동 행정복지센터 (읍·면·동장을 거쳐 시장·군수·구청장에게 제출)",
     appliesTo: { ageMax: 17 },
-    ageNote: "18세 미만이 대상입니다. 재학 중인 경우의 예외를 확인하세요.",
-    summary: "소득 기준을 충족하는 장애아동에게 수당을 지급합니다.",
+    ageNote:
+      "신청월 현재 만 18세 미만이 대상입니다. " +
+      "초·중등교육법 제2조 학교에 재학 중이면 20세 이하까지 포함됩니다 (장애인연금 수급자는 제외).",
+    summary:
+      "**장애인복지법 제32조에 따라 등록한 장애인**이어야 합니다. 발달재활서비스와 달리 등록 없이는 신청할 수 없습니다. " +
+      "국민기초생활보장 수급자와 차상위계층(소득인정액이 기준중위소득 50% 이하)이 대상이며, " +
+      "장애 정도와 소득 계층에 따라 월 3만~22만원을 지급합니다.",
     documents: ["사회보장급여 신청서", "소득·재산 증빙", "통장 사본"],
-    deadline: "상시 신청 (예시)",
-    legalBasis: "장애인복지법 제50조",
-    verified: false,
-    source: "데모용 예시",
+    deadline: "상시 신청. 지급일은 매월 20일 (토요일·공휴일이면 그 전날)",
+    legalBasis: "장애인복지법 제50조·제51조, 시행령 제32조, 시행규칙 제38조",
+    verified: true,
+    source:
+      "법제처 찾기쉬운 생활법령정보 「장애수당 및 장애아동수당」 " +
+      "https://www.easylaw.go.kr/CSP/CnpClsMain.laf?popMenu=ov&csmSeq=916&ccfNo=2&cciNo=1&cnpClsNo=2",
+    asOf: "2026.08 확인 — 지급액은 「2026년 장애인연금 사업안내」 기준",
   },
 ];
 
@@ -465,40 +507,69 @@ export const CURRENT_SERVICES = [
   { id: "localChildCenter", name: "지역아동센터" },
   { id: "togetherCare", name: "다함께돌봄센터" },
   { id: "schoolCare", name: "초등돌봄교실" },
+  // 방과후활동서비스의 공식 제외 목록에 이름이 그대로 올라 있는 두 사업
+  { id: "allDayClass", name: "온종일교실" },
+  { id: "youthAcademy", name: "청소년 방과후 아카데미" },
   { id: "rehabVoucher", name: "발달재활서비스 바우처" },
 ] as const;
 
 export type CurrentServiceId = (typeof CURRENT_SERVICES)[number]["id"];
 
-/** 함께 이용할 때 확인이 필요한 조합 (데모용 예시 — 실제 조항 확인 필요) */
-export const OVERLAP_RULES: {
+/** 함께 이용할 때 확인이 필요한 조합 */
+export const OVERLAP_RULES: ({
   programId: string;
   withService: CurrentServiceId;
   message: string;
-}[] = [
+} & Sourced)[] = [
+  {
+    programId: "welfareAfterschool",
+    withService: "allDayClass",
+    message:
+      "온종일교실 이용자는 방과후활동서비스 대상에서 제외됩니다. 둘 중 하나를 골라야 합니다.",
+    verified: true,
+    source: "보건복지부 「청소년 발달장애인 방과후활동서비스」 제외 대상",
+    asOf: "2026.08 확인",
+  },
+  {
+    programId: "welfareAfterschool",
+    withService: "youthAcademy",
+    message:
+      "청소년 방과후 아카데미 이용자는 방과후활동서비스 대상에서 제외됩니다. 둘 중 하나를 골라야 합니다.",
+    verified: true,
+    source: "보건복지부 「청소년 발달장애인 방과후활동서비스」 제외 대상",
+    asOf: "2026.08 확인",
+  },
   {
     programId: "welfareAfterschool",
     withService: "localChildCenter",
     message:
-      "방과후활동서비스와 지역아동센터는 중복 이용이 제한될 수 있습니다. 해당 연도 사업안내의 중복 이용 조항을 확인하세요.",
+      "지역아동센터는 공식 제외 목록에 이름이 없습니다. 다만 이용 시간이 겹칠 수 있어 해당 연도 사업안내를 확인하세요.",
+    verified: false,
+    source: "공식 제외 목록에서 확인되지 않음 — 사업안내 원문 확인 필요",
   },
   {
     programId: "welfareAfterschool",
     withService: "togetherCare",
     message:
-      "방과후활동서비스와 다함께돌봄은 중복 이용이 제한될 수 있습니다. 사업안내를 확인하세요.",
+      "다함께돌봄도 공식 제외 목록에는 없습니다. 다만 이용 시간이 겹치면 조정이 필요할 수 있어 확인하세요.",
+    verified: false,
+    source: "공식 제외 목록에서 확인되지 않음 — 해당 연도 사업안내 원문 확인 필요",
   },
   {
     programId: "afterschool",
     withService: "schoolCare",
     message:
       "교육청 방과후 교육활동과 초등돌봄교실은 운영 시간이 겹칠 수 있습니다. 학교와 조정이 필요합니다.",
+    verified: false,
+    source: "운영 시간 충돌은 현장 사례 — 명문 조항 확인 필요",
   },
   {
     programId: "therapy",
     withService: "rehabVoucher",
     message:
       "교육청 치료지원과 복지부 발달재활서비스는 같은 치료를 중복 지원하지 않도록 확인이 필요합니다.",
+    verified: false,
+    source: "중복 지원 금지 조항 확인 필요",
   },
 ];
 

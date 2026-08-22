@@ -48,7 +48,7 @@ export type Input = {
 };
 
 export type Warning = {
-  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered";
+  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered" | "age9Cross";
   title: string;
   detail: string;
 };
@@ -232,6 +232,21 @@ export function buildSheet(input: Input) {
     });
   }
 
+  /* 소관이 갈려 있어서 아무도 알려주지 않는 것.
+     교육청 쪽 발달지체 종료와 복지부 쪽 발달재활서비스 종료가 같은 시점이다.
+     (사회서비스 전자바우처 「발달재활서비스」 — 장애 등록이 없으면 만 9세가 되는 달까지) */
+  if (age9) {
+    warnings.push({
+      kind: "age9Cross",
+      title: `만 9세에 두 부처의 지원이 같이 끝납니다 — ${age9}`,
+      detail:
+        "교육청 쪽은 발달지체 특수교육대상자 지위가 이 날까지 유지된 뒤 종료됩니다. " +
+        "복지부 쪽은 장애 등록 없이 발달재활서비스를 받고 있다면 만 9세가 되는 달까지만 지원됩니다. " +
+        "소관이 달라 어느 쪽도 다른 쪽을 알려주지 않습니다. " +
+        "그 전에 ① 재진단·재선정과 ② 장애 등록 여부를 함께 확인하도록 보호자에게 안내하세요.",
+    });
+  }
+
   warnings.push({
     kind: "crossTrack",
     title: "복지부 장애인 등록과 교육청 선정은 별개 절차입니다",
@@ -269,7 +284,11 @@ export function buildSheet(input: Input) {
      1면에는 담당자가 모를 수 있는 것과 이 아동에 대한 판단만 남기고,
      조건과 무관하게 늘 뜨는 일반 안내는 「자세히 보기」로 내린다. */
   const keyWarnings = warnings.filter(
-    (w) => w.kind === "term" || w.kind === "overlap" || w.kind === "unregistered"
+    (w) =>
+      w.kind === "term" ||
+      w.kind === "overlap" ||
+      w.kind === "unregistered" ||
+      w.kind === "age9Cross"
   );
   const generalNotes = warnings.filter(
     (w) => w.kind === "crossTrack" || w.kind === "easyToMiss"
@@ -409,9 +428,10 @@ function buildParentLetter(args: {
 
   if (age9) {
     lines.push("");
-    lines.push(
-      `  ※ 발달지체는 만 9세가 되면 지원이 끝납니다. ${age9}까지이며, 그 전에 다시 검사를 받아야 지원이 이어집니다.`
-    );
+    lines.push(`  ※ 만 9세가 되면 두 가지가 같이 끝납니다. ${age9}까지입니다.`);
+    lines.push("     · 교육청 — 발달지체 특수교육대상자 지위가 종료됩니다. 그 전에 다시 검사를 받아야 이어집니다.");
+    lines.push("     · 읍면동 — 장애 등록 없이 발달재활서비스를 받고 계시면 그때 지원이 끝납니다.");
+    lines.push("       장애 등록을 하시면 만 18세 미만까지 이어집니다. 읍면동에서 확인하세요.");
   }
 
   lines.push("");
