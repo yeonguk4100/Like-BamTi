@@ -470,28 +470,28 @@ function buildParentLetter(args: {
   lines.push(`이 안내는 「${procedure.name}」 기준입니다. (${procedure.when})`);
   lines.push("");
   if (documentsFirst.length > 0) {
-    lines.push("■ 1단계 — 먼저 다른 곳에서 갖춰 오실 것");
-    lines.push("  이것이 빠지면 접수가 되돌아가고 다시 오셔야 합니다.");
+    lines.push("■ 1단계 — 먼저 준비할 서류");
+    lines.push("  서류가 누락된 경우 보완 제출이 필요할 수 있습니다.");
     for (const d of documentsFirst) {
       lines.push(`· ${d.label}`);
       lines.push(`   → ${d.where}`);
     }
     lines.push("");
   }
-  lines.push(`■ ${documentsFirst.length > 0 ? "2단계 — " : ""}${level.submitTo}에서 작성하실 것`);
+  lines.push(`■ ${documentsFirst.length > 0 ? "2단계 — " : ""}${level.submitTo}에서 작성할 서류`);
   for (const d of documentsAtOffice) {
     lines.push(`· ${d.label} [${d.formNo}]`);
   }
   lines.push("");
-  lines.push("■ 서류를 쓰실 때 — 이것 때문에 다시 연락드리는 일이 가장 많습니다");
-  lines.push("  기초조사서에 아이의 행동특성과 발달사항을 적는 칸이 있습니다.");
-  lines.push("  「발달이 느림」처럼 짧게 적으면 정보가 부족해 다시 여쭤보게 됩니다.");
-  lines.push("  · 언제부터 그런지 (예: 두 돌 무렵부터)");
+  lines.push("■ 서류 작성 시 유의사항");
+  lines.push("  행동특성과 발달사항은 구체적으로 작성해 주세요.");
+  lines.push("  「발달이 느림」처럼 짧게 작성하면 추가 확인이 필요할 수 있습니다.");
+  lines.push("  · 언제부터 나타났는지 (예: 두 돌 무렵부터)");
   lines.push("  · 어떤 상황에서 나타나는지 (예: 낯선 사람이 많은 곳에서)");
   lines.push("  · 어떻게 나타나는지 (예: 눈을 맞추지 않고 같은 말을 반복합니다)");
-  lines.push("  이렇게 예를 들어 적어 주시면 한 번에 끝납니다.");
+  lines.push("  구체적으로 작성하면 추가 확인을 줄일 수 있습니다.");
   lines.push("");
-  lines.push("■ 그다음 어떻게 되나요");
+  lines.push("■ 신청 이후 절차");
   lines.push(`1. ${level.submitTo}에 서류를 제출합니다.`);
   lines.push(
     disability.tests.length > 0
@@ -499,29 +499,29 @@ function buildParentLetter(args: {
       : `2. 신청하면 ${region.officeName} 특수교육지원센터가 30일 안에 검사를 진행합니다. 어떤 검사를 하는지는 담당자에게 확인하세요.`
   );
   lines.push(
-    `3. 검사 결과가 나오면 ${level.committee}가 심사하고, 2주 안에 ${level.decider}이(가) 결과를 알려 드립니다.`
+    `3. 검사 결과가 나오면 ${level.committee}가 심사하고, 2주 안에 ${level.decider}이(가) 결과를 통보합니다.`
   );
   lines.push("");
-  lines.push("■ 선정되면 신청할 수 있는 교육청 지원");
+  lines.push("■ 선정 후 신청 가능한 교육청 지원");
   for (const p of eduPrograms) {
     if (p.id === "selection") continue;
     lines.push(`· ${p.resolvedName} — ${p.resolvedApplyTo}`);
   }
   lines.push("");
-  lines.push("■ 교육청과 따로 신청해야 하는 것 (복지·의료)");
+  lines.push("■ 별도 신청이 필요한 지원 (복지·의료)");
   // 확인 주체를 담당자가 아니라 해당 기관으로 넘긴다. 판정하지 않으면서
   // 담당자에게 검수 숙제를 남기지 않는 유일한 방법이다.
-  lines.push("  교육청 소관이 아닙니다. 대상이 되는지와 신청 방법은 아래 기관에서 확인하셔야 합니다.");
+  lines.push("  교육청 소관이 아닙니다. 지원 대상 여부와 신청 방법은 아래 기관에서 확인해 주세요.");
   for (const p of otherPrograms) {
     lines.push(`· ${p.name} — ${p.applyTo}`);
   }
   lines.push("");
   lines.push("  ※ 장애인 등록이 되어 있어도 특수교육대상자로 자동 선정되지 않습니다.");
-  lines.push("     반대로 특수교육대상자가 되어도 복지 지원은 따로 신청하셔야 합니다.");
+  lines.push("     반대로 특수교육대상자로 선정되어도 복지 지원은 별도로 신청해야 합니다.");
 
   if (urgent.length > 0) {
     lines.push("");
-    lines.push("■ 놓치면 안 되는 날짜");
+    lines.push("■ 주요 신청 일정");
     for (const d of urgent) lines.push(`· ${d.label} — ${d.when}`);
   }
 

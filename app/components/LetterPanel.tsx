@@ -59,7 +59,7 @@ export function LetterPanel({
         )}
 
         <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
-          출력해서 건네거나 문자로 보냅니다. AI로 보낼 때{" "}
+          출력하거나 문자로 전달할 수 있습니다. AI로 보낼 때{" "}
           <strong>생년월일·상세 메모·발신 정보는 보내지 않습니다.</strong>
         </p>
 

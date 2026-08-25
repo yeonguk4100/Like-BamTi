@@ -29,29 +29,29 @@ export function StaffBrief({
   return (
     <section className="panel">
       <div className="panel-head">
-        <h3 className="h-sm">건네기 전에 짚을 것</h3>
+        <h3 className="h-sm">안내 전 확인사항</h3>
         <span className="b-sm subtle right">
-          {nothing ? "없습니다" : "이 조건에서 놓치기 쉬운 것만 모았습니다"}
+          {nothing ? "없습니다" : "상담 시 추가 확인이 필요한 항목입니다"}
         </span>
       </div>
       <div className="panel-body">
         {nothing && (
           <p className="hint" style={{ marginTop: 0 }}>
-            이 조건에서는 따로 짚을 것이 없습니다. 위 안내문을 그대로 건네시면 됩니다.
+            이 조건에서는 추가 확인이 필요한 항목이 없습니다. 위 안내문을 그대로 전달할 수 있습니다.
           </p>
         )}
 
         {documentsFirst.length > 0 && (
           <div className="block">
             <h4 className="block-title">
-              다른 곳에서 먼저 떼어 오실 서류
+              사전 준비 서류
               <span className="count">{documentsFirst.length}종</span>
             </h4>
             <p className="hint" style={{ marginTop: 0, marginBottom: 10 }}>
-              이것이 빠진 채로 접수되면 되돌려 보내게 됩니다. 상담 중에 한 번 짚어 주세요.
+              접수 전 반드시 준비 여부를 확인해 주세요.
             </p>
             <table className="tbl">
-              <caption className="skip">먼저 갖춰야 하는 서류</caption>
+              <caption className="skip">사전 준비 서류</caption>
               <tbody>
                 {documentsFirst.map((d) => (
                   <tr key={d.key}>
@@ -69,11 +69,11 @@ export function StaffBrief({
         {urgentDeadlines.length > 0 && (
           <div className="block">
             <h4 className="block-title">
-              말로 짚어야 하는 날짜
-              <span className="count">{urgentDeadlines.length}개</span>
+              주요 신청 일정
+              <span className="count">{urgentDeadlines.length}건</span>
             </h4>
             <table className="tbl">
-              <caption className="skip">긴급 마감일</caption>
+              <caption className="skip">주요 신청 일정</caption>
               <tbody>
                 {urgentDeadlines.map((d, i) => (
                   <tr key={i} className="row-urgent">

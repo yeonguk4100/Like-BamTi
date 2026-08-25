@@ -24,16 +24,16 @@ export const TRACK_DESC: Record<Track, string> = {
 };
 
 export const STEPS = [
-  { no: 1, title: "조건 입력", desc: "상담하면서 아동 조건을 고릅니다", href: "#step1" },
+  { no: 1, title: "조건 입력", desc: "상담 중 아동 조건을 입력합니다", href: "#step1" },
   { no: 2, title: "결과 확인", desc: "확인할 제도·마감일·서류가 정리됩니다", href: "#step2" },
-  { no: 3, title: "안내문 전달", desc: "학부모용 안내문을 출력해 건넵니다", href: "#step3" },
+  { no: 3, title: "안내문 전달", desc: "학부모용 안내문을 출력해 전달합니다", href: "#step3" },
 ];
 
 export const FIGURES = [
   { key: "특수교육대상자", value: "120,735", unit: "명", note: "2025년 기준 · 10년간 37% 증가" },
-  { key: "일반학교 배치", value: "74.1", unit: "%", note: "특수학교가 아닌 학교에 있습니다" },
-  { key: "날짜가 있는 마감", value: "12", unit: "개", note: "교육 트랙 안에서만 센 수" },
-  { key: "시도별 카드 명칭", value: "6", unit: "종", note: "같은 지원, 다른 이름" },
+  { key: "일반학교 배치", value: "74.1", unit: "%", note: "특수교육대상자 중 74.1%가 일반학교에 배치" },
+  { key: "날짜가 있는 마감", value: "12", unit: "개", note: "교육 분야 기준" },
+  { key: "시도별 카드 명칭", value: "6", unit: "종", note: "지역별로 다른 지원 명칭" },
 ];
 
 

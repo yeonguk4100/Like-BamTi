@@ -21,10 +21,10 @@ export function LookupPanel({
 }) {
   return (
     <div className="fold-static">
-      <p className="h-xs">이 지역 정보를 AI가 찾아봅니다</p>
+      <p className="h-xs">지역 추가 지원사업 검색</p>
       <p className="hint" style={{ marginTop: 4, marginBottom: 12 }}>
-        우리 데이터에 없는 칸입니다. 제미나이가 웹을 검색해 후보를 찾고 출처를 함께
-        보여줍니다. <strong>확정이 아니므로 담당자가 확인해야 합니다.</strong>
+        등록된 데이터에 없는 항목입니다. 웹 검색으로 후보와 출처를 함께
+        제공합니다. <strong>확정된 정보가 아니므로 담당자 확인이 필요합니다.</strong>
       </p>
 
       <div className="chip-row" style={{ marginBottom: 12 }}>

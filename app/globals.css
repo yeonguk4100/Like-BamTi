@@ -416,6 +416,14 @@ a.skip:focus {
   color: #22415f;
 }
 
+/* 가상 데이터 고지 — 개인정보 문장과 성격이 달라 한 줄 내려 흐리게 둔다 */
+.notice-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #5a7590;
+}
+
 /* ───────────────────────── 상단 안내 ───────────────────────── */
 
 .hero {

@@ -46,7 +46,7 @@ export function DocumentTable({
             <th scope="col" style={{ width: "34%" }}>
               서류
             </th>
-            <th scope="col">어디서 떼나요</th>
+            <th scope="col">발급처</th>
             <th scope="col" style={{ width: "18%" }}>
               {officeName} 서식
             </th>

@@ -313,9 +313,12 @@ export default function Home() {
         <div className="notice-inner">
           <span className="notice-tag">안내</span>
           <p>
-            이 도구는 <strong>개인정보를 저장하지 않습니다.</strong> 이름·연락처를 받지 않으며,
-            제도와 마감일 계산은 이 화면 안에서 끝납니다. AI 안내문 버튼을 누를 때만 조건이 서버로
-            가고, 그때도 저장하거나 기록하지 않습니다. 화면의 아동 정보는 전부 가상입니다.
+            <strong>이름과 연락처는 수집하지 않습니다.</strong> 제도 및 일정 계산은 브라우저에서
+            처리하며, AI 안내문 생성 시 필요한 조건만 서버로 전달합니다. 전달된 정보는 저장하지
+            않습니다.
+            <span className="notice-sub">
+              ※ 화면에 표시되는 아동 정보는 모두 가상 사례입니다.
+            </span>
           </p>
         </div>
       </div>
@@ -326,13 +329,18 @@ export default function Home() {
             <div className="hero-text">
               <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
               <h1>
-                아동 조건을 넣으면 확인할 제도와
+                아동 조건에 맞는 지원제도와
                 <br />
-                마감일이 한 장으로 정리됩니다
+                신청 일정을 한눈에 확인합니다
               </h1>
               <p className="hero-lead">
-                흩어진 특수교육·복지·의료 제도를 아이 조건에 맞게 정리하고, 담당자에게{" "}
-                <strong>신청 순서와 학부모 안내문까지 한 번에</strong> 제공하는 업무도구입니다.
+                거주지·장애영역·생년월일·학교급을 기준으로 교육·복지·의료 지원제도를 조회합니다.
+                필요한 서류와 신청 순서, 근거 자료를 확인하고 학부모 안내문을 만들 수 있습니다.
+                지원 대상은{" "}
+                <strong>
+                  만 {SCOPE_AGE_MIN}세부터 만 {SCOPE_AGE_MAX}세까지
+                </strong>
+                입니다.
               </p>
               <div className="hero-cta">
                 <a href="#step1" className="btn btn-primary">
@@ -380,8 +388,7 @@ export default function Home() {
         </div>
 
         <div className="greeting">
-          <h2>담당자님, 안녕하세요.</h2>
-          <p>“소관이 달라도, 한 화면에서 확인하실 수 있습니다”</p>
+          <h2>교육·복지·의료 지원정보를 한곳에서 확인합니다</h2>
         </div>
 
         <div className="page-head">
@@ -418,7 +425,7 @@ export default function Home() {
         <section className="section wrap" id="step1">
           <div className="section-head">
             <h2 className="h-lg">1. 조건 입력</h2>
-            <span className="b-sm subtle right">상담 첫머리에 어차피 확인하는 정보만 받습니다</span>
+            <span className="b-sm subtle right">상담에 필요한 기본 정보만 입력합니다</span>
           </div>
 
           <table className="form-table">
@@ -472,10 +479,10 @@ export default function Home() {
                     ))}
                   </div>
                   <span className="hint">
-                    지금 구현된 지역은 <strong>강원특별자치도</strong>와 <strong>경상남도</strong>입니다.
-                    두 지침 원문을 대조해 서식 번호와 명칭을 확인한 곳입니다. 나머지는 절차가 같다는
-                    것만 확인했을 뿐이라 아직 고를 수 없습니다 — 확인하지 않은 서식 번호로 시트를 내면
-                    안 되기 때문입니다. 대조 결과는 아래 <a href="#reference">참고 자료</a>에 있습니다.
+                    현재 <strong>강원특별자치도</strong>와 <strong>경상남도</strong>를 지원합니다. 두
+                    지역은 지침 원문을 기준으로 서식 번호와 명칭까지 확인했으며, 다른 지역은 검증 후
+                    순차적으로 추가할 예정입니다. 지역별 대조 결과는{" "}
+                    <a href="#reference">참고 자료</a>에서 확인할 수 있습니다.
                   </span>
                 </td>
               </tr>
@@ -601,7 +608,7 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
-                  <span className="hint">중복 이용 제한이 있는 조합을 확인해 드립니다.</span>
+                  <span className="hint">중복 이용 제한이 있는 조합을 확인합니다.</span>
                 </td>
               </tr>
 
@@ -655,7 +662,7 @@ export default function Home() {
           <div className="wrap">
             <div className="section-head">
               <h2 className="h-lg">2. 결과 확인</h2>
-              <span className="b-sm subtle right">조건을 바꾸면 결과가 바로 다시 계산됩니다</span>
+              <span className="b-sm subtle right">입력 조건에 따라 결과가 실시간으로 변경됩니다</span>
             </div>
 
             <div className="summary-bar">
@@ -697,12 +704,12 @@ export default function Home() {
                   <span className="subcard-sub">교육청 {counts.education}건 포함</span>
                 </div>
                 <div className="subcard">
-                  <span className="subcard-label">소관 밖 제도</span>
+                  <span className="subcard-label">교육청 외 지원제도</span>
                   <p className="subcard-val">
                     {otherTrackCount}
                     <span className="unit">건</span>
                   </p>
-                  <span className="subcard-sub">복지부·의료 — 따로 신청해야 함</span>
+                  <span className="subcard-sub">복지부·의료 — 별도 신청 필요</span>
                 </div>
                 <div className="subcard">
                   <span className="subcard-label">날짜가 있는 마감</span>

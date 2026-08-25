@@ -791,7 +791,7 @@ export const FORM_SOURCE: Record<FormKey, FormSourceInfo> = {
     // ⚠ 한 항목에 서로 다른 두 기관이 섞여 있다. 학부모가 판단하게 두면 안 된다
     sources: ["school", "townOffice"],
     where:
-      "둘 중 하나를 준비하시면 됩니다 — 재학(예정) 학교에서 「학교장 의견서」, " +
+      "둘 중 하나를 준비합니다 — 재학(예정) 학교에서 「학교장 의견서」, " +
       "또는 읍면동 행정복지센터에서 「장애인증명서·복지카드」",
     verified: true,
     source: "강원·경남 지침 제출 서류 (2026.08 대조) — 택 1 항목",

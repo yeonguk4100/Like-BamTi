@@ -79,9 +79,9 @@ export function Reference({ regionId }: { regionId: RegionId }) {
 
       <div className="callout" style={{ marginTop: 32 }}>
         <div>
-          <p className="callout-title">소관 밖은 여기로 안내하세요</p>
+          <p className="callout-title">교육청 외 문의처</p>
           <p className="callout-note">
-            교육청 소관이 아닌 문의를 받으셨을 때 학부모께 그대로 알려 주시면 되는 번호입니다.
+            보호자 안내용 문의처입니다. 교육청 소관이 아닌 문의는 아래로 안내해 주세요.
             전국 어디서나 같습니다.
           </p>
           <ul className="docs" style={{ marginTop: 10 }}>

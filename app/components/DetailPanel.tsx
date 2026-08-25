@@ -57,16 +57,16 @@ export function DetailPanel({
       <summary>
         <span className="detail-fold-title">자세히 보기</span>
         <span className="detail-fold-hint">
-          학부모가 자세히 물으실 때 여세요 · {sheet.region.officeName} 기준
+          상세 정보 · {sheet.region.officeName} 기준
         </span>
       </summary>
 
       <div className="detail-fold-body">
-        <Ask q="진단·평가에서 어떤 검사를 하나요?">
+        <Ask q="진단·평가 검사 항목">
           <TestTable disability={sheet.disability} detailNote={sheet.detailNote} hideTitle />
         </Ask>
 
-        <Ask q="얼마나 걸리나요? 언제까지 해야 하나요?">
+        <Ask q="소요 기간 및 기한">
           <DeadlineTable
             deadlines={sheet.deadlines}
             urgentCount={sheet.deadlines.filter((d) => d.urgent).length}
@@ -74,7 +74,7 @@ export function DetailPanel({
           />
         </Ask>
 
-        <Ask q="이 서류는 어디서 떼나요?">
+        <Ask q="서류별 발급처">
           <DocumentTable
             documents={sheet.documents}
             officeName={sheet.region.officeName}
@@ -83,7 +83,7 @@ export function DetailPanel({
           />
         </Ask>
 
-        <Ask q="어떤 제도를 신청할 수 있나요?">
+        <Ask q="신청 가능한 지원제도">
           <ProgramList
             sheet={sheet}
             visible={visible}
@@ -104,7 +104,7 @@ export function DetailPanel({
         </Ask>
 
         {sheet.generalNotes.length > 0 && (
-          <Ask q="그 밖에 알아두실 것">
+          <Ask q="그 밖의 확인사항">
             {sheet.generalNotes.map((w, i) => (
               <div key={i} className={`alert ${alertClass(w.kind)}`}>
                 <span className="alert-tag">{alertTag(w.kind)}</span>
