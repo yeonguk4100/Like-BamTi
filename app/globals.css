@@ -992,8 +992,14 @@ input::placeholder {
   color: var(--text-sub);
 }
 
-.chip:hover:not(:disabled) {
+/* 고르지 않은 칩에만 걸리는 hover.
+   :not(.chip-on) 이 없으면 선택된 칩(파란 배경)에도 이 규칙이 걸렸다.
+   .chip:hover:not(:disabled) 의 명시도가 (0,3,0) 이라 .chip-on:hover 의 (0,2,0) 을
+   이겨서, 글씨만 파랗게 바뀌고 배경은 파란 채로 남아 글씨가 사라졌다.
+   배경도 함께 정한다 — 한쪽만 정하면 같은 종류의 사고가 또 난다. */
+.chip:hover:not(:disabled):not(.chip-on) {
   border-color: var(--primary);
+  background: var(--primary-tint-2);
   color: var(--primary);
 }
 
@@ -1004,7 +1010,10 @@ input::placeholder {
   font-weight: 700;
 }
 
-.chip-on:hover {
+/* 선택된 칩의 hover 는 더 진한 남청으로. 글씨는 흰색을 유지한다 */
+.chip-on:hover:not(:disabled) {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
   color: #fff;
 }
 
