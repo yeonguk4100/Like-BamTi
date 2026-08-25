@@ -94,6 +94,9 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
               <td className="td-sub">
                 {p.verified ? "확인함 — " : "데모용 예시 — "}
                 {p.source}
+                {/* 언제 확인한 것인지. 수원 Q7 — 「담당자가 자주 바뀌고 매뉴얼도 자주 변경됨」.
+                    오래된 항목이 드러나야 담당자가 다시 확인할지 판단할 수 있다 */}
+                {p.asOf && <span className="as-of">{p.asOf}</span>}
               </td>
             </tr>
           </tbody>

@@ -381,6 +381,7 @@ export const PROGRAMS: Program[] = [
     legalBasis: "장애인 등에 대한 특수교육법 제15조·제16조·제17조",
     verified: true,
     source: "강원·경남 교육청 지침 (2026.08 대조 확인)",
+    asOf: "2026.08 확인",
   },
   {
     id: "therapy",

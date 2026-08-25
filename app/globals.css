@@ -2301,3 +2301,15 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
 .contact-line {
   margin: 0 0 4px;
 }
+
+/* 언제 확인한 값인지. 오래된 항목이 드러나야 담당자가 다시 확인할지 판단한다 */
+.as-of {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
