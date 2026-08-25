@@ -12,7 +12,7 @@ export function GET() {
   return Response.json(
     {
       ok: true,
-      service: "너도나도 길잡이",
+      service: "복지그루",
       rules: {
         regions: REGIONS.length,
         programs: PROGRAMS.length,

@@ -5,8 +5,6 @@
 
 import { REGIONS, type RegionId } from "../lib/data";
 import { REPO_DOCS } from "../lib/screen";
-/* ⚠ 데모용 — 발표 후 아래 줄과 <DemoKey> 를 지운다 */
-import { DemoKey } from "./DemoKey";
 
 export function Reference({ regionId }: { regionId: RegionId }) {
   return (
@@ -14,11 +12,6 @@ export function Reference({ regionId }: { regionId: RegionId }) {
       <div className="section-head rel">
         <h2 className="h-lg">참고 자료</h2>
         <span className="b-sm subtle right">이 도구가 필요한 이유</span>
-        <DemoKey top={52} right={0}>
-          {`카드 이름 6개 = 지역마다 다름
-강원·경남 절차는 동일
-→ 확장은 개발이 아니라 데이터 교체`}
-        </DemoKey>
       </div>
 
       <h3 className="h-sm" style={{ marginBottom: 12 }}>
@@ -86,7 +79,7 @@ export function Reference({ regionId }: { regionId: RegionId }) {
 
       <div className="callout" style={{ marginTop: 32 }}>
         <div>
-          <p className="callout-title">너도나도 길잡이 상담지원실</p>
+          <p className="callout-title">복지그루 상담지원실</p>
           <p className="callout-tel">1600-0000</p>
           <p className="callout-note">
             평일 09:00 ~ 18:00 (점심 12:00 ~ 13:00) · 가상 번호입니다. 실제로 연결되지 않습니다.

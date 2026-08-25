@@ -1,5 +1,5 @@
 {
-  "name": "neodonado-giljabi",
+  "name": "bokji-guru",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -19,5 +19,5 @@
     "@types/react-dom": "^19.1.0",
     "typescript": "^5.7.0"
   },
-  "description": "너도나도 길잡이 — 특수교육 지원제도 상담 지원 도구"
+  "description": "복지그루 — 특수교육 지원제도 상담 지원 도구"
 }
