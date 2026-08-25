@@ -233,7 +233,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 
 | 파일 | 하는 일 |
 |---|---|
-| `app/lib/data.ts` | 지역 · 장애영역 · 학교급 · 신청 상황 · 서식 · 제도 데이터 |
+| `app/lib/data.ts` | 지역 · 장애영역 · 학교급 · 신청 상황 · 서식 · 제도 데이터. 확인한 제도에는 `officialUrl`(학부모가 열어 볼 공식 페이지)이 붙는다 |
 | `app/lib/build-sheet.ts` | **규칙 계층.** 조건으로 제도·서류·기한을 고른다. 순수 함수 |
 | `app/lib/validate.ts` | 요청 본문 검증. 모르는 id는 통과시키지 않는다 |
 | `app/lib/board.ts` | 알림 마당 · 서식 자료실 · FAQ 데이터 (공지·파일은 가상) |
