@@ -552,16 +552,29 @@ function buildParentLetter(args: {
  * 링크가 붙는 것은 담당자 소관 밖(복지·의료) 제도뿐이다. 교육청 담당자가
  * 설명할 수 없는 것들이고, 그래서 학부모가 직접 찾아가야 하는 것들이다.
  */
-export function officialLinkLines(programs: { officialUrl?: string; officialUrlLabel?: string; name: string }[]): string[] {
-  const linked = programs.filter((p) => p.officialUrl);
+export function officialLinkLines(
+  programs: {
+    officialUrl?: string;
+    officialUrlLabel?: string;
+    contactTel?: string;
+    contactTelLabel?: string;
+    name: string;
+  }[]
+): string[] {
+  const linked = programs.filter((p) => p.officialUrl || p.contactTel);
   if (linked.length === 0) return [];
 
-  const lines = ["■ 직접 확인하실 수 있는 공식 안내 페이지"];
+  const lines = ["■ 직접 확인하실 수 있는 곳"];
   for (const p of linked) {
     lines.push(`· ${p.name}`);
-    lines.push(`  ${p.officialUrlLabel ?? ""} ${p.officialUrl}`.trim());
+    if (p.contactTel) {
+      lines.push(`  전화 ${p.contactTel} ${p.contactTelLabel ?? ""}`.trimEnd());
+    }
+    if (p.officialUrl) {
+      lines.push(`  ${p.officialUrlLabel ?? ""} ${p.officialUrl}`.trim());
+    }
   }
-  lines.push("  ※ 교육청 소관이 아닌 제도입니다. 위 주소에서 직접 확인하실 수 있습니다.");
+  lines.push("  ※ 교육청 소관이 아닌 제도입니다. 위로 직접 확인하실 수 있습니다.");
   return lines;
 }
 

@@ -57,19 +57,31 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
               <th scope="row">기한</th>
               <td>{p.deadline}</td>
             </tr>
-            {p.officialUrl && (
+            {(p.officialUrl || p.contactTel) && (
               <tr>
-                <th scope="row">공식 안내</th>
+                <th scope="row">문의처</th>
                 <td>
-                  <a
-                    className="official-link"
-                    href={p.officialUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {p.officialUrlLabel ?? p.officialUrl}
-                  </a>
-                  <span className="hint"> 학부모께 그대로 알려 주셔도 됩니다.</span>
+                  {p.contactTel && (
+                    <p className="contact-line">
+                      <a className="official-link" href={`tel:${p.contactTel}`}>
+                        {p.contactTel}
+                      </a>
+                      {p.contactTelLabel && <span className="td-sub"> {p.contactTelLabel}</span>}
+                    </p>
+                  )}
+                  {p.officialUrl && (
+                    <p className="contact-line">
+                      <a
+                        className="official-link"
+                        href={p.officialUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {p.officialUrlLabel ?? p.officialUrl}
+                      </a>
+                    </p>
+                  )}
+                  <span className="hint">학부모께 그대로 알려 주셔도 됩니다.</span>
                 </td>
               </tr>
             )}

@@ -79,10 +79,52 @@ export function Reference({ regionId }: { regionId: RegionId }) {
 
       <div className="callout" style={{ marginTop: 32 }}>
         <div>
-          <p className="callout-title">복지그루 상담지원실</p>
-          <p className="callout-tel">1600-0000</p>
+          <p className="callout-title">소관 밖은 여기로 안내하세요</p>
           <p className="callout-note">
-            평일 09:00 ~ 18:00 (점심 12:00 ~ 13:00) · 가상 번호입니다. 실제로 연결되지 않습니다.
+            교육청 소관이 아닌 문의를 받으셨을 때 학부모께 그대로 알려 주시면 되는 번호입니다.
+            전국 어디서나 같습니다.
+          </p>
+          <ul className="docs" style={{ marginTop: 10 }}>
+            <li>
+              <a className="official-link" href="tel:129">
+                129
+              </a>{" "}
+              보건복지상담센터 — 발달재활서비스·장애아동수당 등 복지 제도 (4번 장애인)
+            </li>
+            <li>
+              <a className="official-link" href="tel:1355">
+                1355
+              </a>{" "}
+              국민연금공단 — 장애정도 심사 진행 상황
+            </li>
+            <li>
+              장애인 등록 신청 접수와 복지 제도 신청은 <strong>주소지 읍면동 주민센터</strong>입니다
+            </li>
+            <li>
+              선정·배치와 교육청 지원제도는 <strong>관할 교육지원청 특수교육지원센터</strong>입니다
+              — 시·군마다 번호가 달라 여기에 적지 않습니다
+            </li>
+          </ul>
+          <p className="callout-note" style={{ marginTop: 10 }}>
+            출처 —{" "}
+            <a
+              className="official-link"
+              href="https://www.129.go.kr/counsel/counsel01.do"
+              target="_blank"
+              rel="noreferrer"
+            >
+              보건복지상담센터
+            </a>{" "}
+            ·{" "}
+            <a
+              className="official-link"
+              href="https://www.nps.or.kr/jsppage/etc/disabledPerson/disabledPerson05_05.jsp"
+              target="_blank"
+              rel="noreferrer"
+            >
+              국민연금공단 장애등록심사 Q&amp;A
+            </a>{" "}
+            (2026-08 확인)
           </p>
         </div>
         <a href="#faq" className="btn btn-outline">

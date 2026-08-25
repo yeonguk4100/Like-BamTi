@@ -351,6 +351,20 @@ export type Program = {
   officialUrl?: string;
   /** 링크에 붙일 기관·페이지 이름 */
   officialUrlLabel?: string;
+  /**
+   * 담당 부서 전화번호.
+   *
+   * **전국 어디서나 같은 번호만 넣는다.** 교육청 제도는 넣지 않는다 —
+   * 선정·배치는 관할 교육지원청 특수교육지원센터가 받고, 그 번호는 시·군마다 다르다.
+   * 강원만 해도 교육지원청이 열일곱 곳이라 시도 대표번호를 적으면 틀린 곳으로 보내게 된다.
+   * 교육청 쪽 문의처는 담당자가 「안내문 발신 정보」에 자기 번호를 넣어 채운다.
+   *
+   * 읍면동에 신청하는 복지 제도도 주민센터 번호는 거주지마다 다르므로,
+   * 전국 공통 상담번호(129)만 적는다.
+   */
+  contactTel?: string;
+  /** 그 번호가 어디인지. 번호만 있으면 어디에 거는지 알 수 없다 */
+  contactTelLabel?: string;
 } & Sourced;
 
 export const PROGRAMS: Program[] = [
@@ -453,6 +467,8 @@ export const PROGRAMS: Program[] = [
     legalBasis: "장애인복지법 제32조",
     officialUrl: "https://www.mohw.go.kr/menu.es?mid=a10710010900",
     officialUrlLabel: "보건복지부 — 장애인등록·장애정도 심사제도",
+    contactTel: "1355",
+    contactTelLabel: "국민연금공단 (장애정도 심사)",
     verified: true,
     source:
       "보건복지부 「장애인등록/장애정도 심사제도」 https://www.mohw.go.kr/menu.es?mid=a10710010900 " +
@@ -483,6 +499,8 @@ export const PROGRAMS: Program[] = [
     legalBasis: "장애아동 복지지원법 제21조",
     officialUrl: "https://www.socialservice.or.kr:444/user/htmlEditor/view2.do?p_sn=11",
     officialUrlLabel: "사회서비스 전자바우처 — 발달재활서비스",
+    contactTel: "129",
+    contactTelLabel: "보건복지상담센터 (4번 장애인)",
     verified: true,
     source:
       "사회서비스 전자바우처(한국사회보장정보원) 「발달재활서비스」 사업 안내 " +
@@ -509,6 +527,8 @@ export const PROGRAMS: Program[] = [
     legalBasis: "발달장애인 권리보장 및 지원에 관한 법률 제29조의2 (주간활동·방과 후 활동 지원)",
     officialUrl: "https://www.mohw.go.kr/menu.es?mid=a10710041200",
     officialUrlLabel: "보건복지부 — 발달장애인 방과후활동서비스",
+    contactTel: "129",
+    contactTelLabel: "보건복지상담센터 (4번 장애인)",
     verified: true,
     source:
       "보건복지부 「청소년 발달장애인 방과후활동서비스」 " +
@@ -535,6 +555,8 @@ export const PROGRAMS: Program[] = [
     officialUrl:
       "https://www.easylaw.go.kr/CSP/CnpClsMain.laf?popMenu=ov&csmSeq=916&ccfNo=2&cciNo=1&cnpClsNo=2",
     officialUrlLabel: "찾기쉬운 생활법령 — 장애아동수당",
+    contactTel: "129",
+    contactTelLabel: "보건복지상담센터 (4번 장애인)",
     verified: true,
     source:
       "법제처 찾기쉬운 생활법령정보 「장애수당 및 장애아동수당」 " +

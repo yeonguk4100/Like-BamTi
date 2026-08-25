@@ -2296,3 +2296,8 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
 .official-link:hover {
   color: var(--primary-dark);
 }
+
+/* 문의처 — 번호와 주소를 줄로 나눈다 */
+.contact-line {
+  margin: 0 0 4px;
+}
