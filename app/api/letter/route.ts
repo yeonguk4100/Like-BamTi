@@ -17,10 +17,14 @@ import { buildSheet, contactLines, TRACK_LABEL, type Sheet } from "@/app/lib/bui
 import { fail, parseConditions, readJson } from "@/app/lib/validate";
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
-const TIMEOUT_MS = 12_000;
+const TIMEOUT_MS = 25_000;
 
 export const runtime = "nodejs";
-/** 제미나이 응답을 12초까지 기다린다. Vercel 기본 한도가 더 짧아 명시한다 */
+/**
+ * 제미나이 응답을 25초까지 기다린다. Vercel 기본 한도가 더 짧아 maxDuration 을 명시한다.
+ * gemini-3-flash-preview 는 추론(thought) 파트를 내는 모델이라 12초로는 자주 모자랐다.
+ * TIMEOUT_MS 는 maxDuration 보다 반드시 작아야 한다 — 남는 시간에 응답을 만들어 돌려준다.
+ */
 export const maxDuration = 30;
 
 const SYSTEM = `당신은 한국 특수교육지원센터 담당자를 돕는 문서 작성 보조입니다.
@@ -153,6 +157,6 @@ export async function POST(request: Request) {
   } catch (e) {
     const message = e instanceof Error ? e.message : "알 수 없는 오류";
     const timedOut = message.includes("timed out") || message.includes("abort");
-    return fail(timedOut ? "12초 안에 응답이 오지 않았습니다." : message, 504);
+    return fail(timedOut ? `${TIMEOUT_MS / 1000}초 안에 응답이 오지 않았습니다.` : message, 504);
   }
 }
