@@ -20,7 +20,7 @@
 
 ```
 ① 학부모용 안내문        ← 제품. 그대로 건넨다
-② 건네기 전에 짚을 것     ← 담당자가 읽는 유일한 곳 (몇 줄)
+② 안내 전 확인사항        ← 담당자가 읽는 유일한 곳 (몇 줄)
 ③ 자세히 보기 (접힘)     ← 학부모가 파고들 때만
 ```
 
@@ -71,14 +71,18 @@
 
 ### 1면에는 확실한 것만 올린다
 
-「건네기 전에 짚을 것」은 담당자가 읽는 **유일한 곳**이다. 그래서 두 가지를 지킨다.
+「안내 전 확인사항」(`StaffBrief`)은 담당자가 읽는 **유일한 곳**이다. 그래서 두 가지를 지킨다.
 
 1. **늘 뜨는 일반 안내는 올리지 않는다** — `crossTrack`(별개 절차) · `easyToMiss`(3지망)는
    조건과 무관하게 뜨므로 「자세히 보기」로 내린다
 2. **근거를 확인하지 못한 경고도 올리지 않는다** — `Warning.verified === false` 면 접힘으로.
    「공식 목록에는 없지만 겹칠 수 있다」 수준을 1면에 두면 담당자가 그 숫자를 안 보게 된다
 
-실측 — 프리셋 7개 전부에서 **1면 경고가 0건 또는 1건**이다. 새 경고를 넣을 때 이 숫자를 확인한다.
+실측 — **데모 프리셋 7개에서 1면 경고가 0건 또는 1건**이다. 새 경고를 넣을 때 이 숫자를 확인한다.
+
+⚠ **「어느 조건에서도 1건 이하」가 아니다.** 지역 2 × 학교급 5 × 장애영역 3 = 30개 조합을
+재보면 **최대 3건**이다 (경남·어린이집·발달지체). 겹치는 조건일수록 짚을 것이 늘어나는 것이
+맞는 동작이므로 고칠 것은 아니지만, **문서에 「어느 조건에서도」라고 쓰지 않는다.**
 
 ### 설계 원칙 — 코드와 화면 양쪽에서 지킨다
 
@@ -240,8 +244,9 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
-| `app/components/` | 화면 조각 15개 |
+| `app/components/` | 화면 조각 16개 |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
+| `public/` | 정적 파일. 안내 띠 삽화(`hero-illustration.png`) — **투명 PNG 여야 한다** |
 
 `page.tsx`에는 최상위 선언이 `Home` 하나만 있다. 데이터·상수·화면 조각은 위 모듈로 나갔다.
 새 상수를 화면에 쓸 때는 `page.tsx` 안에 두지 말고 `screen.ts`에 넣는다.
@@ -256,6 +261,10 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `LookupPanel` | `regionId` · `cache` · `busy` · `error` · `onLookup` |
 | `LetterPanel` | `letter` · `isAi` · `aiStatus` · `aiError` · `copied` + 콜백 3개 |
 | `ProgramList` | `sheet` · `visible` · `counts` · `viewMode` · `trackFilter` + 콜백 2개 + `children` |
+| `DetailPanel` | `ProgramList` 와 같고 + `lookup` (빈칸 찾기 상태 묶음) |
+| `DocumentTable` | `documents` · `officeName` · `notes` · `hideTitle` |
+| `StaffBrief` | `documentsFirst` · `urgentDeadlines` · `keyWarnings` — 1면 |
+| `HeroArt` | 없음. 파일이 없으면 스스로 사라진다 |
 
 **섹션이 아니라 데이터 단위로 쪼갰다.** 1단계·2단계를 섹션째 떼면 상태 27~28개를 props로
 넘겨야 해서 오히려 읽기 어려워진다. `ProgramList`가 「AI 빈칸 찾기」를 `children`으로 받는 것도

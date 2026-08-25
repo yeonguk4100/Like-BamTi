@@ -18,7 +18,7 @@ export type TrackFilter = Track | "all";
 export const TRACK_ORDER: Track[] = ["education", "welfare", "medical"];
 
 export const TRACK_DESC: Record<Track, string> = {
-  education: "특수교육대상자로 선정되어야 받을 수 있습니다",
+  education: "특수교육대상자로 선정되어야 신청할 수 있습니다",
   welfare: "읍면동 행정복지센터에 따로 신청해야 합니다",
   medical: "병원에서 먼저 받아야 합니다",
 };

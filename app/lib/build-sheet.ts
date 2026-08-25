@@ -94,7 +94,7 @@ export function eligibilityLines(p: Program): string[] {
 
   // 교육청 지원제도는 선정이 전제다. 새로 만든 사실이 아니라 selection 제도의
   // summary 에 이미 적혀 있는 것을 옮긴 것이다 — 「특수교육대상자로 선정되어야
-  // 아래 교육청 지원제도를 받을 수 있습니다」. 선정·배치 자체는 그 출발점이라 빼둔다.
+  // 아래 교육청 지원제도를 신청할 수 있습니다」. 선정·배치 자체는 그 출발점이라 빼둔다.
   if (p.track === "education" && p.id !== "selection") {
     out.push("특수교육대상자로 선정된 아동");
   }
@@ -124,14 +124,6 @@ export function eligibilityLines(p: Program): string[] {
   }
 
   return out;
-}
-
-/**
- * 대상 조건을 한 줄로도 쓸 수 있게 만든 것. 조건이 없으면 빈 문자열.
- * 「조건이 없다」와 「조건을 적어 두지 않았다」를 구분하기 위해 단정하지 않는다.
- */
-export function eligibilitySummary(p: Program): string {
-  return eligibilityLines(p).join(" · ");
 }
 
 /** 만 9세가 되는 날이 속한 달의 말일 — 강원 지침의 계산 방식 */

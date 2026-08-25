@@ -21,18 +21,13 @@ import {
   TRACK_LABEL,
 } from "./lib/build-sheet";
 import {
-  alertClass,
-  alertTag,
   FIGURES,
-  LOOKUP_TARGETS,
   QUICK,
   REPO,
   REPO_DOCS,
   SCOPE_AGE_MAX,
   SCOPE_AGE_MIN,
   STEPS,
-  TRACK_DESC,
-  TRACK_ORDER,
   type LookupResult,
   type TrackFilter,
   type ViewMode,
