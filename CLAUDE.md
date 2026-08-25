@@ -307,7 +307,8 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
   `page.tsx`의 두 import와 `<DemoPresets>` 한 줄 · `globals.css`의 `.preset*`
 - **데모 사례는 조건 입력 표 안에 두지 않는다.** 실제 업무 화면에는 없는 칸이라 표에 끼우면
   담당자가 볼 화면이 아니게 된다. 화면 오른쪽에 접히는 레일(`DemoPresets`)로 띄우고,
-  열려 있는 동안 `body`에 `padding-right`를 줘서 본문을 가리지 않게 한다
+  열려 있는 동안 `body`에 `padding-right`를 줘서 본문을 가리지 않게 한다.
+  **처음에는 닫혀 있다** — 화면을 열자마자 데모용 칸이 펼쳐져 있으면 같은 문제가 된다
 - **발표용 초록 주석은 걷어냈다.** `DemoKey` 컴포넌트 · `DEMO_TERMS` 용어 목록 ·
   `.demo-*` / `.keys-off` CSS · util-bar 의 「발표 키워드」 토글이 전부 사라졌다.
   화면에 초록 글씨를 다시 넣지 않는다. 쓰이지 않게 된 `--go` 토큰 3개도 함께 지웠으므로

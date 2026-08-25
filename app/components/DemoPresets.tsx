@@ -16,7 +16,9 @@ export function DemoPresets({
   presetId: string;
   onPick: (p: Preset) => void;
 }) {
-  const [open, setOpen] = useState(true);
+  // 처음에는 닫혀 있다. 화면을 열자마자 데모용 칸이 펼쳐져 있으면
+  // 담당자가 볼 업무 화면이 아니게 된다. 시연할 때 눌러서 연다.
+  const [open, setOpen] = useState(false);
 
   return (
     <aside className={`preset-rail ${open ? "" : "preset-rail-shut"}`} aria-label="데모 사례">
