@@ -78,6 +78,62 @@ export const TRACK_LABEL: Record<Track, string> = {
   medical: "의료",
 };
 
+/**
+ * 제도의 대상 조건을 담당자가 읽을 문장으로 바꾼다.
+ *
+ * 수원교육지원청 지원센터 담당자가 「지원별로 대상 조건을 명확하게 표시해 달라」고
+ * 요청한 칸이다. appliesTo 는 규칙이 제도를 고르는 데 쓰던 값인데, 담당자에게는
+ * 보여주지 않고 있었다 — 왜 이 제도가 떴는지, 어디까지가 대상인지 알 수 없었다.
+ *
+ * **여기서 새 사실을 만들지 않는다.** 이미 데이터에 있는 조건을 말로 옮기기만 한다.
+ * 조건이 비어 있으면 「전국 공통」처럼 단정하지 않고 빈 배열을 돌려준다 —
+ * 조건을 적어 두지 않은 것과 조건이 없는 것은 다르다.
+ */
+export function eligibilityLines(p: Program): string[] {
+  const out: string[] = [];
+
+  // 교육청 지원제도는 선정이 전제다. 새로 만든 사실이 아니라 selection 제도의
+  // summary 에 이미 적혀 있는 것을 옮긴 것이다 — 「특수교육대상자로 선정되어야
+  // 아래 교육청 지원제도를 받을 수 있습니다」. 선정·배치 자체는 그 출발점이라 빼둔다.
+  if (p.track === "education" && p.id !== "selection") {
+    out.push("특수교육대상자로 선정된 아동");
+  }
+
+  const a = p.appliesTo;
+  if (!a) return out;
+
+  if (a.ageMin !== undefined && a.ageMax !== undefined) {
+    out.push(`만 ${a.ageMin}세 ~ 만 ${a.ageMax}세`);
+  } else if (a.ageMin !== undefined) {
+    out.push(`만 ${a.ageMin}세부터`);
+  } else if (a.ageMax !== undefined) {
+    out.push(`만 ${a.ageMax}세까지`);
+  }
+
+  if (a.disabilities?.length) {
+    const names = a.disabilities.map((id) => DISABILITIES.find((d) => d.id === id)?.name ?? id);
+    out.push(`장애영역 — ${names.join(" · ")}`);
+  }
+  if (a.levels?.length) {
+    const names = a.levels.map((id) => LEVELS.find((l) => l.id === id)?.name ?? id);
+    out.push(`학교급 — ${names.join(" · ")}`);
+  }
+  if (a.regions?.length) {
+    const names = a.regions.map((id) => REGIONS.find((r) => r.id === id)?.name ?? id);
+    out.push(`지역 — ${names.join(" · ")}`);
+  }
+
+  return out;
+}
+
+/**
+ * 대상 조건을 한 줄로도 쓸 수 있게 만든 것. 조건이 없으면 빈 문자열.
+ * 「조건이 없다」와 「조건을 적어 두지 않았다」를 구분하기 위해 단정하지 않는다.
+ */
+export function eligibilitySummary(p: Program): string {
+  return eligibilityLines(p).join(" · ");
+}
+
 /** 만 9세가 되는 날이 속한 달의 말일 — 강원 지침의 계산 방식 */
 export function age9EndOfMonth(birthDate: string): string | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
