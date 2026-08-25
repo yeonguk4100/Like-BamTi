@@ -427,6 +427,54 @@ a.skip:focus {
   max-width: var(--wrap);
   margin: 0 auto;
   padding: 48px 24px 44px;
+  /* 글과 삽화를 나란히.
+     grid 로 두 칸을 고정하면 삽화가 없을 때도 그 칸이 폭을 차지해 글이 좁아진다.
+     flex 로 두면 삽화가 사라진 만큼 글이 폭을 되찾는다. */
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.hero-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 삽화는 흰 배경이 섞여 있어 남색 위에 그대로 얹으면 흰 사각형으로 보인다.
+   옅은 패널을 깔아 의도한 자리처럼 만든다. */
+.hero-art {
+  flex: 0 0 380px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: #fff;
+}
+.hero-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--r);
+}
+
+/* 좁은 화면에서는 글이 먼저다. 삽화는 아래로 내리고 폭을 줄인다 */
+@media (max-width: 900px) {
+  .hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+  .hero-art {
+    flex: 0 0 auto;
+    max-width: 340px;
+  }
+}
+
+@media print {
+  .hero-art {
+    display: none !important;
+  }
 }
 
 .hero-kicker {

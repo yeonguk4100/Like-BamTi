@@ -46,6 +46,7 @@ import { LetterPanel } from "./components/LetterPanel";
 import { DetailPanel } from "./components/DetailPanel";
 import { StaffBrief } from "./components/StaffBrief";
 import { Reference } from "./components/Reference";
+import { HeroArt } from "./components/HeroArt";
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
 import { type Preset } from "./lib/demo";
 import { DemoPresets } from "./components/DemoPresets";
@@ -322,25 +323,32 @@ export default function Home() {
       <main id="main">
         <section className="hero" aria-label="서비스 소개">
           <div className="hero-inner rel">
-            <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
-            <h1>
-              아동 조건을 넣으면 확인할 제도와
-              <br />
-              마감일이 한 장으로 정리됩니다
-            </h1>
-            <p className="hero-lead">
-              거주지·장애영역·생년월일·학교급을 넣으면 교육청·복지부·의료로 갈라진 제도를 한 화면에
-              모아 준비 서류와 근거 법령까지 정리합니다. 학부모용 안내문을 작성합니다. 지원 대상은{" "}
-              <strong>
-                만 {SCOPE_AGE_MIN}세부터 만 {SCOPE_AGE_MAX}세까지
-              </strong>
-              입니다.
-            </p>
-            <div className="hero-cta">
-              <a href="#step1" className="btn btn-primary">
-                상담 시작하기
-              </a>
+            <div className="hero-text">
+              <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
+              <h1>
+                아동 조건을 넣으면 확인할 제도와
+                <br />
+                마감일이 한 장으로 정리됩니다
+              </h1>
+              <p className="hero-lead">
+                거주지·장애영역·생년월일·학교급을 넣으면 교육청·복지부·의료로 갈라진 제도를 한
+                화면에 모아 준비 서류와 근거 법령까지 정리합니다. 학부모용 안내문을 작성합니다.
+                지원 대상은{" "}
+                <strong>
+                  만 {SCOPE_AGE_MIN}세부터 만 {SCOPE_AGE_MAX}세까지
+                </strong>
+                입니다.
+              </p>
+              <div className="hero-cta">
+                <a href="#step1" className="btn btn-primary">
+                  상담 시작하기
+                </a>
+              </div>
             </div>
+
+            {/* 삽화. 담당자와 학부모가 같은 한 장을 함께 본다는 뜻이다.
+                파일이 없으면 자리째 사라진다 — HeroArt 주석 참고 */}
+            <HeroArt />
           </div>
         </section>
 
