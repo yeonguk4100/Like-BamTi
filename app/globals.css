@@ -657,20 +657,7 @@ a.skip:focus {
   margin-top: -6px;
 }
 
-/* ───────────────────── 인사 · 페이지 머리 ───────────────────── */
-
-.greeting {
-  max-width: var(--wrap);
-  margin: 0 auto;
-  padding: 38px 24px 0;
-}
-
-.greeting h2 {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--navy);
-}
+/* ───────────────────────── 페이지 머리 ───────────────────────── */
 
 .page-head {
   max-width: var(--wrap);
@@ -1994,7 +1981,6 @@ input::placeholder {
   .hero,
   .figures,
   .quick,
-  .greeting,
   .steps,
   .controls,
   .btn-row,

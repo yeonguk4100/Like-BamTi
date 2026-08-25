@@ -384,10 +384,6 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="greeting">
-          <h2>교육·복지·의료 지원정보를 한곳에서 확인합니다</h2>
-        </div>
-
 
         <div className="page-head">
           <div className="page-head-inner rel">
