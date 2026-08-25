@@ -496,6 +496,16 @@ a.skip:focus {
   margin-bottom: 14px;
 }
 
+/* 인사말 둘째 줄. 제목과 같은 h1 안이지만 문장이라 조금 작고 옅게 둔다 */
+.hero-quote {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 25px;
+  font-weight: 500;
+  color: #cddced;
+  letter-spacing: -0.02em;
+}
+
 .hero-lead {
   font-size: 16px;
   line-height: 1.85;
@@ -660,12 +670,6 @@ a.skip:focus {
   font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--navy);
-}
-
-.greeting p {
-  margin-top: 4px;
-  font-size: 15.5px;
-  color: var(--text-sub);
 }
 
 .page-head {

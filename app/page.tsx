@@ -329,9 +329,11 @@ export default function Home() {
             <div className="hero-text">
               <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
               <h1>
-                아동 조건에 맞는 지원제도와
+                담당자님, 안녕하세요.
                 <br />
-                신청 일정을 한눈에 확인합니다
+                <span className="hero-quote">
+                  “소관이 달라도, 한 화면에서 확인하실 수 있습니다”
+                </span>
               </h1>
               <p className="hero-lead">
                 거주지·장애영역·생년월일·학교급을 기준으로 교육·복지·의료 지원제도를 조회합니다.
@@ -390,6 +392,7 @@ export default function Home() {
         <div className="greeting">
           <h2>교육·복지·의료 지원정보를 한곳에서 확인합니다</h2>
         </div>
+
 
         <div className="page-head">
           <div className="page-head-inner rel">
