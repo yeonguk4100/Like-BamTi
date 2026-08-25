@@ -331,13 +331,8 @@ export default function Home() {
                 마감일이 한 장으로 정리됩니다
               </h1>
               <p className="hero-lead">
-                거주지·장애영역·생년월일·학교급을 넣으면 교육청·복지부·의료로 갈라진 제도를 한
-                화면에 모아 준비 서류와 근거 법령까지 정리합니다. 학부모용 안내문을 작성합니다.
-                지원 대상은{" "}
-                <strong>
-                  만 {SCOPE_AGE_MIN}세부터 만 {SCOPE_AGE_MAX}세까지
-                </strong>
-                입니다.
+                흩어진 특수교육·복지·의료 제도를 아이 조건에 맞게 정리하고, 담당자에게{" "}
+                <strong>신청 순서와 학부모 안내문까지 한 번에</strong> 제공하는 업무도구입니다.
               </p>
               <div className="hero-cta">
                 <a href="#step1" className="btn btn-primary">

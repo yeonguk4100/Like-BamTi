@@ -440,22 +440,18 @@ a.skip:focus {
   min-width: 0;
 }
 
-/* 삽화는 흰 배경이 섞여 있어 남색 위에 그대로 얹으면 흰 사각형으로 보인다.
-   옅은 패널을 깔아 의도한 자리처럼 만든다. */
+/* 삽화는 배경이 투명한 PNG 다. 받침을 깔지 않고 남색 띠에 그대로 얹는다 —
+   흰 패널을 깔면 그림 배경을 지운 뜻이 없어진다. */
 .hero-art {
   flex: 0 0 380px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 14px;
-  border-radius: var(--r-lg);
-  background: #fff;
 }
 .hero-art img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--r);
 }
 
 /* 좁은 화면에서는 글이 먼저다. 삽화는 아래로 내리고 폭을 줄인다 */
