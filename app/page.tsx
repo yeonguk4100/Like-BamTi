@@ -336,13 +336,8 @@ export default function Home() {
                 </span>
               </h1>
               <p className="hero-lead">
-                거주지·장애영역·생년월일·학교급을 기준으로 교육·복지·의료 지원제도를 조회합니다.
-                필요한 서류와 신청 순서, 근거 자료를 확인하고 학부모 안내문을 만들 수 있습니다.
-                지원 대상은{" "}
-                <strong>
-                  만 {SCOPE_AGE_MIN}세부터 만 {SCOPE_AGE_MAX}세까지
-                </strong>
-                입니다.
+                흩어진 특수교육·복지·의료 제도를 아이 조건에 맞게 정리하고, 담당자에게{" "}
+                <strong>신청 순서와 학부모 안내문까지 한 번에</strong> 제공하는 업무도구입니다.
               </p>
               <div className="hero-cta">
                 <a href="#step1" className="btn btn-primary">
