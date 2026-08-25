@@ -13,7 +13,13 @@
 //  - API 키는 헤더로만 보낸다. URL 에 넣으면 로그에 남는다.
 //  - 요청 내용을 로그로 남기지 않는다 (설계 원칙 2번).
 
-import { buildSheet, contactLines, TRACK_LABEL, type Sheet } from "@/app/lib/build-sheet";
+import {
+  buildSheet,
+  contactLines,
+  officialLinkLines,
+  TRACK_LABEL,
+  type Sheet,
+} from "@/app/lib/build-sheet";
 import { fail, parseConditions, readJson } from "@/app/lib/validate";
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -143,9 +149,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // 담당자 발신 정보는 제미나이에 보내지 않았다. 규칙이 만든 줄을 여기서 붙인다.
+    // 담당자 발신 정보와 공식 안내 주소는 제미나이에 보내지 않았다.
+    // 규칙이 만든 줄을 여기서 붙인다 — AI 가 주소를 고치거나 지어내지 못하게 한다.
+    const linkLines = officialLinkLines(sheet.programs);
     const withContact = [
       letter,
+      ...(linkLines.length > 0 ? ["", ...linkLines] : []),
       "",
       ...contactLines(sheet.region.officeName, parsed.value.sender),
     ].join("\n");

@@ -47,6 +47,22 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
                 <td className="td-sub">{p.ageNote}</td>
               </tr>
             )}
+            {p.officialUrl && (
+              <tr>
+                <th scope="row">공식 안내</th>
+                <td>
+                  <a
+                    className="official-link"
+                    href={p.officialUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {p.officialUrlLabel ?? p.officialUrl}
+                  </a>
+                  <span className="hint"> 학부모께 그대로 알려 주셔도 됩니다.</span>
+                </td>
+              </tr>
+            )}
             <tr>
               <th scope="row">근거</th>
               <td className="td-sub">{p.legalBasis}</td>

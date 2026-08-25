@@ -478,9 +478,35 @@ function buildParentLetter(args: {
   }
 
   lines.push("");
+  lines.push(...officialLinkLines(programs));
+
+  lines.push("");
   lines.push(...contactLines(region.officeName, sender));
 
   return lines.join("\n");
+}
+
+/**
+ * 안내문 맨 끝의 공식 안내 페이지 목록.
+ *
+ * contactLines 와 같은 이유로 별도 함수다 — 이 줄들은 규칙이 만들어 붙인다.
+ * 주소를 AI 에 넘기면 고치거나 지어낼 수 있어서, AI 가 다시 쓴 안내문에도
+ * 서버가 이 목록을 그대로 뒤에 붙인다.
+ *
+ * 링크가 붙는 것은 담당자 소관 밖(복지·의료) 제도뿐이다. 교육청 담당자가
+ * 설명할 수 없는 것들이고, 그래서 학부모가 직접 찾아가야 하는 것들이다.
+ */
+export function officialLinkLines(programs: { officialUrl?: string; officialUrlLabel?: string; name: string }[]): string[] {
+  const linked = programs.filter((p) => p.officialUrl);
+  if (linked.length === 0) return [];
+
+  const lines = ["■ 직접 확인하실 수 있는 공식 안내 페이지"];
+  for (const p of linked) {
+    lines.push(`· ${p.name}`);
+    lines.push(`  ${p.officialUrlLabel ?? ""} ${p.officialUrl}`.trim());
+  }
+  lines.push("  ※ 교육청 소관이 아닌 제도입니다. 위 주소에서 직접 확인하실 수 있습니다.");
+  return lines;
 }
 
 /**

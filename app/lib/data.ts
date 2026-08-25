@@ -337,6 +337,20 @@ export type Program = {
   documents: string[];
   deadline: string;
   legalBasis: string;
+  /**
+   * 학부모가 직접 열어 볼 수 있는 공식 안내 페이지.
+   *
+   * 담당자 소관 밖 제도에만 붙는다 — 교육청 담당자가 설명할 수 없는 것들이고,
+   * 수원교육지원청 지원센터 담당자가 「관할이 아니면 홈페이지나 전화번호를 찾아서
+   * 안내한다」고 한 바로 그 일이다. 그 찾는 일을 대신한다.
+   *
+   * URL 이 source 문자열에도 들어 있는 경우가 있는데 역할이 다르다 —
+   * source 는 우리가 무엇을 보고 확인했는지의 기록이고, 이 필드는 학부모에게 건네는 주소다.
+   * 확인하지 못한 제도(verified: false)에는 붙이지 않는다 (설계 원칙 3번).
+   */
+  officialUrl?: string;
+  /** 링크에 붙일 기관·페이지 이름 */
+  officialUrlLabel?: string;
 } & Sourced;
 
 export const PROGRAMS: Program[] = [
@@ -437,6 +451,8 @@ export const PROGRAMS: Program[] = [
     ],
     deadline: "상시 신청. 처리기간은 보건복지부 안내에 명시돼 있지 않아 읍면동에 확인해야 합니다",
     legalBasis: "장애인복지법 제32조",
+    officialUrl: "https://www.mohw.go.kr/menu.es?mid=a10710010900",
+    officialUrlLabel: "보건복지부 — 장애인등록·장애정도 심사제도",
     verified: true,
     source:
       "보건복지부 「장애인등록/장애정도 심사제도」 https://www.mohw.go.kr/menu.es?mid=a10710010900 " +
@@ -465,6 +481,8 @@ export const PROGRAMS: Program[] = [
       "장애 등록이 없는 경우에는 만 9세가 되는 달까지만 지원됩니다.",
     deadline: "상시 신청. 제공기관이 부족한 지역은 대기 발생",
     legalBasis: "장애아동 복지지원법 제21조",
+    officialUrl: "https://www.socialservice.or.kr:444/user/htmlEditor/view2.do?p_sn=11",
+    officialUrlLabel: "사회서비스 전자바우처 — 발달재활서비스",
     verified: true,
     source:
       "사회서비스 전자바우처(한국사회보장정보원) 「발달재활서비스」 사업 안내 " +
@@ -489,6 +507,8 @@ export const PROGRAMS: Program[] = [
     documents: ["사회보장급여 신청서", "장애인증명서"],
     deadline: "상시 신청",
     legalBasis: "발달장애인 권리보장 및 지원에 관한 법률 제29조의2 (주간활동·방과 후 활동 지원)",
+    officialUrl: "https://www.mohw.go.kr/menu.es?mid=a10710041200",
+    officialUrlLabel: "보건복지부 — 발달장애인 방과후활동서비스",
     verified: true,
     source:
       "보건복지부 「청소년 발달장애인 방과후활동서비스」 " +
@@ -512,6 +532,9 @@ export const PROGRAMS: Program[] = [
     documents: ["사회보장급여 신청서", "소득·재산 증빙", "통장 사본"],
     deadline: "상시 신청. 지급일은 매월 20일 (토요일·공휴일이면 그 전날)",
     legalBasis: "장애인복지법 제50조·제51조, 시행령 제32조, 시행규칙 제38조",
+    officialUrl:
+      "https://www.easylaw.go.kr/CSP/CnpClsMain.laf?popMenu=ov&csmSeq=916&ccfNo=2&cciNo=1&cnpClsNo=2",
+    officialUrlLabel: "찾기쉬운 생활법령 — 장애아동수당",
     verified: true,
     source:
       "법제처 찾기쉬운 생활법령정보 「장애수당 및 장애아동수당」 " +
