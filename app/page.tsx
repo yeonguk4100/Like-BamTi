@@ -47,8 +47,8 @@ import { DetailPanel } from "./components/DetailPanel";
 import { StaffBrief } from "./components/StaffBrief";
 import { Reference } from "./components/Reference";
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
-import { DEMO_TERMS, PRESETS, type Preset } from "./lib/demo";
-import { DemoKey } from "./components/DemoKey";
+import { type Preset } from "./lib/demo";
+import { DemoPresets } from "./components/DemoPresets";
 
 export default function Home() {
   const [regionId, setRegionId] = useState<RegionId>("gangwon");
@@ -82,7 +82,6 @@ export default function Home() {
 
   /* ⚠ 데모용 — 발표 후 삭제 */
   const [presetId, setPresetId] = useState("a");
-  const [showKeys, setShowKeys] = useState(true);
 
   function applyPreset(p: Preset) {
     setPresetId(p.id);
@@ -245,17 +244,17 @@ export default function Home() {
   }
 
   return (
-    <div className={showKeys ? "" : "keys-off"}>
+    <div>
       <a className="skip" href="#main">
         본문 바로가기
       </a>
 
+      {/* ⚠ 데모용 — 발표 후 이 줄과 import 를 지운다 */}
+      <DemoPresets presetId={presetId} onPick={applyPreset} />
+
       <div className="util-bar">
         <div className="util-inner">
           <span className="util-flag">학습용 시연 화면입니다. 실제 행정 서비스가 아닙니다.</span>
-          <button type="button" onClick={() => setShowKeys((v) => !v)}>
-            발표 키워드 {showKeys ? "끄기" : "켜기"}
-          </button>
           <a href={REPO_DOCS} target="_blank" rel="noreferrer">
             기획서
           </a>
@@ -269,7 +268,7 @@ export default function Home() {
         <div className="gnb-inner">
           <a href="#main" className="logo">
             <span className="logo-mark">특수교육</span>
-            <span className="logo-name">너도나도 길잡이</span>
+            <span className="logo-name">복지그루</span>
           </a>
           <nav className="gnb-menu" aria-label="주 메뉴">
             <a href="#step1" className="gnb-link">
@@ -323,13 +322,6 @@ export default function Home() {
       <main id="main">
         <section className="hero" aria-label="서비스 소개">
           <div className="hero-inner rel">
-            <DemoKey top={0} right={0}>
-              {`소관이 네 갈래
-교육 · 복지 · 의료 · 고용
-
-전 과정이 신청주의
-알려주는 주체가 없다`}
-            </DemoKey>
             <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
             <h1>
               아동 조건을 넣으면 확인할 제도와
@@ -429,32 +421,6 @@ export default function Home() {
           <table className="form-table">
             <caption className="skip">아동 조건 입력</caption>
             <tbody>
-              {/* ⚠ 데모용 행 — 발표 후 삭제 */}
-              <tr>
-                <th scope="row">데모 사례</th>
-                <td className="rel">
-                  <div className="preset-row">
-                    {PRESETS.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        className={`preset ${presetId === p.id ? "preset-on" : ""}`}
-                        onClick={() => applyPreset(p)}
-                      >
-                        <strong>{p.label}</strong>
-                        <span>{p.note}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <span className="hint">
-                    전부 가상 사례입니다. 실제 아동 정보가 아닙니다.
-                    <span className="demo-key-inline">
-                      시연 순서 ① 기본 → ② 경고 → ③ 만9세 → ④ 지역차 → ⑤ 고교
-                    </span>
-                  </span>
-                </td>
-              </tr>
-
               <tr>
                 <th scope="row">
                   신청 상황<span className="req">*</span>
@@ -569,18 +535,6 @@ export default function Home() {
                     </span>
                   </div>
 
-                  {/* ⚠ 데모용 참고 용어 — 발표 후 삭제 */}
-                  <div className="demo-terms">
-                    <p className="demo-terms-head">
-                      참고 용어 · {sheet.disability.name} — 아래 표현을 위 칸에 적을 수 있습니다
-                    </p>
-                    {DEMO_TERMS[disabilityId].map((g) => (
-                      <p key={g.group} className="demo-terms-row">
-                        <strong>{g.group}</strong>
-                        {g.items}
-                      </p>
-                    ))}
-                  </div>
                 </td>
               </tr>
 
@@ -618,7 +572,6 @@ export default function Home() {
                   />
                   <span className="hint">
                     재선정 마감일 계산에만 사용하며 저장하지 않습니다. (발달지체는 만 9세 생일 기준)
-                    <span className="demo-key-inline">← 개인정보 아님 · 저장 안 함</span>
                   </span>
                   {outOfScope && (
                     <span className="hint" style={{ color: "var(--amber)" }}>
@@ -721,12 +674,6 @@ export default function Home() {
             </div>
 
             <div className="tint-card rel">
-              <DemoKey top={14} right={14}>
-                {`소관 밖 N건 ← 이 숫자가 값
-지금은 담당자가 손으로 찾는 몫
-
-첫 사용에서 바로 세지는 0차 지표`}
-              </DemoKey>
               <p className="tint-title">이번 상담에서 확인할 항목</p>
               <p className="tint-line">
                 {sheet.region.name} · {sheet.disabilityLabel} · {sheet.level.name} ·{" "}
@@ -791,12 +738,6 @@ export default function Home() {
 
             {age9Date ? (
               <div className="tint-card rel">
-                <DemoKey top={14} right={14}>
-                  {`이미 받던 지원이 끊긴다
-만 9세 생일 = 종료 기준
-
-생년월일에서 계산되는 실제 날짜`}
-                </DemoKey>
                 <p className="tint-title">발달지체 지원 종료 예정일</p>
                 <p className="tint-status">{age9Date}</p>
                 <p className="tint-note">
@@ -829,20 +770,6 @@ export default function Home() {
             )}
 
             <div className="result-stack rel">
-              <DemoKey top={0} left={-260}>
-                {`한꺼번에 보기 = 부처를 넘는 증거
-소관별 보기 = 어디로 보낼지
-
-판정하지 않는다
-확인 목록만 준다`}
-              </DemoKey>
-              <DemoKey top={0} right={-260}>
-                {`한 번 입력 → 두 장
-담당자용 · 학부모용
-
-그대로 출력해서 건넨다
-= 안내 기록이 남는다`}
-              </DemoKey>
 
               <LetterPanel
                 letter={shownLetter}

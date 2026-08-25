@@ -1,7 +1,7 @@
 :root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}
 
 /* ============================================================
-   너도나도 길잡이 — 공공기관 업무 화면
+   복지그루 — 공공기관 업무 화면
 
    한국장학재단·교육청 계열 화면의 뼈대를 그대로 둔다.
      · 상단 유틸바 → 흰 GNB → 남색 안내 띠 → 지표 → 퀵메뉴 →
@@ -12,8 +12,8 @@
        않았고, 원래 있던 상자의 곡률만 바꿨다.
      · 경계선을 옅게, 안쪽 여백과 줄간격을 넉넉하게. 학부모가 옆에서
        같이 보는 화면이라 빽빽하면 안 된다.
-     · 색은 남색·파랑·회색 세 계열. 경고에 붉은색, 보호자 몫에 호박색,
-       "지금 바로 가능"에 초록 하나. 그 밖의 색은 쓰지 않는다.
+     · 색은 남색·파랑·회색 세 계열. 경고에 붉은색, 보호자 몫에 호박색.
+       그 밖의 색은 쓰지 않는다 — 초록은 발표용 주석에만 쓰다가 걷어냈다.
      · 그라디언트·그림자·떠오르는 호버는 그대로 쓰지 않는다.
    ============================================================ */
 
@@ -39,9 +39,6 @@
   --amber: #8a5a06;
   --amber-tint: #fdf6e8;
   --amber-line: #e3d1a8;
-  --go: #1f6b52;
-  --go-tint: #eef7f3;
-  --go-line: #bcdccf;
 
   --r-sm: 6px;
   --r: 8px;
@@ -2181,10 +2178,64 @@ input::placeholder {
    ⚠ 데모용 — 발표 후 삭제
    ══════════════════════════════════════════════════════════ */
 
+/* 화면 옆에 띄우는 시연용 단축. 실제 업무 화면에는 없는 칸이라 표 안에 두지 않는다.
+   레일이 열려 있으면 본문 폭을 그만큼 줄여 오른쪽에 자리를 낸다 — 겹쳐서 가리지 않는다.
+   fixed 요소는 body 의 padding 에 영향받지 않으므로 레일은 그 자리에 그대로 남는다. */
+body:has(.preset-rail:not(.preset-rail-shut)) {
+  padding-right: 268px;
+}
+.preset-rail {
+  position: fixed;
+  top: 88px;
+  right: 12px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: 244px;
+  max-height: calc(100vh - 108px);
+}
+
+.preset-rail-toggle {
+  flex: none;
+  padding: 7px 13px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  background: var(--canvas);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.preset-rail-body {
+  overflow-y: auto;
+  padding: 13px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.preset-rail-note {
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.preset-rail-shut {
+  width: auto;
+}
+
 .preset-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.preset-rail .preset-row {
+  flex-direction: column;
+  flex-wrap: nowrap;
 }
 
 .preset {
@@ -2219,69 +2270,19 @@ input::placeholder {
   color: var(--primary-dark);
 }
 
-.demo-key {
-  position: absolute;
-  z-index: 5;
-  max-width: 240px;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.6;
-  color: #1f6b52;
-  white-space: pre-line;
-  pointer-events: none;
-}
-
-.demo-key-inline {
-  margin-left: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1f6b52;
-}
-
-.demo-terms {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px dashed #1f6b52;
-  color: #1f6b52;
-}
-
-.demo-terms-head {
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.demo-terms-row {
-  margin-bottom: 8px;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.demo-terms-row strong {
-  display: block;
-  font-weight: 700;
-}
-
-@media (max-width: 1320px) {
-  .demo-key {
-    display: none;
+@media@media (max-width: 1320px) {
+  .preset-rail {
+    top: auto;
+    bottom: 12px;
+    max-height: calc(100vh - 140px);
   }
 }
 
 @media print {
-  .demo-key,
-  .demo-key-inline,
-  .demo-terms,
+  .preset-rail,
   .ai-bar,
   .lookup-result,
   .click-pill-row {
     display: none !important;
   }
-}
-
-/* 발표 키워드 끄기 — util-bar 버튼으로 토글한다 */
-.keys-off .demo-key,
-.keys-off .demo-key-inline,
-.keys-off .demo-terms {
-  display: none !important;
 }
