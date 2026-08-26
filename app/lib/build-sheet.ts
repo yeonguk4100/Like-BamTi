@@ -228,10 +228,17 @@ export function buildSheet(input: Input) {
   /* ── 2. 마감일 — 상황별 기한이 먼저 온다 ── */
   const deadlines: Deadline[] = procedure.deadlines.map((d) => ({ ...d }));
 
-  if (input.levelId === "elementary") {
+  /* 취학 마감일은 아직 배치되지 않은 아동에게만 해당한다.
+     전학·재배치와 재취학은 이미 학교에 다니는 상황이라 붙이지 않는다.
+     신규 선정은 취학 예정일 수도, 재학 중 처음 선정받는 것일 수도 있어
+     판정하지 않고 「취학 예정이라면」이라는 조건을 문장에 남긴다. */
+  const alreadyPlaced = input.procedureId === "reassign" || input.procedureId === "reenroll";
+  if (input.levelId === "elementary" && !alreadyPlaced) {
     deadlines.unshift({
       label: "취학 전 진단·평가 의뢰",
-      when: "취학 전년도에 신청해야 3월 1일 배치에 맞습니다 (시기는 교육지원청 공고 확인)",
+      when:
+        "취학 예정이라면 취학 전년도에 신청해야 3월 1일 배치에 맞습니다 " +
+        "(시기는 교육지원청 공고 확인). 이미 재학 중이면 해당하지 않습니다",
       urgent: true,
     });
   }

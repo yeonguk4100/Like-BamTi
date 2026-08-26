@@ -588,6 +588,10 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
+                  <span className="hint">
+                    아동이 속한(또는 배치받을) 학교급입니다. <strong>신규 선정인지 상급학교 진학인지는
+                    위의 「신청 상황」이 가릅니다.</strong>
+                  </span>
                 </td>
               </tr>
 
