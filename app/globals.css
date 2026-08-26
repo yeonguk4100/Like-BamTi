@@ -2388,3 +2388,13 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   color: var(--text-sub);
   white-space: nowrap;
 }
+
+/* 조건을 다 고르기 전의 「결과 확인하기」 */
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn:disabled:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}

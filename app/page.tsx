@@ -51,8 +51,26 @@ export default function Home() {
   const [disabilityId, setDisabilityId] = useState<DisabilityId>("autism");
   const [levelId, setLevelId] = useState<LevelId>("elementary");
   const [procedureId, setProcedureId] = useState<ProcedureId>("new");
+
+  /**
+   * 처음에는 아무것도 고르지 않은 화면을 보여준다.
+   *
+   * 조건 기본값은 그대로 두되(규칙 계층이 늘 유효한 값을 받아야 한다) 담당자가
+   * 직접 고르기 전까지는 고른 것처럼 보이지 않게 한다. 입력하지 않았는데 결과와
+   * 안내문이 이미 나와 있으면 「조건을 넣으면 나옵니다」가 성립하지 않는다.
+   */
+  const [picked, setPicked] = useState({
+    procedure: false,
+    region: false,
+    disability: false,
+    level: false,
+  });
+  const allPicked = picked.procedure && picked.region && picked.disability && picked.level;
+  /** 「결과 확인하기」를 누른 뒤에만 2·3단계를 보여준다 */
+  const [showResult, setShowResult] = useState(false);
   const [birthDate, setBirthDate] = useState("2019-03-14");
-  const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>(["localChildCenter"]);
+  /* 고른 적 없는 항목이 체크돼 있으면 안 된다. 선택 항목이므로 빈 배열로 시작한다 */
+  const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>([]);
   const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
   const [detailNote, setDetailNote] = useState("");
 
@@ -89,6 +107,9 @@ export default function Home() {
     setCurrentServices(p.currentServices);
     setOtherDisabilityLabel("");
     setDetailNote("");
+    /* 데모 사례는 조건을 한 번에 채우므로 고른 것으로 본다 */
+    setPicked({ procedure: true, region: true, disability: true, level: true });
+    setShowResult(true);
   }
 
   const sheet = useMemo(
@@ -430,9 +451,12 @@ export default function Home() {
                       <button
                         key={x.id}
                         type="button"
-                        className={`chip ${x.id === procedureId ? "chip-on" : ""}`}
+                        className={`chip ${picked.procedure && x.id === procedureId ? "chip-on" : ""}`}
                         aria-pressed={x.id === procedureId}
-                        onClick={() => setProcedureId(x.id)}
+                        onClick={() => {
+                          setProcedureId(x.id);
+                          setPicked((v) => ({ ...v, procedure: true }));
+                        }}
                       >
                         {x.name}
                       </button>
@@ -452,9 +476,12 @@ export default function Home() {
                       <button
                         key={r.id}
                         type="button"
-                        className={`chip ${r.id === regionId ? "chip-on" : ""}`}
+                        className={`chip ${picked.region && r.id === regionId ? "chip-on" : ""}`}
                         aria-pressed={r.id === regionId}
-                        onClick={() => setRegionId(r.id)}
+                        onClick={() => {
+                          setRegionId(r.id);
+                          setPicked((v) => ({ ...v, region: true }));
+                        }}
                         disabled={!r.implemented}
                         title={
                           r.implemented
@@ -486,9 +513,12 @@ export default function Home() {
                       <button
                         key={d.id}
                         type="button"
-                        className={`chip ${d.id === disabilityId ? "chip-on" : ""}`}
+                        className={`chip ${picked.disability && d.id === disabilityId ? "chip-on" : ""}`}
                         aria-pressed={d.id === disabilityId}
-                        onClick={() => setDisabilityId(d.id)}
+                        onClick={() => {
+                          setDisabilityId(d.id);
+                          setPicked((v) => ({ ...v, disability: true }));
+                        }}
                       >
                         {d.name}
                       </button>
@@ -547,9 +577,12 @@ export default function Home() {
                       <button
                         key={l.id}
                         type="button"
-                        className={`chip ${l.id === levelId ? "chip-on" : ""}`}
+                        className={`chip ${picked.level && l.id === levelId ? "chip-on" : ""}`}
                         aria-pressed={l.id === levelId}
-                        onClick={() => setLevelId(l.id)}
+                        onClick={() => {
+                          setLevelId(l.id);
+                          setPicked((v) => ({ ...v, level: true }));
+                        }}
                       >
                         {l.name}
                       </button>
@@ -640,13 +673,31 @@ export default function Home() {
           </table>
 
           <div className="btn-row">
-            <a href="#step2" className="btn btn-primary" onClick={() => setActiveStep(2)}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!allPicked}
+              onClick={() => {
+                setShowResult(true);
+                setActiveStep(2);
+                /* 상태가 그려진 뒤에 옮겨 간다 */
+                requestAnimationFrame(() =>
+                  document.getElementById("step2")?.scrollIntoView({ behavior: "smooth" })
+                );
+              }}
+            >
               결과 확인하기
-            </a>
+            </button>
+            {!allPicked && (
+              <span className="hint">
+                신청 상황 · 거주 지역 · 장애영역 · 학교급을 고르면 결과를 확인할 수 있습니다.
+              </span>
+            )}
           </div>
         </section>
 
-        {/* ═══ 2단계 ═══ */}
+        {/* ═══ 2단계 — 「결과 확인하기」를 누르기 전에는 나오지 않는다 ═══ */}
+        {showResult && (
         <section className="section section-gray" id="step2">
           <div className="wrap">
             <div className="section-head">
@@ -806,6 +857,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        )}
 
         <NoticeBoard />
 
