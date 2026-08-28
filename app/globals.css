@@ -352,6 +352,17 @@ a.skip:focus {
   padding: 0 24px;
   display: flex;
   overflow-x: auto;
+  /* overflow-x 만 auto 로 두면 CSS 규칙상 overflow-y 의 visible 이 auto 로 바뀐다.
+     탭 밑줄 때문에 세로가 1px 넘쳐서 높이 54px 칸에 세로 스크롤바가 통째로 떴다
+     (화살표 두 개와 짧은 손잡이만 보여 ▲⋮▼ 처럼 나왔다). 세로는 막는다. */
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabnav-inner::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .tab {
