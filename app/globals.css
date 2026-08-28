@@ -2458,6 +2458,17 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   color: var(--text);
 }
 
+/* 링크 아래 한 줄 — 기관 이름, 또는 학부모에게 알려 줄 주소 원문.
+   주소는 길어서 반드시 끊어 준다. 안 그러면 표가 옆으로 밀린다 */
+.readaloud-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+  word-break: break-all;
+}
+
 /* 확인하지 못한 것은 읽어 주기 전에 담당자가 알아야 한다 */
 .readaloud-caution {
   margin: 4px -8px 0;

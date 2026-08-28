@@ -148,7 +148,15 @@ function spoken(text: string): string {
   return text.replace(/\*\*/g, "");
 }
 
-export type ReadAloudLine = { q: string; a: string; caution?: boolean };
+export type ReadAloudLine = {
+  q: string;
+  a: string;
+  /** 누를 수 있는 주소. tel: 이면 전화, http 면 새 창 */
+  href?: string;
+  /** 링크 아래에 함께 보여줄 줄 — 기관 이름이나 주소 원문 */
+  sub?: string;
+  caution?: boolean;
+};
 
 export function readAloudBlock(p: ResolvedProgram): {
   name: string;
@@ -172,14 +180,24 @@ export function readAloudBlock(p: ResolvedProgram): {
 
   lines.push({ q: "언제까지인가요", a: p.deadline });
 
+  /* 전화번호와 주소는 학부모에게 그대로 넘겨 주는 값이다. 담당자가 옮겨 적다가
+     틀리지 않게, 그리고 상담 중에 바로 걸거나 열 수 있게 누를 수 있는 값으로 넘긴다. */
   if (p.contactTel) {
     lines.push({
       q: "어디로 문의하나요",
-      a: p.contactTelLabel ? `${p.contactTel} (${p.contactTelLabel})` : p.contactTel,
+      a: p.contactTel,
+      href: `tel:${p.contactTel}`,
+      sub: p.contactTelLabel,
     });
   }
   if (p.officialUrl) {
-    lines.push({ q: "직접 열어 볼 곳", a: p.officialUrlLabel ?? p.officialUrl });
+    lines.push({
+      q: "직접 열어 볼 곳",
+      a: p.officialUrlLabel ?? p.officialUrl,
+      href: p.officialUrl,
+      /* 라벨만 보여주면 학부모에게 알려 줄 주소가 화면에 없다. 주소도 함께 낸다 */
+      sub: p.officialUrlLabel ? p.officialUrl : undefined,
+    });
   }
 
   /* 확인하지 못한 항목은 읽어 주기 전에 담당자가 알아야 한다. 설계 원칙 3번 */
@@ -200,7 +218,7 @@ export function readAloudText(programs: ResolvedProgram[]): string {
   programs.forEach((p, i) => {
     const b = readAloudBlock(p);
     out.push(`${i + 1}. ${b.name} (${TRACK_LABEL[b.track]})`);
-    b.lines.forEach((l) => out.push(`   - ${l.q} : ${l.a}`));
+    b.lines.forEach((l) => out.push(`   - ${l.q} : ${l.a}${l.sub ? ` — ${l.sub}` : ""}`));
     out.push("");
   });
   out.push("자격은 신청처에서 최종 확인합니다. 위 내용은 확인해야 할 항목입니다.");

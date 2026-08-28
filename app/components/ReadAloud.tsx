@@ -58,7 +58,28 @@ export function ReadAloud({ programs }: { programs: ResolvedProgram[] }) {
                 {b.lines.map((l, i) => (
                   <div key={i} className={l.caution ? "readaloud-row readaloud-caution" : "readaloud-row"}>
                     <dt>{l.q}</dt>
-                    <dd>{l.a}</dd>
+                    <dd>
+                      {l.href ? (
+                        l.href.startsWith("tel:") ? (
+                          <a className="official-link" href={l.href}>
+                            {l.a}
+                          </a>
+                        ) : (
+                          <a
+                            className="official-link"
+                            href={l.href}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {l.a}
+                          </a>
+                        )
+                      ) : (
+                        l.a
+                      )}
+                      {/* 기관 이름과 주소 원문. 담당자가 학부모에게 그대로 읽어 줄 값이다 */}
+                      {l.sub && <span className="readaloud-sub">{l.sub}</span>}
+                    </dd>
                   </div>
                 ))}
               </dl>
