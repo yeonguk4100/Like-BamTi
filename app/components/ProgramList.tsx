@@ -3,8 +3,7 @@
 // 나이 조건으로 빠진 제도와 「자체사업 0건」을 숨기지 않고 보여준다.
 // 무엇이 목록에 없는지 담당자가 알아야 하기 때문이다.
 //
-// children 은 제도 목록 아래에 덧붙일 것이 있으면 넣는 자리다.
-// 「AI 빈칸 찾기」(LookupPanel)가 여기 들어갔다가 지금은 내려가 비어 있다.
+// children 은 「AI 빈칸 찾기」 패널이 들어가는 자리다 (LookupPanel).
 
 import type { ReactNode } from "react";
 import type { Track } from "../lib/data";
@@ -29,7 +28,7 @@ export function ProgramList({
   trackFilter: TrackFilter;
   onViewMode: (v: ViewMode) => void;
   onTrackFilter: (v: TrackFilter) => void;
-  children?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="block">

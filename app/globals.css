@@ -352,17 +352,6 @@ a.skip:focus {
   padding: 0 24px;
   display: flex;
   overflow-x: auto;
-  /* overflow-x 만 auto 로 두면 CSS 규칙상 overflow-y 의 visible 이 auto 로 바뀐다.
-     탭 밑줄 때문에 세로가 1px 넘쳐서 높이 54px 칸에 세로 스크롤바가 통째로 떴다
-     (화살표 두 개와 짧은 손잡이만 보여 ▲⋮▼ 처럼 나왔다). 세로는 막는다. */
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.tabnav-inner::-webkit-scrollbar {
-  width: 0;
-  height: 0;
 }
 
 .tab {
@@ -2296,18 +2285,10 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
 
 .preset-rail-body {
   overflow-y: auto;
-  padding: 12px;
+  padding: 13px;
   border: 1px dashed var(--line-strong);
   border-radius: var(--r-lg);
   background: var(--surface);
-  /* 스크롤바 화살표가 레일 위에 드러나 시연 화면에 잡혔다.
-     스크롤은 살리고 스크롤바만 감춘다 */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.preset-rail-body::-webkit-scrollbar {
-  width: 0;
-  height: 0;
 }
 
 .preset-rail-note {
@@ -2330,17 +2311,16 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
 .preset-rail .preset-row {
   flex-direction: column;
   flex-wrap: nowrap;
-  gap: 6px;
 }
 
 .preset {
   text-align: left;
-  padding: 8px 13px;
-  min-height: 40px;
+  padding: 10px 15px;
+  min-height: 44px;
   border: 1px solid var(--line-strong);
   border-radius: var(--r);
   background: #fff;
-  font-size: 13.5px;
+  font-size: 14px;
 }
 
 .preset strong {
