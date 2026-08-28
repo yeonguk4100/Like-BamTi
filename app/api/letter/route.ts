@@ -154,7 +154,7 @@ export async function POST(request: Request) {
 
     // 담당자 발신 정보와 공식 안내 주소는 제미나이에 보내지 않았다.
     // 규칙이 만든 줄을 여기서 붙인다 — AI 가 주소를 고치거나 지어내지 못하게 한다.
-    const linkLines = officialLinkLines(sheet.programs);
+    const linkLines = officialLinkLines(sheet.programs, sheet.region.eduContact);
     const withContact = [
       letter,
       ...(linkLines.length > 0 ? ["", ...linkLines] : []),

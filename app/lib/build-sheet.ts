@@ -652,7 +652,7 @@ function buildParentLetter(args: {
   }
 
   lines.push("");
-  lines.push(...officialLinkLines(programs));
+  lines.push(...officialLinkLines(programs, region.eduContact));
 
   lines.push("");
   lines.push(...contactLines(region.officeName, sender));
@@ -676,23 +676,52 @@ export function officialLinkLines(
     officialUrlLabel?: string;
     contactTel?: string;
     contactTelLabel?: string;
+    track?: Track;
     name: string;
-  }[]
+  }[],
+  /**
+   * 교육청 제도의 문의처 (Region.eduContact).
+   *
+   * 교육청 제도는 5건이 **같은 번호**를 쓴다. 제도마다 되풀이하면 안내문이
+   * 번호로 뒤덮이므로 한 묶음으로 먼저 낸다.
+   *
+   * 담당자 소관 안이라 「소관이 아닙니다」 주석이 붙지 않는다 — 그 주석은
+   * 복지·의료 묶음에만 붙는다.
+   */
+  office?: OfficeContact
 ): string[] {
   const linked = programs.filter((p) => p.officialUrl || p.contactTel);
-  if (linked.length === 0) return [];
+  const hasEdu = programs.some((p) => p.track === "education");
+  const eduBlock = office && hasEdu ? office : undefined;
+  if (linked.length === 0 && !eduBlock) return [];
 
   const lines = ["■ 직접 확인하실 수 있는 곳"];
+
+  if (eduBlock) {
+    lines.push("· 교육청 지원제도 (선정·배치 · 치료지원 등)");
+    lines.push(`  전화 ${eduBlock.tel} ${eduBlock.telLabel}`.trimEnd());
+    lines.push(`  ${eduBlock.listLabel} ${eduBlock.listUrl}`);
+    /* 시도교육청 번호다. 신청은 관할 교육지원청에서 하므로 그렇게 적는다 */
+    lines.push("  ※ 실제 신청과 문의는 관할 교육지원청에서 하십니다.");
+  }
+
   for (const p of linked) {
     lines.push(`· ${p.name}`);
     if (p.contactTel) {
       lines.push(`  전화 ${p.contactTel} ${p.contactTelLabel ?? ""}`.trimEnd());
     }
     if (p.officialUrl) {
-      lines.push(`  ${p.officialUrlLabel ?? ""} ${p.officialUrl}`.trim());
+      /* trim() 을 쓰면 앞 두 칸까지 지워져 「전화」 줄과 어긋난다. 라벨이 없을 때만 줄인다 */
+      lines.push(
+        p.officialUrlLabel
+          ? `  ${p.officialUrlLabel} ${p.officialUrl}`
+          : `  ${p.officialUrl}`
+      );
     }
   }
-  lines.push("  ※ 교육청 소관이 아닌 제도입니다. 위로 직접 확인하실 수 있습니다.");
+  if (linked.length > 0) {
+    lines.push("  ※ 교육청 소관이 아닌 제도입니다. 위로 직접 확인하실 수 있습니다.");
+  }
   return lines;
 }
 
