@@ -814,7 +814,11 @@ export default function Home() {
                   </span>
                 </div>
                 <div className="panel-body">
-                  <ReadAloud programs={sheet.programs} withTrackFilter />
+                  <ReadAloud
+                    programs={sheet.programs}
+                    office={sheet.region.eduContact}
+                    withTrackFilter
+                  />
                 </div>
               </section>
             )}

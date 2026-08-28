@@ -148,6 +148,13 @@ function spoken(text: string): string {
   return text.replace(/\*\*/g, "");
 }
 
+export type OfficeContact = {
+  tel: string;
+  telLabel: string;
+  listUrl: string;
+  listLabel: string;
+};
+
 export type ReadAloudLine = {
   q: string;
   a: string;
@@ -158,7 +165,11 @@ export type ReadAloudLine = {
   caution?: boolean;
 };
 
-export function readAloudBlock(p: ResolvedProgram): {
+export function readAloudBlock(
+  p: ResolvedProgram,
+  /** 교육청 제도의 문의처 — 제도에 번호가 없을 때만 쓴다 (Region.eduContact) */
+  office?: OfficeContact
+): {
   name: string;
   track: Track;
   verified: boolean;
@@ -181,22 +192,31 @@ export function readAloudBlock(p: ResolvedProgram): {
   lines.push({ q: "언제까지인가요", a: p.deadline });
 
   /* 전화번호와 주소는 학부모에게 그대로 넘겨 주는 값이다. 담당자가 옮겨 적다가
-     틀리지 않게, 그리고 상담 중에 바로 걸거나 열 수 있게 누를 수 있는 값으로 넘긴다. */
-  if (p.contactTel) {
+     틀리지 않게, 그리고 상담 중에 바로 걸거나 열 수 있게 누를 수 있는 값으로 넘긴다.
+
+     복지·의료 제도는 전국 공통이라 제도에 번호가 붙어 있지만(129 · 1355),
+     교육청 제도는 시도마다 달라서 제도에 없다. 그때 소관 교육청 번호로 채운다. */
+  const fallback = p.track === "education" ? office : undefined;
+  const tel = p.contactTel ?? fallback?.tel;
+  const telLabel = p.contactTel ? p.contactTelLabel : fallback?.telLabel;
+  const url = p.officialUrl ?? fallback?.listUrl;
+  const urlLabel = p.officialUrl ? p.officialUrlLabel : fallback?.listLabel;
+
+  if (tel) {
     lines.push({
       q: "어디로 문의하나요",
-      a: p.contactTel,
-      href: `tel:${p.contactTel}`,
-      sub: p.contactTelLabel,
+      a: tel,
+      href: `tel:${tel}`,
+      sub: telLabel,
     });
   }
-  if (p.officialUrl) {
+  if (url) {
     lines.push({
       q: "직접 열어 볼 곳",
-      a: p.officialUrlLabel ?? p.officialUrl,
-      href: p.officialUrl,
+      a: urlLabel ?? url,
+      href: url,
       /* 라벨만 보여주면 학부모에게 알려 줄 주소가 화면에 없다. 주소도 함께 낸다 */
-      sub: p.officialUrlLabel ? p.officialUrl : undefined,
+      sub: urlLabel ? url : undefined,
     });
   }
 
@@ -213,10 +233,10 @@ export function readAloudBlock(p: ResolvedProgram): {
 }
 
 /** 읽어 줄 내용 전체를 붙여쓰기용 글자로 바꾼다. 화면과 같은 함수를 쓴다 */
-export function readAloudText(programs: ResolvedProgram[]): string {
+export function readAloudText(programs: ResolvedProgram[], office?: OfficeContact): string {
   const out: string[] = [`전화로 확인해 드릴 제도 ${programs.length}건입니다.`, ""];
   programs.forEach((p, i) => {
-    const b = readAloudBlock(p);
+    const b = readAloudBlock(p, office);
     out.push(`${i + 1}. ${b.name} (${TRACK_LABEL[b.track]})`);
     b.lines.forEach((l) => out.push(`   - ${l.q} : ${l.a}${l.sub ? ` — ${l.sub}` : ""}`));
     out.push("");

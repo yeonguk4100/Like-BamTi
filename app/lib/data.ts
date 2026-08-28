@@ -49,6 +49,27 @@ export type Region = {
    * 이름이 다르다」는 근거이고, 절차가 동일하다는 것이 확장 가능성의 증거다.
    */
   implemented: boolean;
+  /**
+   * 교육청 제도의 문의처.
+   *
+   * 제도마다 다른 값이 아니라 **소관 교육청의 것**이다. 복지·의료 제도는 전국 공통이라
+   * 제도에 번호가 붙지만(129 · 1355), 교육청 제도는 시도마다 달라서 지역에 붙는다.
+   *
+   * 번호는 시도교육청 특수교육 부서다. 실제 신청처는 관할 교육지원청이라
+   * 목록 주소(listUrl)를 함께 둔다 — 시도교육청 번호만 주면 학부모가 한 번 더 돌린다.
+   *
+   * **구현한 지역만 채운다.** 확인하지 않은 번호를 학부모에게 읽어 주면 안 된다.
+   */
+  eduContact?: {
+    tel: string;
+    telLabel: string;
+    /** 관할 교육지원청 연락처 목록 */
+    listUrl: string;
+    listLabel: string;
+    verified: boolean;
+    source: string;
+    asOf: string;
+  };
 };
 
 export const REGIONS: Region[] = [
@@ -64,6 +85,15 @@ export const REGIONS: Region[] = [
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 업무 길잡이",
     implemented: true,
+    eduContact: {
+      tel: "033-258-5390",
+      telLabel: "강원특별자치도교육청 문화체육특수교육과 특수교육팀",
+      listUrl: "https://www.gwe.go.kr/main/content.do?key=bTIzMDcyMTEyMDY0NTg%3D",
+      listLabel: "강원 교육지원청 17곳 연락처 — 관할 교육지원청 찾기",
+      verified: true,
+      source: "강원특별자치도교육청 조직도 — 문화체육특수교육과 특수교육팀 대표전화",
+      asOf: "2026.08 확인",
+    },
   },
   {
     id: "gyeongnam",
@@ -78,6 +108,17 @@ export const REGIONS: Region[] = [
     guideName: "2025 특수교육대상자 선정·배치 업무 처리 지침",
     // 132쪽 지침 원문에서 서식 번호 11개를 확인했다. 강원보다 오히려 많다
     implemented: true,
+    eduContact: {
+      tel: "055-268-1140",
+      telLabel: "경상남도교육청 유아특수교육과",
+      listUrl: "https://www.gne.go.kr/www/office/eduguide.jsp",
+      listLabel: "경남 교육지원청 18곳 연락처 — 관할 교육지원청 찾기",
+      verified: true,
+      /* 같은 쪽에 장학사 개인 직통번호가 함께 있지만 넣지 않는다 —
+         담당자가 자주 바뀌고(수원 Q7), 개인 번호를 학부모에게 읽어 줄 것이 아니다 */
+      source: "경상남도교육청 유아특수교육과 업무분장 — 과 대표전화",
+      asOf: "2026.08 확인",
+    },
   },
   {
     id: "chungnam",

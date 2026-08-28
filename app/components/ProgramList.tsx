@@ -94,7 +94,7 @@ export function ProgramList({
       )}
 
       {viewMode === "readaloud" ? (
-        <ReadAloud programs={visible} />
+        <ReadAloud programs={visible} office={sheet.region.eduContact} />
       ) : viewMode === "all"
         ? visible.map((p) => <ProgramItem key={p.id} program={p} />)
         : TRACK_ORDER.filter((t) => trackFilter === "all" || t === trackFilter).map(

@@ -16,12 +16,15 @@ import {
   readAloudBlock,
   readAloudText,
   TRACK_LABEL,
+  type OfficeContact,
   type ResolvedProgram,
 } from "../lib/build-sheet";
 import { TRACK_DESC, TRACK_ORDER, type TrackFilter } from "../lib/screen";
 
 export function ReadAloud({
   programs,
+  /** 교육청 제도의 문의처. 제도에 번호가 없는 교육청 제도에만 채워진다 */
+  office,
   /**
    * 소관 필터를 이 화면이 직접 들고 있을지.
    *
@@ -32,6 +35,7 @@ export function ReadAloud({
   withTrackFilter = false,
 }: {
   programs: ResolvedProgram[];
+  office?: OfficeContact;
   withTrackFilter?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
@@ -46,7 +50,7 @@ export function ReadAloud({
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(readAloudText(shown));
+      await navigator.clipboard.writeText(readAloudText(shown, office));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -60,7 +64,7 @@ export function ReadAloud({
 
   /** 제도 한 건 — 문답 묶음 */
   function item(p: ResolvedProgram) {
-    const b = readAloudBlock(p);
+    const b = readAloudBlock(p, office);
     return (
       <li key={p.id} className="readaloud-item">
         <p className="readaloud-name">
