@@ -93,13 +93,13 @@ export function DetailPanel({
             onViewMode={onViewMode}
             onTrackFilter={onTrackFilter}
           >
-            <LookupPanel
-              regionId={lookup.regionId}
-              cache={lookup.cache}
-              busy={lookup.busy}
-              error={lookup.error}
-              onLookup={lookup.onLookup}
-            />
+            {/*
+              「AI 빈칸 찾기」(LookupPanel)를 화면에서 내렸다.
+              검색 붙은 호출의 제미나이 할당량이 따로 있어 소진되면 502 가 나는데,
+              그 버튼이 화면에 있으면 눌러 보는 사람에게 오류만 보인다.
+              라우트(app/api/lookup)와 컴포넌트는 그대로 두었으므로
+              할당량을 확보하면 이 자리에 다시 넣기만 하면 된다.
+            */}
           </ProgramList>
         </Ask>
 
