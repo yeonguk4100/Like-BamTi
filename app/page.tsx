@@ -42,6 +42,7 @@ import { DetailPanel } from "./components/DetailPanel";
 import { StaffBrief } from "./components/StaffBrief";
 import { Reference } from "./components/Reference";
 import { HeroArt } from "./components/HeroArt";
+import { ReadAloud } from "./components/ReadAloud";
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
 import { type Preset } from "./lib/demo";
 import { DemoPresets } from "./components/DemoPresets";
@@ -83,24 +84,9 @@ export default function Home() {
   const [activeStep, setActiveStep] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("grouped");
 
-  /* 「제도 자세히 보기」 버튼이 접힌 칸을 열어야 해서 여닫힘을 화면이 들고 있는다.
-     열고 나서도 담당자가 손으로 닫을 수 있게 details 의 onToggle 로 되돌려 받는다. */
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [programsOpen, setProgramsOpen] = useState(false);
-
-  /** 숫자 카드에서 제도 목록으로 데려간다 — 전화 상담 중에 읽어 줄 화면으로 연다 */
-  function openPrograms() {
-    setViewMode("readaloud");
-    setTrackFilter("all");
-    setDetailOpen(true);
-    setProgramsOpen(true);
-    /* 두 칸이 열린 뒤에 자리를 잡아야 엉뚱한 높이로 내려간다 */
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() =>
-        document.getElementById("programs")?.scrollIntoView({ behavior: "smooth", block: "start" })
-      )
-    );
-  }
+  /* 숫자 카드의 「제도 자세히 보기」. 버튼 바로 밑에서 열고 닫는다 —
+     아래쪽 「자세히 보기」로 스크롤해 데려가면 화면이 튀어 어디로 갔는지 알 수 없다. */
+  const [readAloudOpen, setReadAloudOpen] = useState(false);
   const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
 
   /* AI 안내문 — 조건별로 캐시한다 */
@@ -793,8 +779,16 @@ export default function Home() {
               </div>
 
               <div className="click-pill-row">
-                <button type="button" className="btn btn-outline" onClick={openPrograms}>
-                  제도 자세히 보기 — {sheet.programs.length}건 읽어 주기
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  aria-expanded={readAloudOpen}
+                  aria-controls="readaloud-panel"
+                  onClick={() => setReadAloudOpen((v) => !v)}
+                >
+                  {readAloudOpen
+                    ? "제도 자세히 보기 닫기"
+                    : `제도 자세히 보기 — ${sheet.programs.length}건`}
                 </button>
               </div>
 
@@ -808,6 +802,22 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            {/* 버튼 바로 밑. 전화 상담 중에 담당자가 화면을 보며 그대로 읽는 자리다.
+                소관 필터를 거치지 않은 제도 전부를 넘긴다 — 버튼에 적힌 건수와 맞아야 한다. */}
+            {readAloudOpen && (
+              <section className="panel" id="readaloud-panel">
+                <div className="panel-head">
+                  <h3 className="h-sm">제도 자세히 보기</h3>
+                  <span className="b-sm subtle right">
+                    전화 상담 중에 그대로 읽어 주시면 됩니다
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <ReadAloud programs={sheet.programs} />
+                </div>
+              </section>
+            )}
 
             {age9Date ? (
               <div className="tint-card rel">
@@ -869,10 +879,6 @@ export default function Home() {
                 trackFilter={trackFilter}
                 onViewMode={setViewMode}
                 onTrackFilter={setTrackFilter}
-                open={detailOpen}
-                onOpenChange={setDetailOpen}
-                programsOpen={programsOpen}
-                onProgramsOpenChange={setProgramsOpen}
                 lookup={{
                   regionId,
                   cache: lookupCache,

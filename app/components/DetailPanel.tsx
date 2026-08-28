@@ -18,33 +18,9 @@ import { LookupPanel } from "./LookupPanel";
 import { ProgramList } from "./ProgramList";
 import { TestTable } from "./TestTable";
 
-/**
- * 자세히 보기 안의 문답 한 칸.
- *
- * open 을 넘기면 밖에서 열 수 있다 — 「제도 자세히 보기」 버튼이 이 칸을 열어야 해서다.
- * 열고 나서도 담당자가 손으로 닫을 수 있어야 하므로 onToggle 로 상태를 되돌려 준다.
- * open 을 넘기지 않으면 예전처럼 스스로 여닫는다.
- */
-function Ask({
-  q,
-  id,
-  open,
-  onToggle,
-  children,
-}: {
-  q: string;
-  id?: string;
-  open?: boolean;
-  onToggle?: (v: boolean) => void;
-  children: ReactNode;
-}) {
+function Ask({ q, children }: { q: string; children: ReactNode }) {
   return (
-    <details
-      className="faq"
-      id={id}
-      {...(open === undefined ? {} : { open })}
-      onToggle={(e) => onToggle?.((e.currentTarget as HTMLDetailsElement).open)}
-    >
+    <details className="faq">
       <summary>{q}</summary>
       <div className="faq-a">{children}</div>
     </details>
@@ -60,10 +36,6 @@ export function DetailPanel({
   onViewMode,
   onTrackFilter,
   lookup,
-  open,
-  onOpenChange,
-  programsOpen,
-  onProgramsOpenChange,
 }: {
   sheet: Sheet;
   visible: ResolvedProgram[];
@@ -79,19 +51,9 @@ export function DetailPanel({
     error: string;
     onLookup: (target: string) => void;
   };
-  /** 「제도 자세히 보기」 버튼이 밖에서 여는 상태 */
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  programsOpen: boolean;
-  onProgramsOpenChange: (v: boolean) => void;
 }) {
   return (
-    <details
-      className="detail-fold"
-      id="detail-fold"
-      open={open}
-      onToggle={(e) => onOpenChange((e.currentTarget as HTMLDetailsElement).open)}
-    >
+    <details className="detail-fold">
       <summary>
         <span className="detail-fold-title">자세히 보기</span>
         <span className="detail-fold-hint">
@@ -121,12 +83,7 @@ export function DetailPanel({
           />
         </Ask>
 
-        <Ask
-          q="신청 가능한 지원제도"
-          id="programs"
-          open={programsOpen}
-          onToggle={onProgramsOpenChange}
-        >
+        <Ask q="신청 가능한 지원제도">
           <ProgramList
             sheet={sheet}
             visible={visible}
