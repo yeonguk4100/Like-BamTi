@@ -2261,7 +2261,7 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
 }
 .preset-rail {
   position: fixed;
-  top: 88px;
+  top: 118px;
   right: 12px;
   z-index: 40;
   display: flex;
@@ -2269,7 +2269,9 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   align-items: flex-end;
   gap: 8px;
   width: 244px;
-  max-height: calc(100vh - 108px);
+  /* 위 sticky 헤더가 util-bar 36px + gnb 71px = 107px 를 차지하고 z-index 가 50 이라
+     레일(40)보다 위에 온다. top 을 그 아래로 내려야 첫 화면에서 열기 버튼이 묻히지 않는다. */
+  max-height: calc(100vh - 138px);
 }
 
 .preset-rail-toggle {
