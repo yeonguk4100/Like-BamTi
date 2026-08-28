@@ -137,6 +137,17 @@ export function eligibilityLines(p: Program): string[] {
  * 옮기기만 한다. 판정하는 문장은 넣지 않는다 (설계 원칙 1번).
  * 표현 규칙에 따라 「받을 수 있습니다」를 쓰지 않고 「신청할 수 있습니다」로 쓴다.
  */
+/**
+ * 소리 내 읽을 글자로 다듬는다.
+ *
+ * data.ts 의 summary 에는 강조하려고 넣은 마크다운 `**` 이 글자 그대로 들어 있다.
+ * 표에서는 눈으로 넘길 수 있지만 읽어 주는 화면에서는 「별표별표」가 되어 버린다.
+ * 뜻을 바꾸지 않고 기호만 걷어낸다.
+ */
+function spoken(text: string): string {
+  return text.replace(/\*\*/g, "");
+}
+
 export type ReadAloudLine = { q: string; a: string; caution?: boolean };
 
 export function readAloudBlock(p: ResolvedProgram): {
@@ -145,7 +156,7 @@ export function readAloudBlock(p: ResolvedProgram): {
   verified: boolean;
   lines: ReadAloudLine[];
 } {
-  const lines: ReadAloudLine[] = [{ q: "어떤 제도인가요", a: p.summary }];
+  const lines: ReadAloudLine[] = [{ q: "어떤 제도인가요", a: spoken(p.summary) }];
 
   lines.push({ q: "어디에 신청하나요", a: p.resolvedApplyTo });
 
