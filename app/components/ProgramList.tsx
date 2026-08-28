@@ -10,6 +10,7 @@ import type { Track } from "../lib/data";
 import { TRACK_LABEL, type ResolvedProgram, type Sheet } from "../lib/build-sheet";
 import { TRACK_DESC, TRACK_ORDER, type TrackFilter, type ViewMode } from "../lib/screen";
 import { ProgramItem } from "./ProgramItem";
+import { ReadAloud } from "./ReadAloud";
 
 export function ProgramList({
   sheet,
@@ -55,6 +56,15 @@ export function ProgramList({
           >
             한꺼번에 보기
           </button>
+          {/* 전화 상담 중에 화면을 보며 그대로 읽는 보기. 안내문을 건넨 뒤에 오는 화면이다 */}
+          <button
+            type="button"
+            className={`seg-btn ${viewMode === "readaloud" ? "seg-on" : ""}`}
+            aria-pressed={viewMode === "readaloud"}
+            onClick={() => onViewMode("readaloud")}
+          >
+            전화로 읽어 주기
+          </button>
         </div>
         <button
           type="button"
@@ -83,7 +93,9 @@ export function ProgramList({
         </p>
       )}
 
-      {viewMode === "all"
+      {viewMode === "readaloud" ? (
+        <ReadAloud programs={visible} />
+      ) : viewMode === "all"
         ? visible.map((p) => <ProgramItem key={p.id} program={p} />)
         : TRACK_ORDER.filter((t) => trackFilter === "all" || t === trackFilter).map(
             (t) => {
@@ -108,7 +120,8 @@ export function ProgramList({
             }
           )}
 
-      {visible.length === 0 && (
+      {/* 「전화로 읽어 주기」는 스스로 빈 목록을 알린다 — 두 번 띄우지 않는다 */}
+      {visible.length === 0 && viewMode !== "readaloud" && (
         <p className="hint">이 조건에 해당하는 제도가 없습니다.</p>
       )}
 

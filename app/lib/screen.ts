@@ -12,7 +12,8 @@ export const REPO_DOCS = `${REPO}/tree/main/docs`;
 export const SCOPE_AGE_MIN = 5;
 export const SCOPE_AGE_MAX = 8;
 
-export type ViewMode = "all" | "grouped";
+/** 제도 목록 보기 방식. readaloud 는 전화 상담 중에 그대로 읽어 주는 화면이다 */
+export type ViewMode = "all" | "grouped" | "readaloud";
 export type TrackFilter = Track | "all";
 
 export const TRACK_ORDER: Track[] = ["education", "welfare", "medical"];

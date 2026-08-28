@@ -2364,6 +2364,124 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   }
 }
 
+/* ─────────────── 전화로 읽어 주기 ───────────────
+   전화 상담 중에 담당자가 화면을 보며 그대로 읽는 화면.
+   눈으로 훑어 옮겨 말하지 않게 하는 것이 목적이라 글씨를 본문보다 키우고
+   문답 한 줄이 한눈에 끊기게 둔다. 색은 :root 토큰만 쓴다. */
+
+.readaloud-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.readaloud-lead {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-sub);
+}
+
+.readaloud-lead strong {
+  color: var(--primary-dark);
+}
+
+.readaloud-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: readaloud;
+}
+
+.readaloud-item {
+  counter-increment: readaloud;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--canvas);
+}
+
+.readaloud-item + .readaloud-item {
+  margin-top: 10px;
+}
+
+.readaloud-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.readaloud-name::before {
+  content: counter(readaloud);
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.readaloud-qa {
+  margin: 0;
+}
+
+.readaloud-row {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.readaloud-row dt {
+  flex: none;
+  width: 122px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.readaloud-row dd {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.72;
+  color: var(--text);
+}
+
+/* 확인하지 못한 것은 읽어 주기 전에 담당자가 알아야 한다 */
+.readaloud-caution {
+  margin: 4px -8px 0;
+  padding: 8px;
+  border-top: 0;
+  border-radius: var(--r-sm);
+  background: var(--amber-tint);
+}
+
+.readaloud-caution dt,
+.readaloud-caution dd {
+  color: var(--amber);
+}
+
+@media (max-width: 720px) {
+  .readaloud-row {
+    display: block;
+  }
+  .readaloud-row dt {
+    width: auto;
+    margin-bottom: 2px;
+  }
+}
+
 /* 학부모가 직접 열어 볼 공식 안내 페이지. 확인한 제도에만 붙는다 */
 .official-link {
   color: var(--primary);

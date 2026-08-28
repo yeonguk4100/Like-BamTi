@@ -126,6 +126,76 @@ export function eligibilityLines(p: Program): string[] {
   return out;
 }
 
+/**
+ * 전화 상담 중에 그대로 읽어 줄 문장 한 벌.
+ *
+ * 담당자가 안내문을 건넨 뒤에도 학부모는 전화로 다시 묻는다 — 수원 지원센터 담당자가
+ * 「같은 것을 여러 번 설명한다」고 한 부분이다. 그때 지침 책자나 표를 눈으로 훑으며
+ * 옮겨 말하지 않도록, 말할 순서대로 미리 늘어놓는다.
+ *
+ * **여기서 새 사실을 만들지 않는다.** 규칙이 이미 고른 값(resolved*)을 말차례로
+ * 옮기기만 한다. 판정하는 문장은 넣지 않는다 (설계 원칙 1번).
+ * 표현 규칙에 따라 「받을 수 있습니다」를 쓰지 않고 「신청할 수 있습니다」로 쓴다.
+ */
+export type ReadAloudLine = { q: string; a: string; caution?: boolean };
+
+export function readAloudBlock(p: ResolvedProgram): {
+  name: string;
+  track: Track;
+  verified: boolean;
+  lines: ReadAloudLine[];
+} {
+  const lines: ReadAloudLine[] = [{ q: "어떤 제도인가요", a: p.summary }];
+
+  lines.push({ q: "어디에 신청하나요", a: p.resolvedApplyTo });
+
+  lines.push(
+    p.resolvedDocuments.length > 0
+      ? { q: "무엇을 준비하나요", a: p.resolvedDocuments.join(" · ") }
+      : {
+          q: "무엇을 준비하나요",
+          a: "준비 서류를 확인하지 못했습니다. 신청처에 확인이 필요합니다",
+          caution: true,
+        }
+  );
+
+  lines.push({ q: "언제까지인가요", a: p.deadline });
+
+  if (p.contactTel) {
+    lines.push({
+      q: "어디로 문의하나요",
+      a: p.contactTelLabel ? `${p.contactTel} (${p.contactTelLabel})` : p.contactTel,
+    });
+  }
+  if (p.officialUrl) {
+    lines.push({ q: "직접 열어 볼 곳", a: p.officialUrlLabel ?? p.officialUrl });
+  }
+
+  /* 확인하지 못한 항목은 읽어 주기 전에 담당자가 알아야 한다. 설계 원칙 3번 */
+  if (!p.verified) {
+    lines.push({
+      q: "확인 필요",
+      a: "아직 근거를 확인하지 못한 예시입니다. 이 항목은 신청처에 다시 확인해 주세요",
+      caution: true,
+    });
+  }
+
+  return { name: p.resolvedName, track: p.track, verified: p.verified, lines };
+}
+
+/** 읽어 줄 내용 전체를 붙여쓰기용 글자로 바꾼다. 화면과 같은 함수를 쓴다 */
+export function readAloudText(programs: ResolvedProgram[]): string {
+  const out: string[] = [`전화로 확인해 드릴 제도 ${programs.length}건입니다.`, ""];
+  programs.forEach((p, i) => {
+    const b = readAloudBlock(p);
+    out.push(`${i + 1}. ${b.name} (${TRACK_LABEL[b.track]})`);
+    b.lines.forEach((l) => out.push(`   - ${l.q} : ${l.a}`));
+    out.push("");
+  });
+  out.push("자격은 신청처에서 최종 확인합니다. 위 내용은 확인해야 할 항목입니다.");
+  return out.join("\n");
+}
+
 /** 만 9세가 되는 날이 속한 달의 말일 — 강원 지침의 계산 방식 */
 export function age9EndOfMonth(birthDate: string): string | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
