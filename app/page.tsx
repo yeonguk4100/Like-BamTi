@@ -82,6 +82,25 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("grouped");
+
+  /* 「제도 자세히 보기」 버튼이 접힌 칸을 열어야 해서 여닫힘을 화면이 들고 있는다.
+     열고 나서도 담당자가 손으로 닫을 수 있게 details 의 onToggle 로 되돌려 받는다. */
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [programsOpen, setProgramsOpen] = useState(false);
+
+  /** 숫자 카드에서 제도 목록으로 데려간다 — 전화 상담 중에 읽어 줄 화면으로 연다 */
+  function openPrograms() {
+    setViewMode("readaloud");
+    setTrackFilter("all");
+    setDetailOpen(true);
+    setProgramsOpen(true);
+    /* 두 칸이 열린 뒤에 자리를 잡아야 엉뚱한 높이로 내려간다 */
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        document.getElementById("programs")?.scrollIntoView({ behavior: "smooth", block: "start" })
+      )
+    );
+  }
   const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
 
   /* AI 안내문 — 조건별로 캐시한다 */
@@ -774,9 +793,9 @@ export default function Home() {
               </div>
 
               <div className="click-pill-row">
-                <a href="#reference" className="click-pill">
-                  이 숫자가 무슨 뜻인가요 →
-                </a>
+                <button type="button" className="btn btn-outline" onClick={openPrograms}>
+                  제도 자세히 보기 — {sheet.programs.length}건 읽어 주기
+                </button>
               </div>
 
               <div className="card-actions">
@@ -850,6 +869,10 @@ export default function Home() {
                 trackFilter={trackFilter}
                 onViewMode={setViewMode}
                 onTrackFilter={setTrackFilter}
+                open={detailOpen}
+                onOpenChange={setDetailOpen}
+                programsOpen={programsOpen}
+                onProgramsOpenChange={setProgramsOpen}
                 lookup={{
                   regionId,
                   cache: lookupCache,
