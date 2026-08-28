@@ -814,7 +814,7 @@ export default function Home() {
                   </span>
                 </div>
                 <div className="panel-body">
-                  <ReadAloud programs={sheet.programs} />
+                  <ReadAloud programs={sheet.programs} withTrackFilter />
                 </div>
               </section>
             )}

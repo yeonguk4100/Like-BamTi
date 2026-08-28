@@ -2458,6 +2458,15 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   color: var(--text);
 }
 
+/* 소관 묶음 — 전화로 「교육청 쪽 3건 먼저 말씀드리면」이 되게 머리를 붙인다 */
+.readaloud-group + .readaloud-group {
+  margin-top: 20px;
+}
+
+.readaloud-group .readaloud-list {
+  margin-top: 10px;
+}
+
 /* 링크 아래 한 줄 — 기관 이름, 또는 학부모에게 알려 줄 주소 원문.
    주소는 길어서 반드시 끊어 준다. 안 그러면 표가 옆으로 밀린다 */
 .readaloud-sub {
