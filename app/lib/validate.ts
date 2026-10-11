@@ -126,9 +126,13 @@ export function parseConditions(raw: unknown): Parsed<Input> {
     return { ok: false, error: `procedureId 가 올바르지 않습니다. (${PROCEDURE_IDS.join(" / ")})` };
   }
 
+  // 생년월일은 선택이다. 상담 중에 바로 모를 수 있고, 없으면 나이 조건과 만 9세 날짜만 빠진다.
   const birthDate = typeof body.birthDate === "string" ? body.birthDate : "";
-  if (!isRealDate(birthDate)) {
-    return { ok: false, error: "birthDate 는 실제로 있는 yyyy-mm-dd 날짜여야 합니다." };
+  if (birthDate !== "" && !isRealDate(birthDate)) {
+    return {
+      ok: false,
+      error: "birthDate 는 비워 두거나 실제로 있는 yyyy-mm-dd 날짜여야 합니다.",
+    };
   }
 
   const rawServices = body.currentServices;

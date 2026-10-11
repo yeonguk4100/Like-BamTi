@@ -36,7 +36,7 @@ curl -X POST http://localhost:3000/api/sheet \
 | `regionId` | ⭕ | `gangwon` `gyeongnam` `chungnam` `gyeonggi` `incheon` `seoul` |
 | `disabilityId` | ⭕ | `autism` `intellectual` `developmentalDelay` `other` |
 | `levelId` | ⭕ | `kinder` `elementary` `middle` `high` |
-| `birthDate` | ⭕ | `yyyy-mm-dd`. 마감일 계산에만 쓴다 |
+| `birthDate` | | `yyyy-mm-dd`. 마감일 계산에만 쓴다. 비우면 나이 조건을 걸지 않고, 발달지체 종료일은 「만 9세가 되는 달의 말일」로 나간다 |
 | `procedureId` | | `new` `advance` `reassign` `deferral` `reenroll` (기본 `new`) |
 | `currentServices` | | `localChildCenter` `togetherCare` `schoolCare` `rehabVoucher` |
 | `otherDisabilityLabel` | | 「기타」를 골랐을 때 적는 영역명 (80자까지) |

@@ -16,6 +16,7 @@ import {
   type Track,
 } from "./lib/data";
 import {
+  AGE9_WITHOUT_DATE,
   age9EndOfMonth,
   buildSheet,
   TRACK_LABEL,
@@ -72,7 +73,8 @@ export default function Home() {
   /** 「결과 확인하기」를 누른 뒤에만 2·3단계를 보여준다 */
   const [showResult, setShowResult] = useState(false);
   /* 칸에 보이는 글자. 치는 도중의 「2019-0」 같은 값도 담는다 */
-  const [birthText, setBirthText] = useState("2019-03-14");
+  /* 비워 둔다. 기본값을 넣어 두면 입력하지 않아도 가짜 날짜로 마감일이 계산돼 안내문에 나간다 */
+  const [birthText, setBirthText] = useState("");
   /* 규칙에 넘기는 값. 달력에 있는 날짜가 다 쳐졌을 때만 채워진다 */
   const birthDate = isRealDate(birthText) ? birthText : "";
   const birthInvalid = birthText.length === 10 && !birthDate;
@@ -857,6 +859,20 @@ export default function Home() {
                   <span className="divider" />
                   <a href="#step3" className="card-action">
                     안내문 확인
+                  </a>
+                </div>
+              </div>
+            ) : sheet.disability.reselection === "age9" ? (
+              <div className="tint-card rel">
+                <p className="tint-title">발달지체 지원 종료 예정일</p>
+                <p className="tint-status">생년월일 입력 필요</p>
+                <p className="tint-note">
+                  {AGE9_WITHOUT_DATE}까지 유지된 뒤 종료됩니다. 생년월일을 넣으면 날짜가 계산되어
+                  안내문에도 들어갑니다.
+                </p>
+                <div className="card-actions">
+                  <a href="#birth" className="card-action">
+                    생년월일 입력
                   </a>
                 </div>
               </div>

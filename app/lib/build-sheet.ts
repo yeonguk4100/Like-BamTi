@@ -256,6 +256,9 @@ export function formNoTag(formNo: string): string {
   return formNo === FORM_NO_UNKNOWN ? "" : ` [${formNo}]`;
 }
 
+/** 생년월일이 없을 때 날짜 자리에 들어가는 말. 「○○까지 유지 후 종료」에 그대로 이어 붙는다 */
+export const AGE9_WITHOUT_DATE = "만 9세가 되는 달의 말일";
+
 /** 만 9세가 되는 날이 속한 달의 말일 — 강원 지침의 계산 방식 */
 export function age9EndOfMonth(birthDate: string): string | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
@@ -387,7 +390,11 @@ export function buildSheet(input: Input) {
     });
   }
 
-  const age9 = disability.reselection === "age9" ? age9EndOfMonth(input.birthDate) : null;
+  /* 생년월일을 안 넣었어도 발달지체면 만 9세 종료는 짚는다. 날짜 대신 계산 방식을 쓴다 */
+  const age9 =
+    disability.reselection === "age9"
+      ? (age9EndOfMonth(input.birthDate) ?? AGE9_WITHOUT_DATE)
+      : null;
   if (age9) {
     deadlines.unshift({
       label: "발달지체 재선정 마감",
