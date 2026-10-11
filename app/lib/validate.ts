@@ -48,7 +48,7 @@ function clamp(raw: unknown, max: number): string | undefined {
 }
 
 /** yyyy-mm-dd 형식이면서 달력에 실제로 있는 날짜인지 */
-function isRealDate(value: string): boolean {
+export function isRealDate(value: string): boolean {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!m) return false;
   const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];

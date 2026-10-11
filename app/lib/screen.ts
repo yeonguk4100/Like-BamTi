@@ -12,6 +12,18 @@ export const REPO_DOCS = `${REPO}/tree/main/docs`;
 export const SCOPE_AGE_MIN = 5;
 export const SCOPE_AGE_MAX = 8;
 
+/**
+ * 생년월일 칸에 친 글자를 yyyy-mm-dd 모양으로 맞춘다.
+ * 숫자만 남겨 8자리로 자르고, 치는 도중에도 하이픈을 넣어 보여준다 (2019 → 2019, 201903 → 2019-03).
+ * 상담 중에는 달력을 넘기는 것보다 숫자 8개를 치는 편이 빠르다.
+ */
+export function formatBirthInput(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(0, 8);
+  if (d.length <= 4) return d;
+  if (d.length <= 6) return `${d.slice(0, 4)}-${d.slice(4)}`;
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`;
+}
+
 /** 제도 목록 보기 방식. readaloud 는 전화 상담 중에 그대로 읽어 주는 화면이다 */
 export type ViewMode = "all" | "grouped" | "readaloud";
 export type TrackFilter = Track | "all";

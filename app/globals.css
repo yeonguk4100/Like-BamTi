@@ -943,6 +943,12 @@ input[type="text"]:focus {
   outline: 1px solid var(--primary);
 }
 
+input[aria-invalid="true"],
+input[aria-invalid="true"]:focus {
+  border-color: var(--danger);
+  outline-color: var(--danger);
+}
+
 input::placeholder {
   color: #9aa5b1;
 }

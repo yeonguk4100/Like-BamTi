@@ -20,8 +20,10 @@ import {
   buildSheet,
   TRACK_LABEL,
 } from "./lib/build-sheet";
+import { isRealDate } from "./lib/validate";
 import {
   FIGURES,
+  formatBirthInput,
   QUICK,
   REPO,
   REPO_DOCS,
@@ -69,7 +71,11 @@ export default function Home() {
   const allPicked = picked.procedure && picked.region && picked.disability && picked.level;
   /** 「결과 확인하기」를 누른 뒤에만 2·3단계를 보여준다 */
   const [showResult, setShowResult] = useState(false);
-  const [birthDate, setBirthDate] = useState("2019-03-14");
+  /* 칸에 보이는 글자. 치는 도중의 「2019-0」 같은 값도 담는다 */
+  const [birthText, setBirthText] = useState("2019-03-14");
+  /* 규칙에 넘기는 값. 달력에 있는 날짜가 다 쳐졌을 때만 채워진다 */
+  const birthDate = isRealDate(birthText) ? birthText : "";
+  const birthInvalid = birthText.length === 10 && !birthDate;
   /* 고른 적 없는 항목이 체크돼 있으면 안 된다. 선택 항목이므로 빈 배열로 시작한다 */
   const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>([]);
   const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
@@ -108,7 +114,7 @@ export default function Home() {
     setDisabilityId(p.disabilityId);
     setLevelId(p.levelId);
     setProcedureId(p.procedureId ?? "new");
-    setBirthDate(p.birthDate);
+    setBirthText(p.birthDate);
     setCurrentServices(p.currentServices);
     setOtherDisabilityLabel("");
     setDetailNote("");
@@ -607,13 +613,25 @@ export default function Home() {
                 <td>
                   <input
                     id="birth"
-                    type="date"
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="예: 20190314"
+                    maxLength={10}
+                    value={birthText}
+                    aria-invalid={birthInvalid}
+                    aria-describedby="birth-hint"
+                    onChange={(e) => setBirthText(formatBirthInput(e.target.value))}
                   />
-                  <span className="hint">
-                    재선정 마감일 계산에만 사용하며 저장하지 않습니다. (발달지체는 만 9세 생일 기준)
+                  <span className="hint" id="birth-hint">
+                    숫자 8자리로 입력합니다. 재선정 마감일 계산에만 사용하며 저장하지 않습니다.
+                    (발달지체는 만 9세 생일 기준)
                   </span>
+                  {birthInvalid && (
+                    <span className="hint" style={{ color: "var(--danger)" }}>
+                      달력에 없는 날짜입니다. 월과 일을 다시 확인해 주세요.
+                    </span>
+                  )}
                   {outOfScope && (
                     <span className="hint" style={{ color: "var(--amber)" }}>
                       만 {sheet.age}세는 이 도구가 정리한 구간(만 {SCOPE_AGE_MIN}~{SCOPE_AGE_MAX}세)
