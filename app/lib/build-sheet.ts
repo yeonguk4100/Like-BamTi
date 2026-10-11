@@ -245,6 +245,17 @@ export function readAloudText(programs: ResolvedProgram[], office?: OfficeContac
   return out.join("\n");
 }
 
+/** 서식 번호를 확인하지 못한 서류. 담당자 표에는 이대로 보이고, 학부모 안내문에서는 뺀다 */
+export const FORM_NO_UNKNOWN = "서식 번호 미확인";
+
+/**
+ * 안내문에 붙일 서식 번호 꼬리표. 확인 못 한 번호는 붙이지 않는다 —
+ * 학부모가 받을 종이에 「미확인」이 찍혀 나가면 안내 전체를 믿지 못하게 된다.
+ */
+export function formNoTag(formNo: string): string {
+  return formNo === FORM_NO_UNKNOWN ? "" : ` [${formNo}]`;
+}
+
 /** 만 9세가 되는 날이 속한 달의 말일 — 강원 지침의 계산 방식 */
 export function age9EndOfMonth(birthDate: string): string | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
@@ -283,7 +294,7 @@ export function buildSheet(input: Input) {
     return {
       key,
       label: FORM_LABEL[key],
-      formNo: no ?? "서식 번호 미확인",
+      formNo: no ?? FORM_NO_UNKNOWN,
       /** 어디서 떼는가. 이 칸이 비어 있어서 미비 접수가 생겼다 */
       where: src.where,
       whereVerified: src.verified,
@@ -598,7 +609,7 @@ function buildParentLetter(args: {
   }
   lines.push(`■ ${documentsFirst.length > 0 ? "2단계 — " : ""}${level.submitTo}에서 작성할 서류`);
   for (const d of documentsAtOffice) {
-    lines.push(`· ${d.label} [${d.formNo}]`);
+    lines.push(`· ${d.label}${formNoTag(d.formNo)}`);
   }
   lines.push("");
   lines.push("■ 서류 작성 시 유의사항");

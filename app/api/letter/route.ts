@@ -16,6 +16,7 @@
 import {
   buildSheet,
   contactLines,
+  formNoTag,
   officialLinkLines,
   TRACK_LABEL,
   type Sheet,
@@ -70,7 +71,7 @@ function promptPayload(sheet: Sheet) {
     결정권자: sheet.level.decider,
     신청상황: sheet.procedure.name,
     상황설명: sheet.procedure.when,
-    제출서류: sheet.documents.map((d) => `${d.label} [${d.formNo}]`),
+    제출서류: sheet.documents.map((d) => `${d.label}${formNoTag(d.formNo)}`),
     상황주의사항: sheet.procedure.notes,
     마감일: sheet.deadlines.map((d) => ({
       항목: d.label,

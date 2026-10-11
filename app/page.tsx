@@ -789,7 +789,8 @@ export default function Home() {
                 <div className="subcard subcard-alert">
                   <span className="subcard-label">확인이 필요한 항목</span>
                   <p className="subcard-val">
-                    {sheet.warnings.length}
+                    {/* 아래 「안내 전 확인사항」과 같은 수를 센다. 접힌 일반 안내까지 세면 두 숫자가 어긋난다 */}
+                    {sheet.keyWarnings.length}
                     <span className="unit">건</span>
                   </p>
                   <span className="subcard-sub">아래 시트 맨 위에 표시</span>
