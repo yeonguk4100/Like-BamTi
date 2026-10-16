@@ -164,10 +164,13 @@ AI는 규칙이 못 하는 두 가지만 한다.
 
 ## ⚠ 아직 확정 안 된 것
 
-1. **지역 자체사업 0건** — `LOCAL_PROGRAMS`가 비어 있다. 강원(원주) 기준으로 조사해야 한다.
-   화면이 「조사할 곳」 목록을 띄우고 있다. **1순위 과제**
-2. **교육 트랙 3개가 아직 「예시」** — 치료지원 · 방과후 교육활동 · 통학 지원.
-   금액과 절차가 시도마다 달라 강원 지침 원문에서 확인해야 한다
+1. **지역 자체사업은 복지로 등록 목록으로 띄운다** (2026.10) — `LocalPrograms`가 지자체복지서비스 API에서
+   시도 단위로 받아 시·군·나이로 거른다. **규칙이 고른 것이 아니라 확인할 후보**라서 안내문·1면에 넣지 않는다.
+   `LOCAL_PROGRAMS`(규칙이 고르는 자체사업)는 여전히 비어 있다 — 후보 중 확인한 것을 옮겨 넣는 것이 다음 일
+2. **교육 트랙 3개는 강원·경남만 공식 데이터로 채웠다** (2026.10) — 치료지원 · 방과후 · 통학을 `Program.byRegion`에
+   지역별 금액 · 서류 · 신청 시기 · 카드 이름으로 넣었다. 근거는 행안부 「공공서비스(혜택) 정보」의 교육청 항목과
+   교육청 누리집. **공통 값은 여전히 「예시」**라서 새 지역을 열 때 `byRegion`을 먼저 채운다.
+   경남은 치료지원(「치료지원 전자카드」)과 특기적성(「특기적성교육비 전자카드」, 지침상 「특기적성비지원카드」) 카드가 따로다
 3. **구매 구조 미확인** — 위임전결 한도, 예산 항목, 조달 경로
 4. **인터뷰 인용 정보 일부 미기록** — 20곳 정도에 문의(2026년 8월 둘째 주)했고 심층 2건을 남겼다.
    ②는 **수원교육지원청 특수교육지원센터**로 확인됐고, **①의 기관명과 유형별 곳 수가 아직 없다**
@@ -264,7 +267,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
-| `app/components/` | 화면 조각 17개 |
+| `app/components/` | 화면 조각 18개 |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
 | `public/` | 정적 파일. 안내 띠 삽화(`hero-illustration.png`) — **투명 PNG 여야 한다** |
 
@@ -276,6 +279,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `Icon` · `NoticeBoard` · `Faq` · `SiteFooter` | 없음 (또는 모듈 상수만) |
 | `Reference` | `regionId` |
 | `ProgramItem` | `program` — 펼칠 때 `bokjiroId`가 있으면 `OfficialInfo`를 띄운다 |
+| `LocalPrograms` | `sido` · `sigungu` · `age` · `fallbackSources` — 지역 자체사업. 서버엔 시도명만 보내고 시·군·나이는 화면에서 거른다 |
 | `OfficialInfo` | `servId` · `active` — 복지로 원문(대상·지원내용·신청 경로·서식·근거법령). 펼친 카드만 부르고 서비스ID만 보낸다 |
 | `DeadlineTable` | `deadlines` · `urgentCount` |
 | `TestTable` | `disability` · `detailNote` |

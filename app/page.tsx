@@ -7,6 +7,7 @@ import {
   LEVELS,
   PROCEDURES,
   REGIONS,
+  SIGUNGU,
   UNREGISTERED_AREAS,
   type CurrentServiceId,
   type DisabilityId,
@@ -52,6 +53,8 @@ import { DemoPresets } from "./components/DemoPresets";
 
 export default function Home() {
   const [regionId, setRegionId] = useState<RegionId>("gangwon");
+  /* 거주 시·군 (선택). 지역 자체사업을 거르는 데만 쓰고 서버로 보내지 않는다 */
+  const [sigungu, setSigungu] = useState("");
   const [disabilityId, setDisabilityId] = useState<DisabilityId>("autism");
   const [levelId, setLevelId] = useState<LevelId>("elementary");
   const [procedureId, setProcedureId] = useState<ProcedureId>("new");
@@ -113,6 +116,7 @@ export default function Home() {
   function applyPreset(p: Preset) {
     setPresetId(p.id);
     setRegionId(p.regionId);
+    setSigungu("");
     setDisabilityId(p.disabilityId);
     setLevelId(p.levelId);
     setProcedureId(p.procedureId ?? "new");
@@ -343,8 +347,8 @@ export default function Home() {
           <span className="notice-tag">안내</span>
           <p>
             <strong>이름과 연락처는 수집하지 않습니다.</strong> 제도 및 일정 계산은 브라우저에서
-            처리하며, AI 안내문 생성 시 필요한 조건만 서버로 전달합니다. 전달된 정보는 저장하지
-            않습니다.
+            처리하며, AI 안내문 생성 시 필요한 조건만 서버로 전달합니다. 공식 정보와 지역 사업을
+            불러올 때는 서비스 번호와 시도 이름만 보냅니다. 전달된 정보는 저장하지 않습니다.
             <span className="notice-sub">
               ※ 화면에 표시되는 아동 정보는 모두 가상 사례입니다.
             </span>
@@ -492,6 +496,7 @@ export default function Home() {
                         className={`chip ${picked.region && r.id === regionId ? "chip-on" : ""}`}
                         aria-pressed={r.id === regionId}
                         onClick={() => {
+                          if (r.id !== regionId) setSigungu("");
                           setRegionId(r.id);
                           setPicked((v) => ({ ...v, region: true }));
                         }}
@@ -512,6 +517,30 @@ export default function Home() {
                     지역은 지침 원문을 기준으로 서식 번호와 명칭까지 확인했으며, 다른 지역은 검증 후
                     순차적으로 추가할 예정입니다. 지역별 대조 결과는{" "}
                     <a href="#reference">참고 자료</a>에서 확인할 수 있습니다.
+                  </span>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">
+                  <label htmlFor="sigungu">거주 시·군</label>
+                </th>
+                <td>
+                  <select
+                    id="sigungu"
+                    value={sigungu}
+                    onChange={(e) => setSigungu(e.target.value)}
+                    disabled={!picked.region}
+                  >
+                    <option value="">선택 안 함 (도 전체 사업만)</option>
+                    {(SIGUNGU[regionId] ?? []).map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="hint">
+                    지역 자체사업을 고르는 데만 씁니다. 시·군은 서버로 보내지 않고 화면 안에서 거릅니다.
                   </span>
                 </td>
               </tr>
@@ -918,6 +947,7 @@ export default function Home() {
                 trackFilter={trackFilter}
                 onViewMode={setViewMode}
                 onTrackFilter={setTrackFilter}
+                sigungu={sigungu}
                 lookup={{
                   regionId,
                   cache: lookupCache,

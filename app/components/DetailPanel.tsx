@@ -35,6 +35,7 @@ export function DetailPanel({
   trackFilter,
   onViewMode,
   onTrackFilter,
+  sigungu,
   lookup,
 }: {
   sheet: Sheet;
@@ -44,6 +45,7 @@ export function DetailPanel({
   trackFilter: TrackFilter;
   onViewMode: (v: ViewMode) => void;
   onTrackFilter: (v: TrackFilter) => void;
+  sigungu: string;
   lookup: {
     regionId: Parameters<typeof LookupPanel>[0]["regionId"];
     cache: Parameters<typeof LookupPanel>[0]["cache"];
@@ -92,6 +94,7 @@ export function DetailPanel({
             trackFilter={trackFilter}
             onViewMode={onViewMode}
             onTrackFilter={onTrackFilter}
+            sigungu={sigungu}
           >
             <LookupPanel
               regionId={lookup.regionId}

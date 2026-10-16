@@ -2593,3 +2593,57 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   font-size: 12.5px;
   color: var(--muted);
 }
+
+/* 지역 자체사업 — 복지로 등록 목록. 규칙이 고른 제도 카드와 구분되게 가볍게 둔다 */
+.local-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.local-item {
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.local-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.local-name {
+  font-weight: 600;
+  color: var(--text);
+}
+.local-summary {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-sub);
+}
+.local-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* 거주 시·군 — 텍스트 칸과 같은 모양 */
+.form-table select {
+  height: 42px;
+  min-width: 220px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  background: var(--canvas);
+  color: var(--text);
+}
+.form-table select:focus {
+  border-color: var(--primary);
+  outline: 1px solid var(--primary);
+}
+.form-table select:disabled {
+  opacity: 0.5;
+}

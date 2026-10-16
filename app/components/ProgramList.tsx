@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import type { Track } from "../lib/data";
 import { TRACK_LABEL, type ResolvedProgram, type Sheet } from "../lib/build-sheet";
 import { TRACK_DESC, TRACK_ORDER, type TrackFilter, type ViewMode } from "../lib/screen";
+import { LocalPrograms } from "./LocalPrograms";
 import { ProgramItem } from "./ProgramItem";
 import { ReadAloud } from "./ReadAloud";
 
@@ -20,6 +21,7 @@ export function ProgramList({
   trackFilter,
   onViewMode,
   onTrackFilter,
+  sigungu,
   children,
 }: {
   sheet: Sheet;
@@ -29,6 +31,8 @@ export function ProgramList({
   trackFilter: TrackFilter;
   onViewMode: (v: ViewMode) => void;
   onTrackFilter: (v: TrackFilter) => void;
+  /** 거주 시·군 (선택). 지역 자체사업을 거르는 데만 쓰고 서버로 보내지 않는다 */
+  sigungu: string;
   children: ReactNode;
 }) {
   return (
@@ -144,17 +148,13 @@ export function ProgramList({
         </details>
       )}
 
-      {!sheet.hasLocalPrograms && (
-        <div className="fold-static">
-          <p className="h-xs">{sheet.region.name} 자체사업 0건</p>
-          <p className="hint" style={{ marginTop: 4 }}>
-            위 목록은 전국 공통 제도입니다. 지자체·교육청 자체사업은 아직 등록되지
-            않았습니다.
-            {sheet.localSources.length > 0 && " 조사할 곳: "}
-            {sheet.localSources.join(" · ")}
-          </p>
-        </div>
-      )}
+      {/* 지역 자체사업 — 복지로 공식 등록 목록. 규칙이 고른 것이 아니라 확인할 후보다 */}
+      <LocalPrograms
+        sido={sheet.region.name}
+        sigungu={sigungu}
+        age={sheet.age}
+        fallbackSources={sheet.localSources}
+      />
 
       {children}
     </div>

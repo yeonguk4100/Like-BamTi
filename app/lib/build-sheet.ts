@@ -324,7 +324,16 @@ export function buildSheet(input: Input) {
   /** 나이 조건에 걸려 목록에서 빠진 제도. 숨기지 않고 개수와 이름을 보여준다 */
   const excludedByAge: { name: string; reason: string }[] = [];
 
-  const candidates = [...PROGRAMS, ...LOCAL_PROGRAMS].filter((p) => {
+  /* 지역 값을 먼저 덮는다 — 대상 조건(appliesTo)도 지역마다 달라서 거르기 전에 합쳐야 한다.
+     지역 값의 verified·source·asOf 가 그 지역에서의 확인 여부다 */
+  const regional = [...PROGRAMS, ...LOCAL_PROGRAMS].map((p) => {
+    const r = p.byRegion?.[input.regionId];
+    if (!r) return { program: p, cardName: undefined, cardNameOld: undefined };
+    const { cardName, cardNameOld, gov24Id: _gov24Id, ...rest } = r;
+    return { program: { ...p, ...rest }, cardName, cardNameOld };
+  });
+
+  const candidates = regional.filter(({ program: p }) => {
     const a = p.appliesTo;
     if (a?.levels && !a.levels.includes(input.levelId)) return false;
     if (a?.disabilities && !a.disabilities.includes(input.disabilityId)) return false;
@@ -343,7 +352,9 @@ export function buildSheet(input: Input) {
     return true;
   });
 
-  const programs: ResolvedProgram[] = candidates.map((p) => {
+  const programs: ResolvedProgram[] = candidates.map(({ program: p, cardName, cardNameOld }) => {
+    const card = cardName ?? region.cardName;
+    const cardLabel = cardNameOld ? `${card} (지침상 「${cardNameOld}」)` : card;
     const fill = (s: string) =>
       s
         .replace(/\{\{submitTo\}\}/g, level.submitTo)
@@ -352,7 +363,7 @@ export function buildSheet(input: Input) {
 
     return {
       ...p,
-      resolvedName: p.usesRegionCard ? `${p.name} — ${region.cardName}` : p.name,
+      resolvedName: p.usesRegionCard ? `${p.name} — ${cardLabel}` : p.name,
       resolvedApplyTo: fill(p.applyTo),
       resolvedDocuments: p.documents.map(fill),
     };
