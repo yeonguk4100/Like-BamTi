@@ -11,9 +11,14 @@
 //
 // 명세 · 코드표: 「활용가이드_중앙부처복지서비스(v2.2)」(한국사회보장정보원, 2025.4)
 
+import { revalidateTag } from "next/cache";
+import { dataGoKrKey } from "./data-go-kr";
+
 const BASE = "https://apis.data.go.kr/B554287/NationalWelfareInformationsV001";
 const TIMEOUT_MS = 10_000;
 const CACHE_SECONDS = 60 * 60 * 24;
+/** 오류가 나면 이 태그의 캐시를 비운다. 포털은 오류도 200 으로 줄 때가 있어 하루 동안 오류가 남을 수 있다 */
+const CACHE_TAG = "bokjiro";
 
 export const BOKJIRO_SOURCE = {
   name: "한국사회보장정보원 「중앙부처복지서비스」",
@@ -162,7 +167,7 @@ function links(xml: string, tag: string): BokjiroLink[] {
 /* ─── 호출 ─── */
 
 async function call(path: string, params: Record<string, string>): Promise<string> {
-  const key = process.env.DATA_GO_KR_KEY;
+  const key = dataGoKrKey();
   if (!key) throw new BokjiroError("DATA_GO_KR_KEY 가 설정되지 않았습니다.", 503);
 
   const url = new URL(`${BASE}/${path}`);
@@ -174,7 +179,7 @@ async function call(path: string, params: Record<string, string>): Promise<strin
   try {
     res = await fetch(url, {
       signal: AbortSignal.timeout(TIMEOUT_MS),
-      next: { revalidate: CACHE_SECONDS },
+      next: { revalidate: CACHE_SECONDS, tags: [CACHE_TAG] },
     });
   } catch {
     throw new BokjiroError("중앙부처복지서비스 API 에 연결하지 못했습니다.", 504);
@@ -184,6 +189,8 @@ async function call(path: string, params: Record<string, string>): Promise<strin
 
   // data.go.kr 게이트웨이 오류는 <cmmMsgHeader> 로, 서비스 오류는 <resultCode> 로 온다
   const code = field(xml, "returnReasonCode") || field(xml, "resultCode");
+  const failed = (code && code !== "0" && code !== "00") || !res.ok;
+  if (failed) revalidateTag(CACHE_TAG);
   if (code && code !== "0" && code !== "00") {
     throw new BokjiroError(
       RESULT_MESSAGES[code] ?? `중앙부처복지서비스 API 오류 (코드 ${code})`,

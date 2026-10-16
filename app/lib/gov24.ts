@@ -10,9 +10,14 @@
 // 필드 이름과 지원조건 코드는 swagger 문서 기준이다.
 // https://infuser.odcloud.kr/api/stages/44436/api-docs
 
+import { revalidateTag } from "next/cache";
+import { dataGoKrKey } from "./data-go-kr";
+
 const BASE = "https://api.odcloud.kr/api/gov24/v3";
 const TIMEOUT_MS = 10_000;
 const CACHE_SECONDS = 60 * 60 * 24;
+/** 오류가 나면 이 태그의 캐시를 비운다. 포털은 오류도 200 으로 줄 때가 있어 하루 동안 오류가 남을 수 있다 */
+const CACHE_TAG = "gov24";
 
 /** 응답에 함께 실어 출처를 밝힌다 */
 export const GOV24_SOURCE = {
@@ -108,7 +113,7 @@ function age(v: unknown): number | null {
 }
 
 async function call<T>(path: string, params: Record<string, string>): Promise<Page<T>> {
-  const key = process.env.DATA_GO_KR_KEY;
+  const key = dataGoKrKey();
   if (!key) throw new Gov24Error("DATA_GO_KR_KEY 가 설정되지 않았습니다.", 503);
 
   const url = new URL(`${BASE}${path}`);
@@ -120,13 +125,14 @@ async function call<T>(path: string, params: Record<string, string>): Promise<Pa
       // 헤더 방식은 Decoding 키를 그대로 쓴다. 쿼리에 넣으면 인코딩 문제가 생긴다
       headers: { Authorization: `Infuser ${key}`, Accept: "application/json" },
       signal: AbortSignal.timeout(TIMEOUT_MS),
-      next: { revalidate: CACHE_SECONDS },
+      next: { revalidate: CACHE_SECONDS, tags: [CACHE_TAG] },
     });
   } catch {
     throw new Gov24Error("공공서비스 정보 API 에 연결하지 못했습니다.", 504);
   }
 
   if (!res.ok) {
+    revalidateTag(CACHE_TAG);
     // 원문 응답에 키가 섞여 돌아올 수 있어 본문은 싣지 않는다
     const hint =
       res.status === 401 || res.status === 403
