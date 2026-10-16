@@ -2544,3 +2544,50 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   background: var(--primary);
   border-color: var(--primary);
 }
+
+/* 제도 카드 안의 「공식 정보」 — 복지로 원문. 우리 표와 나란히 두고 출처·기준연도를 붙인다 */
+.official {
+  margin-top: 14px;
+  padding: 14px 15px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--primary-tint-2);
+}
+.official-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.official-title {
+  font-weight: 600;
+  color: var(--text);
+}
+.official-open {
+  margin-left: auto;
+  font-size: 13px;
+}
+.official-tbl {
+  background: var(--canvas);
+}
+.official-text {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-sub);
+}
+.official-flow {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.official-flow strong {
+  margin-right: 4px;
+  color: var(--text);
+}
+.official-source {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}

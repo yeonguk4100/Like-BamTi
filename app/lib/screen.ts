@@ -24,6 +24,27 @@ export function formatBirthInput(raw: string): string {
   return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`;
 }
 
+/**
+ * 복지로 서비스 상세 페이지 — 학부모가 직접 열어 볼 공식 주소.
+ * 주소 모양은 「활용가이드_중앙부처복지서비스(v2.2)」 목록 응답의 servDtlLink 예시를 따른다.
+ */
+export function bokjiroPageUrl(servId: string): string {
+  return (
+    "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do" +
+    `?wlfareInfoId=${encodeURIComponent(servId)}&wlfareInfoReldBztpCd=01`
+  );
+}
+
+/** 복지로 신청 경로 목록 이름 → 화면에 쓸 단계 이름. 순서도 이 표를 따른다 */
+export const APPLY_FLOW_STEPS: [string, string][] = [
+  ["신청기관연락처목록", "신청"],
+  ["조사기관연락처목록", "조사"],
+  ["결정기관연락처목록", "결정"],
+  ["지급기관연락처목록", "지급"],
+  ["사후관리기관목록", "사후관리"],
+  ["이의신청접수기관연락처목록", "이의신청"],
+];
+
 /** 제도 목록 보기 방식. readaloud 는 전화 상담 중에 그대로 읽어 주는 화면이다 */
 export type ViewMode = "all" | "grouped" | "readaloud";
 export type TrackFilter = Track | "all";

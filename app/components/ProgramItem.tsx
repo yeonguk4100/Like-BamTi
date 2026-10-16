@@ -3,13 +3,21 @@
 // verified 가 false 면 「예시」 배지가 붙는다. 근거와 출처를 늘 함께 보여준다
 // (설계 원칙 3번). 자격을 판정하는 표시는 없다.
 
+import { useState } from "react";
 import { eligibilityLines, TRACK_LABEL, type ResolvedProgram } from "../lib/build-sheet";
+import { OfficialInfo } from "./OfficialInfo";
 
 /** 제도 한 건 — 접었다 펼 수 있는 항목 */
 export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
   const eligibility = eligibilityLines(p);
+  /* 펼친 카드만 공식 정보를 부른다 */
+  const [open, setOpen] = useState(p.id === "selection");
   return (
-    <details className="program" open={p.id === "selection"}>
+    <details
+      className="program"
+      open={open}
+      onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+    >
       <summary>
         <span className={`badge ${p.track === "education" ? "badge-primary" : ""}`}>
           {TRACK_LABEL[p.track]}
@@ -101,6 +109,7 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
             </tr>
           </tbody>
         </table>
+        {p.bokjiroId && <OfficialInfo servId={p.bokjiroId} active={open} />}
       </div>
     </details>
   );

@@ -259,7 +259,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
-| `app/components/` | 화면 조각 16개 |
+| `app/components/` | 화면 조각 17개 |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
 | `public/` | 정적 파일. 안내 띠 삽화(`hero-illustration.png`) — **투명 PNG 여야 한다** |
 
@@ -270,7 +270,8 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 |---|---|
 | `Icon` · `NoticeBoard` · `Faq` · `SiteFooter` | 없음 (또는 모듈 상수만) |
 | `Reference` | `regionId` |
-| `ProgramItem` | `program` |
+| `ProgramItem` | `program` — 펼칠 때 `bokjiroId`가 있으면 `OfficialInfo`를 띄운다 |
+| `OfficialInfo` | `servId` · `active` — 복지로 원문(대상·지원내용·신청 경로·서식·근거법령). 펼친 카드만 부르고 서비스ID만 보낸다 |
 | `DeadlineTable` | `deadlines` · `urgentCount` |
 | `TestTable` | `disability` · `detailNote` |
 | `LookupPanel` | `regionId` · `cache` · `busy` · `error` · `onLookup` |

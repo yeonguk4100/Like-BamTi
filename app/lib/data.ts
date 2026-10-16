@@ -417,6 +417,15 @@ export type Program = {
   contactTel?: string;
   /** 그 번호가 어디인지. 번호만 있으면 어디에 거는지 알 수 없다 */
   contactTelLabel?: string;
+  /**
+   * 복지로(한국사회보장정보원 「중앙부처복지서비스」)의 서비스ID.
+   *
+   * 있으면 제도 카드를 펼칠 때 /api/welfare?id= 로 공식 원문(대상·지원내용·신청 경로·서식·근거법령)을
+   * 받아 「공식 정보」 칸에 함께 보여준다. 보내는 것은 이 ID 뿐이고 아동 조건은 보내지 않는다.
+   * 우리 데이터를 덮지 않는다 — 나란히 놓아 담당자가 대조하게 한다 (설계 원칙 5번과 같은 이유).
+   * ID 는 2026-10-16 `household=040&life=002` 목록 응답에서 확인했다.
+   */
+  bokjiroId?: string;
 } & Sourced;
 
 export const PROGRAMS: Program[] = [
@@ -438,6 +447,8 @@ export const PROGRAMS: Program[] = [
   {
     id: "therapy",
     name: "치료지원",
+    // 복지로 「(특수교육대상자) 치료지원서비스」(교육부). 금액·절차는 시도마다 달라 우리 값은 계속 「예시」다
+    bokjiroId: "WLF00001113",
     track: "education",
     authority: "교육청",
     applyTo: "특수교육지원센터",
@@ -531,6 +542,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "rehab",
     name: "발달재활서비스 바우처",
+    bokjiroId: "WLF00003195",
     track: "welfare",
     authority: "보건복지부",
     applyTo: "읍면동 주민센터 (온라인은 복지로)",
@@ -563,6 +575,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "welfareAfterschool",
     name: "청소년 발달장애인 방과후활동서비스",
+    bokjiroId: "WLF00001178",
     track: "welfare",
     authority: "보건복지부",
     applyTo: "읍면동 주민센터",
@@ -591,6 +604,7 @@ export const PROGRAMS: Program[] = [
   {
     id: "allowance",
     name: "장애아동수당",
+    bokjiroId: "WLF00003198",
     track: "welfare",
     authority: "보건복지부",
     applyTo: "읍면동 행정복지센터 (읍·면·동장을 거쳐 시장·군수·구청장에게 제출)",
