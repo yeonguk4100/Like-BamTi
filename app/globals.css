@@ -2575,6 +2575,8 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   font-size: 13.5px;
   line-height: 1.7;
   color: var(--text-sub);
+  /* 원문의 줄바꿈(소득 구간별 금액 등)을 살린다 */
+  white-space: pre-line;
 }
 .official-flow {
   margin: 0;

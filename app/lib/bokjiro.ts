@@ -97,6 +97,8 @@ function decode(s: string): string {
     .replace(/&apos;/g, "'")
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
     .replace(/&amp;/g, "&")
+    // 원문 줄바꿈이 \r 하나로 온다. 브라우저는 \r 을 공백으로 그려서 소득 구간별 금액이 한 줄로 붙는다
+    .replace(/\r\n?/g, "\n")
     .trim();
 }
 
