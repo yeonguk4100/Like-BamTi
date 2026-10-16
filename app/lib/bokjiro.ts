@@ -96,6 +96,10 @@ function decode(s: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    // 원문 HTML 에서 넘어온 이름 붙은 문자 (장애아동수당 소득인정액 식에 &times; 가 그대로 온다)
+    .replace(/&times;/g, "×")
+    .replace(/&middot;/g, "·")
+    .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     // 원문 줄바꿈이 \r 하나로 온다. 브라우저는 \r 을 공백으로 그려서 소득 구간별 금액이 한 줄로 붙는다
     .replace(/\r\n?/g, "\n")
