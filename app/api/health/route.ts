@@ -22,6 +22,10 @@ export function GET() {
         configured: Boolean(process.env.GEMINI_API_KEY),
         model: process.env.GEMINI_MODEL || "gemini-3-flash-preview",
       },
+      /* 공공서비스(혜택) 정보 API. 키 값은 넣지 않고 있는지만 알린다 */
+      publicData: {
+        configured: Boolean(process.env.DATA_GO_KR_KEY),
+      },
     },
     { headers: { "Cache-Control": "no-store" } }
   );

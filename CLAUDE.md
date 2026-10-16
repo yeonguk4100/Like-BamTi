@@ -236,8 +236,13 @@ npm run dev
 |---|---|
 | `GEMINI_API_KEY` | 필수. 없으면 AI 버튼이 안내 메시지를 낸다 |
 | `GEMINI_MODEL` | 선택. 기본값 `gemini-3-flash-preview` |
+| `DATA_GO_KR_KEY` | 공공데이터포털 **일반 인증키(Decoding)**. `/api/welfare`가 쓴다. **Vercel에만 넣어 두었다** — 로컬 `.env.local`에는 없다 |
 
 **키가 없어도 화면과 규칙 계산은 그대로 동작한다.** AI는 버튼을 눌렀을 때만 호출된다.
+
+**공공데이터 API는 Vercel에서만 시험한다.** 로컬에 키를 두지 않기로 했다. push → 배포 →
+`/api/health`의 `publicData.configured` 확인 → `/api/welfare` 호출 순서로 본다.
+중앙부처복지서비스 개발계정은 **하루 100건**이라 같은 요청을 반복하지 않는다 (라우트가 하루 캐시한다).
 
 ## 기술 구성
 
@@ -249,6 +254,8 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/build-sheet.ts` | **규칙 계층.** 조건으로 제도·서류·기한을 고른다. 순수 함수 |
 | `app/lib/validate.ts` | 요청 본문 검증. 모르는 id는 통과시키지 않는다 |
 | `app/lib/board.ts` | 알림 마당 · 서식 자료실 · FAQ 데이터 (공지·파일은 가상) |
+| `app/lib/bokjiro.ts` | 한국사회보장정보원 「중앙부처복지서비스」 API. XML 응답을 손으로 읽는다(의존성 없음). 코드표 포함 |
+| `app/lib/gov24.ts` | 행정안전부 「공공서비스(혜택) 정보」 API. 구비서류·지원조건(장애인·연령) |
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
@@ -287,6 +294,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `GET /api/reference` | 지역별 카드 명칭 · 서식 번호 대조표 | ❌ |
 | `GET /api/notices` | 알림 마당 · 서식 자료실 · FAQ | ❌ |
 | `GET /api/health` | 배포 확인. 키 값은 응답에 넣지 않는다 | ❌ |
+| `GET /api/welfare` | 공공 복지서비스 실데이터 (중앙부처복지서비스 · `source=gov24`) | ❌ |
 | `POST /api/letter` | 안내문 문장화 | ⭕ |
 | `POST /api/lookup` | 빈칸 찾기 | ⭕ |
 
