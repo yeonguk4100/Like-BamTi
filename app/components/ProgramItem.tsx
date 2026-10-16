@@ -7,6 +7,18 @@ import { useState } from "react";
 import { eligibilityLines, TRACK_LABEL, type ResolvedProgram } from "../lib/build-sheet";
 import { OfficialInfo } from "./OfficialInfo";
 
+/**
+ * data.ts 의 summary 에 강조로 넣은 `**…**` 을 굵은 글씨로 그린다.
+ * 그대로 두면 별표가 글자로 보인다 (읽어 주기 화면은 build-sheet 의 spoken() 이 기호를 걷어낸다).
+ */
+function Emphasized({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part))}
+    </>
+  );
+}
+
 /** 제도 한 건 — 접었다 펼 수 있는 항목 */
 export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
   const eligibility = eligibilityLines(p);
@@ -26,7 +38,9 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
         {!p.verified && <span className="badge">예시</span>}
       </summary>
       <div className="program-body">
-        <p className="program-summary">{p.summary}</p>
+        <p className="program-summary">
+          <Emphasized text={p.summary} />
+        </p>
         <table className="tbl">
           <caption className="skip">{p.name} 상세</caption>
           <tbody>
