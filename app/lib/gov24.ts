@@ -144,13 +144,19 @@ async function call<T>(path: string, params: Record<string, string>): Promise<Pa
   return (await res.json()) as Page<T>;
 }
 
-/** 서비스 이름으로 찾는다. 검색어 말고는 아무것도 보내지 않는다 */
-export async function searchServices(query: string, perPage = 20) {
-  const page = await call<RawListItem>("/serviceList", {
+/**
+ * 서비스 이름 · 소관기관명으로 찾는다. 검색어와 기관명 말고는 아무것도 보내지 않는다.
+ * 소관기관명에 「강원특별자치도교육청」을 주면 그 교육청의 특수교육 서비스만 온다 —
+ * 교육청 층(치료지원·통학비·방과후)이 이 API 에 들어 있다 (2026-10-16 실측).
+ */
+export async function searchServices(query: string, perPage = 50, org?: string) {
+  const cond: Record<string, string> = {
     page: "1",
     perPage: String(perPage),
-    "cond[서비스명::LIKE]": query,
-  });
+  };
+  if (query) cond["cond[서비스명::LIKE]"] = query;
+  if (org) cond["cond[소관기관명::LIKE]"] = org;
+  const page = await call<RawListItem>("/serviceList", cond);
   const items: Gov24Service[] = page.data.map((r) => ({
     id: text(r["서비스ID"]),
     name: text(r["서비스명"]),

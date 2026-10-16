@@ -10,8 +10,9 @@
 //   GET /api/welfare?source=local&sido=강원특별자치도&sigungu=원주시
 //   GET /api/welfare?source=local&id=서비스ID
 //
-// source=gov24 를 붙이면 행정안전부 「공공서비스(혜택) 정보」(gov24.ts)로 찾는다.
+// source=gov24 를 붙이면 행정안전부 「공공서비스(혜택) 정보」(gov24.ts)로 찾는다. 교육청 서비스도 들어 있다.
 //   GET /api/welfare?source=gov24&q=발달재활
+//   GET /api/welfare?source=gov24&q=특수교육&org=강원특별자치도교육청
 //   GET /api/welfare?source=gov24&id=서비스ID
 //
 // 아동 조건은 받지 않는다. 검색어 · 코드표의 코드 · 서비스ID 만 받는다.
@@ -63,13 +64,18 @@ export async function GET(request: Request) {
 
   try {
     if (source === "gov24") {
-      if (!q && !id) return fail("q 또는 id 중 하나가 필요합니다.", 400);
+      const org = params.get("org")?.trim() ?? "";
+      if (org && !PLACE_PATTERN.test(org)) return fail("org 는 한글 기관명이어야 합니다.", 400);
+      if (!q && !id && !org) return fail("q, org, id 중 하나가 필요합니다.", 400);
       if (id) {
         const found = await getService(id);
         if (!found) return fail("해당 서비스ID 를 찾지 못했습니다.", 404);
         return Response.json({ source: GOV24_SOURCE, ...found }, NO_STORE);
       }
-      return Response.json({ source: GOV24_SOURCE, query: q, ...(await searchServices(q)) }, NO_STORE);
+      return Response.json(
+        { source: GOV24_SOURCE, query: { q: q || null, org: org || null }, ...(await searchServices(q, 50, org || undefined)) },
+        NO_STORE
+      );
     }
 
     if (source !== "bokjiro" && source !== "local") {
