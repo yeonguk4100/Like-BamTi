@@ -7,17 +7,14 @@
 //    생년월일이나 이름이 들어갈 자리가 없다 (설계 원칙 2번).
 //  - 고르지 않는다. 받은 목록을 모양만 맞춘다. 시트에 무엇을 올릴지는 규칙(build-sheet)이 정한다.
 //  - 하루 동안 캐시한다. 개발계정 한도가 하루 100건이고, 원본도 하루 1회 갱신된다 (활용가이드).
-//  - 응답이 XML 뿐이다. 새 의존성을 넣지 않으려고 이 API 모양에 맞춘 작은 파서를 둔다.
+//  - 응답이 XML 뿐이다. 호출·오류·파서는 data-go-kr.ts 와 같이 쓴다.
 //
 // 명세 · 코드표: 「활용가이드_중앙부처복지서비스(v2.2)」(한국사회보장정보원, 2025.4)
 
-import { revalidateTag } from "next/cache";
-import { dataGoKrKey } from "./data-go-kr";
+import { DataGoKrError, callDataGoKrXml, xmlBlocks as blocks, xmlField as field } from "./data-go-kr";
 
 const BASE = "https://apis.data.go.kr/B554287/NationalWelfareInformationsV001";
-const TIMEOUT_MS = 10_000;
-const CACHE_SECONDS = 60 * 60 * 24;
-/** 오류가 나면 이 태그의 캐시를 비운다. 포털은 오류도 200 으로 줄 때가 있어 하루 동안 오류가 남을 수 있다 */
+const LABEL = "중앙부처복지서비스";
 const CACHE_TAG = "bokjiro";
 
 export const BOKJIRO_SOURCE = {
@@ -67,56 +64,8 @@ export const THEME_CODES = {
   "160": "에너지",
 } as const;
 
-/** 활용가이드 「OpenAPI 에러 코드」 */
-const RESULT_MESSAGES: Record<string, string> = {
-  "10": "요청 파라미터가 잘못되었습니다.",
-  "12": "해당 오픈API 서비스가 없거나 폐기되었습니다.",
-  "20": "서비스 접근이 거부되었습니다. 활용신청 승인 여부를 확인하세요.",
-  "22": "하루 요청 한도를 넘었습니다.",
-  "30": "등록되지 않은 서비스키입니다. 승인 직후라면 반영까지 기다려야 합니다.",
-  "31": "활용기간이 만료되었습니다.",
-};
-
-export class BokjiroError extends Error {
-  constructor(
-    message: string,
-    readonly status: number
-  ) {
-    super(message);
-  }
-}
-
-/* ─── 작은 XML 파서 — 이 API 의 응답 모양(중첩 1단, 속성 없음)만 다룬다 ─── */
-
-function decode(s: string): string {
-  return s
-    .replace(/^<!\[CDATA\[([\s\S]*)\]\]>$/, "$1")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-    .replace(/&amp;/g, "&")
-    // 원문 HTML 에서 넘어온 이름 붙은 문자. XML 안에 &amp;times; 로 한 번 더 감싸여 오므로
-    // &amp; 를 푼 다음에 풀어야 한다 (장애아동수당 소득인정액 식)
-    .replace(/&times;/g, "×")
-    .replace(/&middot;/g, "·")
-    .replace(/&nbsp;/g, " ")
-    // 원문 줄바꿈이 \r 하나로 온다. 브라우저는 \r 을 공백으로 그려서 소득 구간별 금액이 한 줄로 붙는다
-    .replace(/\r\n?/g, "\n")
-    .trim();
-}
-
-/** 첫 번째 <tag>값</tag> */
-function field(xml: string, tag: string): string {
-  const m = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`).exec(xml);
-  return m ? decode(m[1]) : "";
-}
-
-/** 모든 <tag>…</tag> 블록 */
-function blocks(xml: string, tag: string): string[] {
-  return [...xml.matchAll(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "g"))].map((m) => m[1]);
-}
+/** 이전 이름. 라우트가 쓰던 이름을 그대로 둔다 */
+export const BokjiroError = DataGoKrError;
 
 /* ─── 응답 모양 ─── */
 
@@ -173,42 +122,8 @@ function links(xml: string, tag: string): BokjiroLink[] {
 
 /* ─── 호출 ─── */
 
-async function call(path: string, params: Record<string, string>): Promise<string> {
-  const key = dataGoKrKey();
-  if (!key) throw new BokjiroError("DATA_GO_KR_KEY 가 설정되지 않았습니다.", 503);
-
-  const url = new URL(`${BASE}/${path}`);
-  // Decoding 키를 넣는다. URLSearchParams 가 한 번만 인코딩한다
-  url.searchParams.set("serviceKey", key);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      next: { revalidate: CACHE_SECONDS, tags: [CACHE_TAG] },
-    });
-  } catch {
-    throw new BokjiroError("중앙부처복지서비스 API 에 연결하지 못했습니다.", 504);
-  }
-
-  const xml = await res.text();
-
-  // data.go.kr 게이트웨이 오류는 <cmmMsgHeader> 로, 서비스 오류는 <resultCode> 로 온다
-  const code = field(xml, "returnReasonCode") || field(xml, "resultCode");
-  const failed = (code && code !== "0" && code !== "00") || !res.ok;
-  if (failed) revalidateTag(CACHE_TAG);
-  if (code && code !== "0" && code !== "00") {
-    throw new BokjiroError(
-      RESULT_MESSAGES[code] ?? `중앙부처복지서비스 API 오류 (코드 ${code})`,
-      code === "22" ? 429 : 502
-    );
-  }
-  if (!res.ok) {
-    // 원문 본문은 싣지 않는다 — 요청 주소(키 포함)가 되돌아올 수 있다
-    throw new BokjiroError(`중앙부처복지서비스 API 가 ${res.status} 를 돌려주었습니다.`, 502);
-  }
-  return xml;
+function call(path: string, params: Record<string, string>): Promise<string> {
+  return callDataGoKrXml(`${BASE}/${path}`, params, { label: LABEL, cacheTag: CACHE_TAG });
 }
 
 export type ListQuery = {

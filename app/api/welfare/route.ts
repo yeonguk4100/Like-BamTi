@@ -5,6 +5,11 @@
 //   GET /api/welfare?household=040&life=002     코드표로 찾기 (040 장애인 · 002 아동)
 //   GET /api/welfare?id=WLF00000000             상세 · 근거법령 · 서식 · 신청 경로
 //
+// source=local 은 한국사회보장정보원 「지자체복지서비스」(localwelfare.ts) — 시·도, 시·군·구 자체사업.
+//   GET /api/welfare?source=local&region=gangwon&household=040   지역 id 로 (REGIONS 의 이름을 쓴다)
+//   GET /api/welfare?source=local&sido=강원특별자치도&sigungu=원주시
+//   GET /api/welfare?source=local&id=서비스ID
+//
 // source=gov24 를 붙이면 행정안전부 「공공서비스(혜택) 정보」(gov24.ts)로 찾는다.
 //   GET /api/welfare?source=gov24&q=발달재활
 //   GET /api/welfare?source=gov24&id=서비스ID
@@ -21,7 +26,10 @@ import {
   getServiceDetail,
   listServices,
 } from "@/app/lib/bokjiro";
+import { REGIONS } from "@/app/lib/data";
+import { DataGoKrError } from "@/app/lib/data-go-kr";
 import { GOV24_SOURCE, Gov24Error, getService, searchServices } from "@/app/lib/gov24";
+import { LOCAL_WELFARE_SOURCE, getLocalService, listLocalServices } from "@/app/lib/localwelfare";
 import { fail } from "@/app/lib/validate";
 
 export const runtime = "nodejs";
@@ -30,6 +38,8 @@ export const maxDuration = 20;
 const MAX_QUERY = 40;
 const NO_STORE = { headers: { "Cache-Control": "no-store" } };
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,40}$/;
+/** 시도명·시군구명 — 한글과 공백만, 20자까지. 아동 정보가 섞일 자리가 아니다 */
+const PLACE_PATTERN = /^[가-힣 ]{1,20}$/;
 
 /** 코드표에 있는 코드만 통과시킨다 */
 function code<T extends Record<string, string>>(
@@ -62,7 +72,15 @@ export async function GET(request: Request) {
       return Response.json({ source: GOV24_SOURCE, query: q, ...(await searchServices(q)) }, NO_STORE);
     }
 
-    if (source !== "bokjiro") return fail("source 는 bokjiro 또는 gov24 입니다.", 400);
+    if (source !== "bokjiro" && source !== "local") {
+      return fail("source 는 bokjiro · local · gov24 중 하나입니다.", 400);
+    }
+
+    if (source === "local" && id) {
+      const detail = await getLocalService(id);
+      if (!detail) return fail("해당 서비스ID 를 찾지 못했습니다.", 404);
+      return Response.json({ source: LOCAL_WELFARE_SOURCE, detail }, NO_STORE);
+    }
 
     if (id) {
       const detail = await getServiceDetail(id);
@@ -76,6 +94,45 @@ export async function GET(request: Request) {
     if (!life.ok) return fail(life.error, 400);
     if (!household.ok) return fail(household.error, 400);
     if (!theme.ok) return fail(theme.error, 400);
+
+    if (source === "local") {
+      const regionId = params.get("region");
+      const region = regionId ? REGIONS.find((r) => r.id === regionId) : undefined;
+      if (regionId && !region) {
+        return fail(`region 이 올바르지 않습니다. (${REGIONS.map((r) => r.id).join(" / ")})`, 400);
+      }
+      const sido = region?.name ?? params.get("sido")?.trim() ?? "";
+      const sigungu = params.get("sigungu")?.trim() ?? "";
+      if (sido && !PLACE_PATTERN.test(sido)) return fail("sido 는 한글 시도명이어야 합니다.", 400);
+      if (sigungu && !PLACE_PATTERN.test(sigungu)) return fail("sigungu 는 한글 시군구명이어야 합니다.", 400);
+      if (!sido && !sigungu && !q && !household.value && !life.value && !theme.value) {
+        return fail("region, sido, sigungu, q, household, life, theme, id 중 하나 이상이 필요합니다.", 400);
+      }
+      const result = await listLocalServices({
+        sido: sido || undefined,
+        sigungu: sigungu || undefined,
+        q: q || undefined,
+        life: life.value,
+        household: household.value,
+        theme: theme.value,
+      });
+      return Response.json(
+        {
+          source: LOCAL_WELFARE_SOURCE,
+          query: {
+            sido: sido || null,
+            sigungu: sigungu || null,
+            q: q || null,
+            household: household.value ? `${household.value} ${HOUSEHOLD_CODES[household.value]}` : null,
+            life: life.value ? `${life.value} ${LIFE_CODES[life.value]}` : null,
+            theme: theme.value ? `${theme.value} ${THEME_CODES[theme.value]}` : null,
+          },
+          ...result,
+        },
+        NO_STORE
+      );
+    }
+
     if (!q && !life.value && !household.value && !theme.value) {
       return fail("q, life, household, theme, id 중 하나 이상이 필요합니다.", 400);
     }
@@ -97,7 +154,9 @@ export async function GET(request: Request) {
       ...result,
     }, NO_STORE);
   } catch (e) {
-    if (e instanceof BokjiroError || e instanceof Gov24Error) return fail(e.message, e.status);
+    if (e instanceof DataGoKrError || e instanceof BokjiroError || e instanceof Gov24Error) {
+      return fail(e.message, e.status);
+    }
     return fail("공공 복지서비스 정보를 가져오지 못했습니다.", 500);
   }
 }

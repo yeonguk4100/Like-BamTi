@@ -87,6 +87,7 @@ curl -X POST http://localhost:3000/api/sheet \
 | `?household=040&life=002` | 코드표로 찾기 — 가구유형 `040` 장애인 · 생애주기 `001` 영유아 `002` 아동 `003` 청소년 |
 | `?theme=100` | 관심주제 (`090` 보육 · `100` 교육 · `120` 보호·돌봄 …) |
 | `?id=WLF00000000` | 상세 — 대상·선정기준·지원내용·신청 경로(`applyFlow`)·문의처·근거법령·서식(`forms`) |
+| `?source=local&region=gangwon&household=040` | 한국사회보장정보원 **「지자체복지서비스」**([15108347](https://www.data.go.kr/data/15108347/openapi.do), `app/lib/localwelfare.ts`) — 시·도, 시·군·구 자체사업. `sido=`·`sigungu=`(한글 20자까지)로도 찾는다. 상세는 `&id=` — 시행 시작·종료일, 지원대상, 신청방법, 문의처, 서식. 개발계정 하루 1,000건 |
 | `?source=gov24&q=…` / `&id=…` | 행정안전부 「공공서비스(혜택) 정보」([15113968](https://www.data.go.kr/data/15113968/openapi.do), `app/lib/gov24.ts`) — 구비서류·신청기한·지원조건(장애인 `JA0328`, 대상연령) |
 
 - **아동 조건을 받지 않는다.** 검색어 · 코드표의 코드 · 서비스ID만 받는다. 코드표에 없는 코드는 400
