@@ -101,12 +101,15 @@ export const REGIONS: Region[] = [
     officeName: "경상남도교육청",
     cardName: "특기적성비지원카드",
     cardVerified: true,
-    cardSource: "경상남도교육청 「2025 특수교육대상자 선정·배치 업무 처리 지침」",
+    // 지역 대조표의 이름은 2025 지침 표기다. 2026 지침은 Q&A에 「특기적성 비지원카드」, 서식에 「특기적성교육지원카드」로 적는다
+    cardSource: "경상남도교육청 「2025 특수교육대상자 선정·배치 업무 처리 지침」 (2026 지침 Q&A에도 같은 표기)",
     requestFormNo: "서식 2",
-    basicSurveyName: "기초조사서(일반 / 건강장애)",
+    // 2026 지침에서 보호자용 · 담임교사용이 나뉘었다 (강원과 같은 구조). 건강장애는 따로
+    basicSurveyName: "기초조사서(보호자용 / 담임교사용 / 건강장애)",
+    // 2026 지침에도 「장애등급」이 14회 남아 있다 (신청서류 목록의 「장애등급 결정서」, 배치 신청서의 「장애등급(정도)」 등)
     legacyTermInGuide: true,
-    guideName: "2025 특수교육대상자 선정·배치 업무 처리 지침",
-    // 132쪽 지침 원문에서 서식 번호 11개를 확인했다. 강원보다 오히려 많다
+    guideName: "2026. 특수교육대상자 선정 배치 업무 처리 지침",
+    // 2026 지침 원문(128쪽)에서 서식 번호를 다시 확인했다 (2026-10-17). 2025판보다 3번부터 2~3씩 밀렸다
     implemented: true,
     eduContact: {
       tel: "055-268-1140",
@@ -519,6 +522,8 @@ export const PROGRAMS: Program[] = [
       },
       gyeongnam: {
         cardName: "치료지원 전자카드",
+        // 2026 지침 서식(9·10)의 표기. 운영계획 · 교육청 누리집은 「치료지원 전자카드」
+        cardNameOld: "치료지원비 전자카드",
         summary:
           "**1인당 월 15만 원 한도**로 치료지원비를 지원합니다. 전자카드에 매월 충전되거나 영수증으로 청구합니다. " +
           "병·의원의 물리치료 · 작업치료 · 청능훈련과, 발달재활치료기관의 언어 · 미술 · 놀이 · 음악재활, 재활심리, " +
@@ -575,8 +580,9 @@ export const PROGRAMS: Program[] = [
       gyeongnam: {
         name: "특기적성교육비 지원",
         cardName: "특기적성교육비 전자카드",
-        // 2025 지침의 표기. 교육청 누리집·행안부 원문에는 「특기적성교육비 전자카드」로만 나온다
-        cardNameOld: "특기적성비지원카드",
+        // 2026 지침 서식(9·10)의 표기. 교육청 누리집·행안부 원문은 「특기적성교육비 전자카드」,
+        // 2025 지침과 2026 Q&A는 「특기적성비지원카드」 — 지역 대조표(Region.cardName)에는 그 이름이 남아 있다
+        cardNameOld: "특기적성교육지원카드",
         summary:
           "유 · 초 · 중 · 고 · 특수학교 특수교육대상자에게 **1인당 월 12만 원 한도**로 특기적성교육비를 전자카드로 " +
           "지원합니다. 예 · 체능, 직업 관련 학원 · 교습소 등 가맹점에서 씁니다. " +
@@ -984,18 +990,22 @@ export const FORM_NO: Record<RegionId, Partial<Record<FormKey, string>>> = {
     privacyConsent: "서식 12",
     ldRecord: "서식 25·26",
   },
+  // 경남 2026 지침 「2026. 특수교육대상자 선정 배치 업무 처리 지침」(2026-03-04 게시, 128쪽 — 파일명에 「(안)」)
+  // 기초조사서가 보호자용 · 담임교사용으로 나뉘면서 3번부터 번호가 밀렸다. 2025판 번호로 안내하면 다른 서식을 찾게 된다
   gyeongnam: {
     applicantList: "서식 1-❶",
     advanceList: "서식 1-❷",
     requestForm: "서식 2",
-    basicSurvey: "서식 3 (일반) / 서식 4 (건강장애)",
-    placementRequest: "서식 5",
-    reassignRequest: "서식 6",
-    deferralRequest: "서식 8",
-    reenrollRequest: "서식 9",
-    principalOpinion: "서식 10",
-    privacyConsent: "서식 11",
-    ldRecord: "서식 12",
+    basicSurvey: "서식 3·4 (보호자용 / 담임교사용) · 서식 6 (건강장애)",
+    placementRequest: "서식 7",
+    // 상급학교 진학도 배치 신청서 [서식 7]을 쓴다 (2026 운영계획 94쪽)
+    advanceRequest: "서식 7",
+    reassignRequest: "서식 8",
+    deferralRequest: "서식 10",
+    reenrollRequest: "서식 11",
+    principalOpinion: "서식 12",
+    privacyConsent: "서식 13",
+    ldRecord: "서식 5",
   },
   chungnam: {},
   gyeonggi: {},
@@ -1138,16 +1148,11 @@ export const FORM_SOURCE: Record<FormKey, FormSourceInfo> = {
 export const FORM_SOURCE_BY_REGION: Partial<
   Record<RegionId, Partial<Record<FormKey, FormSourceInfo>>>
 > = {
-  gyeongnam: {
-    basicSurvey: {
-      sources: ["eduForm"],
-      where: "신청처에서 서식을 받아 작성합니다 — 「일반」과 「건강장애」 두 가지로 나뉩니다",
-      verified: false,
-      source:
-        "서식 이름과 구분은 경남 지침에서 확인(기초조사서 일반/건강장애). " +
-        "누가 작성하는지는 확인 필요",
-    },
-  },
+  // 경남은 덮어쓰지 않는다 (2026-10-17). 2025판에 기초조사서를 「신청처에서 받아 보호자가 작성」으로 넣었는데
+  // 2025 지침 원문 서식 3 아래에도 「담임교사가 작성함」이라고 적혀 있어 틀린 값이었다. 2026 지침은
+  // 강원과 같이 보호자용[서식 3] · 담임교사용[서식 4]으로 나뉘고, 학교가 모아 공문에 첨부해 낸다.
+  // 그래서 공통 값(보호자용은 직접 작성, 담임교사용은 학교에 요청)을 그대로 쓴다.
+  // 학적이 없는 영유아(미취원 · 어린이집)는 서류를 센터에 직접 낸다 — 2026 지침 13~14쪽.
 };
 
 /** 그 지역의 발급처. 지역별 덮어쓰기가 있으면 그것을 쓴다 */
