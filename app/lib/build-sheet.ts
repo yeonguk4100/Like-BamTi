@@ -619,16 +619,18 @@ function buildParentLetter(args: {
   if (documentsFirst.length > 0) {
     lines.push("■ 1단계 — 먼저 준비할 서류");
     lines.push("  서류가 누락된 경우 보완 제출이 필요할 수 있습니다.");
+    // □ 는 출력해서 하나씩 지워 가는 체크 칸이다. 빠진 서류로 되돌아오는 일을 줄이려는 것
     for (const d of documentsFirst) {
-      lines.push(`· ${d.label}`);
+      lines.push(`□ ${d.label}`);
       lines.push(`   → ${d.where}`);
     }
     lines.push("");
   }
   lines.push(`■ ${documentsFirst.length > 0 ? "2단계 — " : ""}${level.submitTo}에서 작성할 서류`);
   for (const d of documentsAtOffice) {
-    lines.push(`· ${d.label}${formNoTag(d.formNo)}`);
+    lines.push(`□ ${d.label}${formNoTag(d.formNo)}`);
   }
+  lines.push("  □ 칸을 하나씩 지우며 챙겨 오시면 서류가 빠져 다시 오시는 일을 줄일 수 있습니다.");
   lines.push("");
   lines.push("■ 서류 작성 시 유의사항");
   lines.push("  행동특성과 발달사항은 구체적으로 작성해 주세요.");

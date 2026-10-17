@@ -269,7 +269,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
-| `app/components/` | 화면 조각 18개 |
+| `app/components/` | 화면 조각 19개 |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
 | `public/` | 정적 파일. 안내 띠 삽화(`hero-illustration.png`) — **투명 PNG 여야 한다** |
 
@@ -290,6 +290,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `ProgramList` | `sheet` · `visible` · `counts` · `viewMode` · `trackFilter` + 콜백 2개 + `children` |
 | `DetailPanel` | `ProgramList` 와 같고 + `lookup` (빈칸 찾기 상태 묶음) |
 | `DocumentTable` | `documents` · `officeName` · `notes` · `hideTitle` |
+| `IntakeCheck` | `documents` · `submitTo` — 접수할 때 가져온 서류를 체크하면 빠진 서류·발급처와 「보완 안내」 문구가 나온다. 접혀 있고 저장하지 않는다 |
 | `StaffBrief` | `documentsFirst` · `urgentDeadlines` · `keyWarnings` — 1면 |
 | `HeroArt` | 없음. 파일이 없으면 스스로 사라진다 |
 

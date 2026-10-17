@@ -46,6 +46,7 @@ import { DetailPanel } from "./components/DetailPanel";
 import { StaffBrief } from "./components/StaffBrief";
 import { Reference } from "./components/Reference";
 import { HeroArt } from "./components/HeroArt";
+import { IntakeCheck } from "./components/IntakeCheck";
 import { ReadAloud } from "./components/ReadAloud";
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
 import { type Preset } from "./lib/demo";
@@ -937,6 +938,13 @@ export default function Home() {
                 documentsFirst={sheet.documentsFirst}
                 urgentDeadlines={sheet.deadlines.filter((d) => d.urgent)}
                 keyWarnings={sheet.keyWarnings}
+              />
+
+              {/* 조건이 바뀌면 체크를 처음부터 — key 가 바뀌면 상태가 새로 시작된다 */}
+              <IntakeCheck
+                key={`${regionId}-${procedureId}-${levelId}`}
+                documents={sheet.documents}
+                submitTo={sheet.level.submitTo}
               />
 
               <DetailPanel

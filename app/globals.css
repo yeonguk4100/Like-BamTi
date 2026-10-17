@@ -2647,3 +2647,58 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
 .form-table select:disabled {
   opacity: 0.5;
 }
+
+/* 접수할 때 — 서류 누락 확인. 접혀 있다가 학부모가 서류를 가져왔을 때 연다 */
+.intake > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.intake > summary::-webkit-details-marker {
+  display: none;
+}
+.intake-list {
+  margin: 6px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.intake-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.intake-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 260px;
+  cursor: pointer;
+}
+.intake-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+.intake-done .intake-name {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.intake-where {
+  font-size: 13px;
+}
+.intake-result {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r);
+  background: var(--amber-tint);
+}
+.intake-result p {
+  margin: 0 0 6px;
+}
+.intake-ok {
+  border-color: var(--line);
+  background: var(--primary-tint-2);
+}
