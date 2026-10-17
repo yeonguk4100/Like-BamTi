@@ -100,7 +100,8 @@ export type Gov24Conditions = {
 };
 
 function text(v: unknown): string {
-  return typeof v === "string" ? v.trim() : v == null ? "" : String(v);
+  // 원문 줄바꿈이 CRLF 로 온다. 화면은 CR 을 공백으로 그리므로 LF 하나로 맞춘다
+  return typeof v === "string" ? v.replace(/\r\n?/g, "\n").trim() : v == null ? "" : String(v);
 }
 
 function flag(v: unknown): boolean {

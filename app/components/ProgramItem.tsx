@@ -125,9 +125,10 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
         </table>
         {/* 지역 원문(교육청 · 행안부)이 있으면 그쪽이 더 정확하다. 없으면 전국 공통 복지로 원문 */}
         {p.gov24Id ? (
-          <OfficialInfo source="gov24" servId={p.gov24Id} active={open} />
+          /* key 로 지역이 바뀌면 새로 그린다 — 같은 카드(치료지원)를 다시 쓰면 앞 지역 원문이 남는다 */
+          <OfficialInfo key={`gov24:${p.gov24Id}`} source="gov24" servId={p.gov24Id} active={open} />
         ) : (
-          p.bokjiroId && <OfficialInfo servId={p.bokjiroId} active={open} />
+          p.bokjiroId && <OfficialInfo key={`bokjiro:${p.bokjiroId}`} servId={p.bokjiroId} active={open} />
         )}
       </div>
     </details>
