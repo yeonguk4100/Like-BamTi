@@ -35,6 +35,14 @@ export function bokjiroPageUrl(servId: string): string {
   );
 }
 
+/**
+ * 정부24 서비스 상세 페이지 — 행안부 「공공서비스(혜택) 정보」의 서비스ID 로 연다.
+ * 주소 모양은 같은 API 목록 응답의 상세조회URL 필드 그대로다 (2026-10-17 확인).
+ */
+export function gov24PageUrl(servId: string): string {
+  return `https://www.gov.kr/portal/rcvfvrSvc/dtlEx/${encodeURIComponent(servId)}`;
+}
+
 /** 복지로 신청 경로 목록 이름 → 화면에 쓸 단계 이름. 순서도 이 표를 따른다 */
 export const APPLY_FLOW_STEPS: [string, string][] = [
   ["신청기관연락처목록", "신청"],

@@ -329,7 +329,7 @@ export function buildSheet(input: Input) {
   const regional = [...PROGRAMS, ...LOCAL_PROGRAMS].map((p) => {
     const r = p.byRegion?.[input.regionId];
     if (!r) return { program: p, cardName: undefined, cardNameOld: undefined };
-    const { cardName, cardNameOld, gov24Id: _gov24Id, ...rest } = r;
+    const { cardName, cardNameOld, ...rest } = r;
     return { program: { ...p, ...rest }, cardName, cardNameOld };
   });
 

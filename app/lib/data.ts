@@ -432,6 +432,8 @@ export type Program = {
    * 지역 값의 verified·source·asOf 가 그 지역에서의 확인 여부다.
    */
   byRegion?: Partial<Record<RegionId, RegionalProgram>>;
+  /** 행안부 「공공서비스(혜택) 정보」 서비스ID — 지역 값(byRegion)에서만 채워진다. 있으면 카드가 교육청 원문을 띄운다 */
+  gov24Id?: string;
 } & Sourced;
 
 /** 한 지역에서만 다른 제도 값 — Program.byRegion */

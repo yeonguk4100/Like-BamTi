@@ -123,7 +123,12 @@ export function ProgramItem({ program: p }: { program: ResolvedProgram }) {
             </tr>
           </tbody>
         </table>
-        {p.bokjiroId && <OfficialInfo servId={p.bokjiroId} active={open} />}
+        {/* 지역 원문(교육청 · 행안부)이 있으면 그쪽이 더 정확하다. 없으면 전국 공통 복지로 원문 */}
+        {p.gov24Id ? (
+          <OfficialInfo source="gov24" servId={p.gov24Id} active={open} />
+        ) : (
+          p.bokjiroId && <OfficialInfo servId={p.bokjiroId} active={open} />
+        )}
       </div>
     </details>
   );

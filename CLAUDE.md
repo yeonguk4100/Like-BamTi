@@ -299,7 +299,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `Reference` | `regionId` |
 | `ProgramItem` | `program` — 펼칠 때 `bokjiroId`가 있으면 `OfficialInfo`를 띄운다 |
 | `LocalPrograms` | `sido` · `sigungu` · `age` · `fallbackSources` — 지역 자체사업. 서버엔 시도명만 보내고 시·군·나이는 화면에서 거른다 |
-| `OfficialInfo` | `servId` · `active` — 복지로 원문(대상·지원내용·신청 경로·서식·근거법령). 펼친 카드만 부르고 서비스ID만 보낸다 |
+| `OfficialInfo` | `source` · `servId` · `active` — 공식 원문. 교육청 제도는 지역 `gov24Id`로 **교육청 원문(행안부 · 정부24)**, 없으면 복지로 원문. 펼친 카드만 부르고 서비스ID만 보낸다 |
 | `DeadlineTable` | `deadlines` · `urgentCount` |
 | `TestTable` | `disability` · `detailNote` |
 | `LookupPanel` | `regionId` · `cache` · `busy` · `error` · `onLookup` |
