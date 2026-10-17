@@ -24,6 +24,10 @@
 ③ 자세히 보기 (접힘)     ← 학부모가 파고들 때만
 ```
 
+**화면 순서는 담당자가 쓰는 순서다 (2026.10 정리)** — 안내 전 확인사항 → 학부모용 안내문(□ 체크리스트) →
+접수할 때 서류 누락 확인(접힘) → 자세히 보기(접힘). 「안내 전」이라는 이름대로 담당자가 먼저 짚고 안내문을 건넨다.
+첫 화면에는 입력 칸이 보여야 한다 — 소개 영역(hero) · 바로가기 · 단계 카드를 걷어냈고, 현장 숫자는 아래 참고 자료 앞으로 내렸다.
+
 ### 가치 명제 — 2026.08 담당자 인터뷰로 바뀌었다
 
 | ❌ 아닌 것 | ✅ 맞는 것 |
@@ -50,13 +54,13 @@
 
 | 시점 | 할 일 |
 |---|---|
-| ~2026-08-28 | 교육 종료 · **1차 발표** |
-| 2026-09 1~2주 | 권역별 아이디어톤 (기획안 + 발표) |
-| 10월 | 우수팀 한정 집중 멘토링 (프로토타입 구현) |
-| 11월 | 전국 해커톤 |
+| ~2026-08-28 | 교육 종료 · 1차 발표 (끝남) |
+| 2026-09 1~2주 | 권역별 아이디어톤 (끝남 — 우수팀 선정) |
+| 10월 | 우수팀 집중 멘토링 · **모든 준비를 10월 안에 끝낸다** |
+| **2026-11-28** | **전국 해커톤** — 장소·시연 방식·평가 기준은 운영기관 공지 대기 |
 
-**아이디어톤 산출물은 기획안 + 발표다.** 공고 문구가 *"AI 기반 서비스 기획안 도출 및 발표"*이고,
-프로토타입 구현은 10월 우수팀 과제다. 구현 완성도보다 문제 정의와 근거가 점수다.
+**해커톤은 「핵심 흐름이 시연에서 동작하는 것」이 점수다** (운영기관 답변). 실제 전화 발신·결제처럼
+사업자등록이 필요한 기능은 시연용으로 대체해도 된다. 현황과 계획은 [docs/해커톤-현황.md](docs/해커톤-현황.md).
 
 ---
 
@@ -274,24 +278,24 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/data.ts` | 지역 · 장애영역 · 학교급 · 신청 상황 · 서식 · 제도 데이터. 확인한 제도에는 `officialUrl`(학부모가 열어 볼 공식 페이지)이 붙는다 |
 | `app/lib/build-sheet.ts` | **규칙 계층.** 조건으로 제도·서류·기한을 고른다. 순수 함수 |
 | `app/lib/validate.ts` | 요청 본문 검증. 모르는 id는 통과시키지 않는다 |
-| `app/lib/board.ts` | 알림 마당 · 서식 자료실 · FAQ 데이터 (공지·파일은 가상) |
+| `app/lib/board.ts` | FAQ 데이터. 알림 마당 · 서식 자료실(가상)은 화면에서 뺐고 `/api/notices` 에만 남아 있다 |
 | `app/lib/bokjiro.ts` | 한국사회보장정보원 「중앙부처복지서비스」 API. XML 응답을 손으로 읽는다(의존성 없음). 코드표 포함 |
 | `app/lib/localwelfare.ts` | 한국사회보장정보원 「지자체복지서비스」 API. 시도·시군구 자체사업 (`source=local`) |
 | `app/lib/data-go-kr.ts` | 공공데이터포털 공통 — 인증키(Encoding·Decoding 둘 다), XML 호출·오류 코드·작은 파서 |
 | `app/lib/gov24.ts` | 행정안전부 「공공서비스(혜택) 정보」 API. 구비서류·지원조건(장애인·연령) |
-| `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · QUICK · 나이 구간)와 표현용 헬퍼 |
+| `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
-| `app/components/` | 화면 조각 19개 |
+| `app/components/` | 화면 조각 16개 |
 | `app/globals.css` | 스타일. 색·간격은 `:root` 토큰으로만 쓰고 인라인 hex를 넣지 않는다 |
-| `public/` | 정적 파일. 안내 띠 삽화(`hero-illustration.png`) — **투명 PNG 여야 한다** |
+| `public/` | 정적 파일. 안내 띠 삽화(`hero-illustration.png`)는 2026.10 소개 영역을 걷어내며 쓰지 않는다 |
 
 `page.tsx`에는 최상위 선언이 `Home` 하나만 있다. 데이터·상수·화면 조각은 위 모듈로 나갔다.
 새 상수를 화면에 쓸 때는 `page.tsx` 안에 두지 말고 `screen.ts`에 넣는다.
 
 | 컴포넌트 | props |
 |---|---|
-| `Icon` · `NoticeBoard` · `Faq` · `SiteFooter` | 없음 (또는 모듈 상수만) |
+| `Faq` · `SiteFooter` | 없음 (또는 모듈 상수만) |
 | `Reference` | `regionId` |
 | `ProgramItem` | `program` — 펼칠 때 `bokjiroId`가 있으면 `OfficialInfo`를 띄운다 |
 | `LocalPrograms` | `sido` · `sigungu` · `age` · `fallbackSources` — 지역 자체사업. 서버엔 시도명만 보내고 시·군·나이는 화면에서 거른다 |
@@ -305,7 +309,6 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `DocumentTable` | `documents` · `officeName` · `notes` · `hideTitle` |
 | `IntakeCheck` | `documents` · `submitTo` — 접수할 때 가져온 서류를 체크하면 빠진 서류·발급처와 「보완 안내」 문구가 나온다. 접혀 있고 저장하지 않는다 |
 | `StaffBrief` | `documentsFirst` · `urgentDeadlines` · `keyWarnings` — 1면 |
-| `HeroArt` | 없음. 파일이 없으면 스스로 사라진다 |
 
 **섹션이 아니라 데이터 단위로 쪼갰다.** 1단계·2단계를 섹션째 떼면 상태 27~28개를 props로
 넘겨야 해서 오히려 읽기 어려워진다. `ProgramList`가 「AI 빈칸 찾기」를 `children`으로 받는 것도
@@ -344,7 +347,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 - 데이터를 추가할 때 `verified` 플래그와 `source`를 반드시 채운다. 확인 못 했으면 `false`
 - 나이 계산은 **오늘 날짜를 쓰지 않는다.** `BASE_DATE`(학년도 시작) 기준으로 계산한다.
   오늘 날짜를 쓰면 서버와 브라우저 렌더링이 어긋난다
-- **데모용 코드는 한곳에 모아 둔다.** 발표(2026-08-28) 후 지울 것은 이 네 가지다 —
+- **데모용 코드는 한곳에 모아 둔다.** 해커톤(2026-11-28) 시연에 쓰고, 끝나면 지울 것은 이 네 가지다 —
   `app/lib/demo.ts` 삭제 · `app/components/DemoPresets.tsx` 삭제 ·
   `page.tsx`의 두 import와 `<DemoPresets>` 한 줄 · `globals.css`의 `.preset*`
 - **데모 사례는 조건 입력 표 안에 두지 않는다.** 실제 업무 화면에는 없는 칸이라 표에 끼우면

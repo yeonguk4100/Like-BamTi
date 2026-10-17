@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CURRENT_SERVICES,
   DISABILITIES,
@@ -26,7 +26,6 @@ import { isRealDate } from "./lib/validate";
 import {
   FIGURES,
   formatBirthInput,
-  QUICK,
   REPO,
   REPO_DOCS,
   SCOPE_AGE_MAX,
@@ -36,16 +35,13 @@ import {
   type TrackFilter,
   type ViewMode,
 } from "./lib/screen";
-import { Icon } from "./components/Icon";
 import { ProgramItem } from "./components/ProgramItem";
 import { Faq } from "./components/Faq";
-import { NoticeBoard } from "./components/NoticeBoard";
 import { SiteFooter } from "./components/SiteFooter";
 import { LetterPanel } from "./components/LetterPanel";
 import { DetailPanel } from "./components/DetailPanel";
 import { StaffBrief } from "./components/StaffBrief";
 import { Reference } from "./components/Reference";
-import { HeroArt } from "./components/HeroArt";
 import { IntakeCheck } from "./components/IntakeCheck";
 import { ReadAloud } from "./components/ReadAloud";
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
@@ -129,6 +125,35 @@ export default function Home() {
     setPicked({ procedure: true, region: true, disability: true, level: true });
     setShowResult(true);
   }
+
+  /**
+   * 새 상담 — 다음 전화를 받을 때 이전 아동 조건을 하나씩 지우지 않게 한 번에 비운다.
+   * 담당자 본인 정보(안내문 발신 정보)는 남긴다. 상담마다 다시 칠 값이 아니다.
+   */
+  function startNewConsult() {
+    setPicked({ procedure: false, region: false, disability: false, level: false });
+    setShowResult(false);
+    setBirthText("");
+    setSigungu("");
+    setCurrentServices([]);
+    setOtherDisabilityLabel("");
+    setDetailNote("");
+    setReadAloudOpen(false);
+    setTrackFilter("all");
+    setAiStatus("idle");
+    setAiError("");
+    setCopied(false);
+    setActiveStep(1);
+    setScrollToInput((n) => n + 1);
+  }
+
+  /* 새 상담은 화면 맨 위에서 시작한다 — 입력 칸이 첫 화면에 들어오도록 줄여 두었다.
+     결과 영역이 사라진 뒤에 스크롤한다. 같은 순간에 하면 페이지 높이가 바뀌어 중간에 끊긴다 */
+  const [scrollToInput, setScrollToInput] = useState(0);
+  useEffect(() => {
+    if (scrollToInput === 0) return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [scrollToInput]);
 
   const sheet = useMemo(
     () =>
@@ -312,15 +337,12 @@ export default function Home() {
             <a href="#step2" className="gnb-link">
               확인 시트
             </a>
-            <a href="#forms" className="gnb-link">
-              자료실
-            </a>
             <a href="#reference" className="gnb-link">
               참고 자료
             </a>
-            <a href="#step1" className="btn btn-primary">
-              상담 시작
-            </a>
+            <button type="button" className="btn btn-primary" onClick={startNewConsult}>
+              새 상담
+            </button>
           </nav>
         </div>
       </header>
@@ -358,95 +380,17 @@ export default function Home() {
       </div>
 
       <main id="main">
-        <section className="hero" aria-label="서비스 소개">
-          <div className="hero-inner rel">
-            <div className="hero-text">
-              <p className="hero-kicker">특수교육 지원제도 상담 지원</p>
-              <h1>
-                담당자님, 안녕하세요.
-                <br />
-                <span className="hero-quote">
-                  “소관이 달라도, 한 화면에서 확인하실 수 있습니다”
-                </span>
-              </h1>
-              <p className="hero-lead">
-                흩어진 특수교육·복지·의료 제도를 아이 조건에 맞게 정리하고, 담당자에게{" "}
-                <strong>신청 순서와 학부모 안내문까지 한 번에</strong> 제공하는 업무도구입니다.
-              </p>
-              <div className="hero-cta">
-                <a href="#step1" className="btn btn-primary">
-                  상담 시작하기
-                </a>
-              </div>
-            </div>
-
-            {/* 삽화. 담당자와 학부모가 같은 한 장을 함께 본다는 뜻이다.
-                파일이 없으면 자리째 사라진다 — HeroArt 주석 참고 */}
-            <HeroArt />
-          </div>
-        </section>
-
-        <div className="figures">
-          <dl className="figure-row">
-            {FIGURES.map((f) => (
-              <div className="figure" key={f.key}>
-                <dt>{f.key}</dt>
-                <dd>
-                  {f.value}
-                  <span className="unit">{f.unit}</span>
-                </dd>
-                <p>{f.note}</p>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        <div className="quick">
-          <div className="quick-card">
-            <p className="quick-title">자주 찾는 서비스</p>
-            <nav className="quick-grid" aria-label="자주 찾는 서비스">
-              {QUICK.map((q) => (
-                <a href={q.href} className="quick-item" key={q.label}>
-                  <span className="quick-ic">
-                    <Icon name={q.icon} />
-                  </span>
-                  <span className="quick-label">{q.label}</span>
-                  <span className="quick-desc">{q.desc}</span>
-                </a>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-
         <div className="page-head">
           <div className="page-head-inner rel">
-            <p className="crumb">홈 &gt; 상담 지원 &gt; 특수교육 지원제도 확인</p>
+            {/* 첫 화면에 입력 칸이 보이도록 한 줄로 줄였다 (경로 표시 · 긴 설명 삭제) */}
             <h1 className="h-xl">특수교육 지원제도 상담 지원</h1>
             <p className="lead">
-              <strong>판정하지 않습니다. 확인 목록을 드립니다.</strong> 모든 항목에 근거 법령과 지침
-              출처가 붙고, 입력값은 저장되지 않습니다. 지금 정리된 제도와 마감일은 만{" "}
-              {SCOPE_AGE_MIN}세~만 {SCOPE_AGE_MAX}세 구간에 맞춰져 있습니다.
+              조건을 넣으면 <strong>안내문 · 확인사항</strong>이 나오고, 서류를 받을 때는{" "}
+              <strong>빠진 서류</strong>를 찾아 줍니다. 판정하지 않습니다 — 확인 목록을 드립니다.
+              (만 {SCOPE_AGE_MIN}~{SCOPE_AGE_MAX}세 기준)
             </p>
           </div>
-          <ol className="steps">
-            {STEPS.map((s) => (
-              <li key={s.no}>
-                <a
-                  href={s.href}
-                  className={`step ${activeStep === s.no ? "step-on" : ""}`}
-                  onClick={() => setActiveStep(s.no)}
-                >
-                  <span className="step-num">{s.no}</span>
-                  <span>
-                    <strong>{s.title}</strong>
-                    <br />
-                    <span className="b-sm">{s.desc}</span>
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
+          {/* 단계 카드는 위 탭(1·2·3)과 같은 내용이라 뺐다 — 입력 칸이 첫 화면에 들어오게 */}
         </div>
 
         {/* ═══ 1단계 ═══ */}
@@ -780,6 +724,9 @@ export default function Home() {
               <a href="#step1" onClick={() => setActiveStep(1)}>
                 조건 수정
               </a>
+              <button type="button" className="sum-new" onClick={startNewConsult}>
+                새 상담
+              </button>
             </div>
 
             <div className="tint-card rel">
@@ -825,7 +772,7 @@ export default function Home() {
                     {sheet.keyWarnings.length}
                     <span className="unit">건</span>
                   </p>
-                  <span className="subcard-sub">아래 시트 맨 위에 표시</span>
+                  <span className="subcard-sub">아래 「안내 전 확인사항」에 표시</span>
                 </div>
               </div>
 
@@ -923,6 +870,13 @@ export default function Home() {
 
             <div className="result-stack rel">
 
+              {/* 담당자가 먼저 짚고(안내 전 확인사항) 그다음 안내문을 건넨다 — 「안내 전」이라는 이름대로 */}
+              <StaffBrief
+                documentsFirst={sheet.documentsFirst}
+                urgentDeadlines={sheet.deadlines.filter((d) => d.urgent)}
+                keyWarnings={sheet.keyWarnings}
+              />
+
               <LetterPanel
                 letter={shownLetter}
                 isAi={Boolean(aiLetter)}
@@ -932,12 +886,6 @@ export default function Home() {
                 onCopy={copyLetter}
                 onRewrite={rewriteWithAi}
                 onReset={resetLetter}
-              />
-
-              <StaffBrief
-                documentsFirst={sheet.documentsFirst}
-                urgentDeadlines={sheet.deadlines.filter((d) => d.urgent)}
-                keyWarnings={sheet.keyWarnings}
               />
 
               {/* 조건이 바뀌면 체크를 처음부터 — key 가 바뀌면 상태가 새로 시작된다 */}
@@ -969,9 +917,24 @@ export default function Home() {
         </section>
         )}
 
-        <NoticeBoard />
 
         <Faq />
+
+        {/* 숫자로 보는 현장 — 맨 위에 있던 것을 내렸다. 담당자는 열자마자 입력부터 한다 */}
+        <div className="figures">
+          <dl className="figure-row">
+            {FIGURES.map((f) => (
+              <div className="figure" key={f.key}>
+                <dt>{f.key}</dt>
+                <dd>
+                  {f.value}
+                  <span className="unit">{f.unit}</span>
+                </dd>
+                <p>{f.note}</p>
+              </div>
+            ))}
+          </dl>
+        </div>
 
         <Reference regionId={regionId} />
       </main>

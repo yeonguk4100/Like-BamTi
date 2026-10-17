@@ -37,7 +37,7 @@ export function StaffBrief({
       <div className="panel-body">
         {nothing && (
           <p className="hint" style={{ marginTop: 0 }}>
-            이 조건에서는 추가 확인이 필요한 항목이 없습니다. 위 안내문을 그대로 전달할 수 있습니다.
+            이 조건에서는 추가 확인이 필요한 항목이 없습니다. 아래 안내문을 그대로 전달할 수 있습니다.
           </p>
         )}
 

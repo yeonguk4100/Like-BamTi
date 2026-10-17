@@ -73,16 +73,6 @@ export const FIGURES = [
 ];
 
 
-export const QUICK = [
-  { href: "#step1", icon: "doc", label: "상담 시작", desc: "조건 입력" },
-  { href: "#step2", icon: "sheet", label: "확인 시트", desc: "담당자용" },
-  { href: "#step3", icon: "mail", label: "안내문 만들기", desc: "학부모용" },
-  { href: "#deadlines", icon: "calendar", label: "마감일 보기", desc: "재선정·기한" },
-  { href: "#reference", icon: "compare", label: "지역별 명칭", desc: "카드 대조표" },
-  { href: "#forms", icon: "folder", label: "서식 자료실", desc: "제출 서류" },
-  { href: "#faq", icon: "help", label: "자주 묻는 질문", desc: "상담 FAQ" },
-  { href: "#notice-board", icon: "bell", label: "공지사항", desc: "지침 개정" },
-];
 
 export const LOOKUP_TARGETS = [
   { id: "guide", label: "선정·배치 지침 문서", hint: "이 교육청 지침이 어디 있는지" },

@@ -2702,3 +2702,20 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   border-color: var(--line);
   background: var(--primary-tint-2);
 }
+
+/* 현재 조건 띠의 「새 상담」 — 다음 전화를 받을 때 조건을 한 번에 비운다 */
+/* 색은 바로 위 .sum-label · .summary-bar a 와 같은 값을 쓴다 */
+.sum-new {
+  padding: 4px 12px;
+  border: 1px solid #4a6d99;
+  border-radius: 999px;
+  background: transparent;
+  color: #c2d6ec;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sum-new:hover {
+  border-color: #c2d6ec;
+  color: #fff;
+}
