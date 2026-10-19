@@ -74,6 +74,21 @@ curl -X POST http://localhost:3000/api/sheet \
 배포 확인용. AI 키(`ai.configured`)와 공공데이터 키(`publicData.configured`)가 설정됐는지
 `true`/`false`로만 알린다. **키 값은 응답에 넣지 않는다.**
 
+## 갱신 파이프라인 (`SUPABASE_URL` · `SUPABASE_SECRET_KEY` · `CRON_SECRET` 필요)
+
+### `GET /api/cron/sync`
+
+Vercel Cron 이 하루 한 번 부른다. 헤더 `Authorization: Bearer {CRON_SECRET}` 가 맞아야 한다 (아니면 401).
+`?manual=1` 을 붙이면 기록에 `manual` 로 남는다. 공식 원문을 다시 받아 `raw_snapshots` 와 해시로 비교하고,
+바뀐 것은 `review_queue` 에 올린다. 우리 데이터(`data.ts`)는 고치지 않는다.
+
+```json
+{ "ok": true, "trigger": "manual", "checked": 60, "added": 60, "changed": 0, "failed": 0,
+  "by_source": { "bokjiro": {…}, "gov24": {…}, "local": {…} }, "errors": [] }
+```
+
+`/api/health` 의 `supabase.lastRun` · `supabase.pendingReviews` 로 마지막 실행과 검토 대기 수를 본다.
+
 ## 공공데이터 라우트 (`DATA_GO_KR_KEY` 필요)
 
 ### `GET /api/welfare` — 공공 복지서비스 실데이터

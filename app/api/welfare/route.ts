@@ -17,6 +17,9 @@
 //
 // 아동 조건은 받지 않는다. 검색어 · 코드표의 코드 · 서비스ID 만 받는다.
 // 결과는 「확인용 원문」이다. 어떤 제도를 시트에 올릴지는 규칙이 정한다.
+//
+// 상세(id) 조회가 실패하면 Supabase 에 받아 둔 마지막 원문(raw_snapshots, 매일 cron 이 채운다)을 대신 낸다.
+// 그때는 응답에 cached.fetchedAt 이 붙고, 화면은 「○월 ○일에 받아 둔 원문」이라고 밝힌다.
 
 import {
   BOKJIRO_SOURCE,
@@ -31,6 +34,7 @@ import { REGIONS } from "@/app/lib/data";
 import { DataGoKrError } from "@/app/lib/data-go-kr";
 import { GOV24_SOURCE, Gov24Error, getService, searchServices } from "@/app/lib/gov24";
 import { LOCAL_WELFARE_SOURCE, getLocalService, listLocalServices } from "@/app/lib/localwelfare";
+import { getSnapshot } from "@/app/lib/supabase";
 import { fail } from "@/app/lib/validate";
 
 export const runtime = "nodejs";
@@ -161,6 +165,21 @@ export async function GET(request: Request) {
     }, NO_STORE);
   } catch (e) {
     if (e instanceof DataGoKrError || e instanceof BokjiroError || e instanceof Gov24Error) {
+      if (id && (source === "bokjiro" || source === "gov24")) {
+        const snap = await getSnapshot(source, id);
+        if (snap && snap.payload && typeof snap.payload === "object") {
+          const { _content, ...payload } = snap.payload as Record<string, unknown>;
+          void _content;
+          return Response.json(
+            {
+              source: source === "gov24" ? GOV24_SOURCE : BOKJIRO_SOURCE,
+              ...payload,
+              cached: { fetchedAt: snap.fetched_at, reason: e.message },
+            },
+            NO_STORE
+          );
+        }
+      }
       return fail(e.message, e.status);
     }
     return fail("공공 복지서비스 정보를 가져오지 못했습니다.", 500);

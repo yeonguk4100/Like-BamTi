@@ -281,6 +281,9 @@ npm run dev
 | `GEMINI_API_KEY` | 필수. 없으면 AI 버튼이 안내 메시지를 낸다 |
 | `GEMINI_MODEL` | 선택. 기본값 `gemini-3-flash-preview` |
 | `DATA_GO_KR_KEY` | 공공데이터포털 **일반 인증키(Decoding)**. `/api/welfare`가 쓴다. **Vercel에만 넣어 두었다** — 로컬 `.env.local`에는 없다 |
+| `SUPABASE_URL` | Supabase 프로젝트 주소 (`https://○○.supabase.co`). 갱신 파이프라인 저장소. **Vercel에만** |
+| `SUPABASE_SECRET_KEY` | Supabase **secret 키**(`sb_secret_…`, 옛 `service_role`도 됨 — `SUPABASE_SERVICE_ROLE_KEY` 이름도 읽는다). 서버에서만 쓴다. **publishable/anon 키가 아니다** |
+| `CRON_SECRET` | `/api/cron/sync` 를 부를 수 있는 값. Vercel Cron 이 `Authorization: Bearer` 로 붙여 보낸다 |
 
 **키가 없어도 화면과 규칙 계산은 그대로 동작한다.** AI는 버튼을 눌렀을 때만 호출된다.
 
@@ -302,6 +305,9 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/localwelfare.ts` | 한국사회보장정보원 「지자체복지서비스」 API. 시도·시군구 자체사업 (`source=local`) |
 | `app/lib/data-go-kr.ts` | 공공데이터포털 공통 — 인증키(Encoding·Decoding 둘 다), XML 호출·오류 코드·작은 파서 |
 | `app/lib/gov24.ts` | 행정안전부 「공공서비스(혜택) 정보」 API. 구비서류·지원조건(장애인·연령) |
+| `app/lib/supabase.ts` | Supabase PostgREST 를 `fetch` 로 (SDK 없음). secret 키는 서버에서만. 마지막 원문 조회 · 동기화 기록 |
+| `app/lib/sync.ts` | **갱신 파이프라인 1단계(감지).** 공식 원문을 받아 해시 비교 → `raw_snapshots` · 바뀐 것은 `review_queue`. `data.ts`는 고치지 않는다 |
+| `supabase/migrations/` | 테이블 3개 (`sync_runs` · `raw_snapshots` · `review_queue`). RLS 를 켜고 정책을 두지 않아 secret 키로만 다룬다 |
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
 | `app/page.tsx` | 상담 화면 본체. 규칙 모듈을 브라우저에서 직접 부른다 |
@@ -342,7 +348,8 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `GET /api/reference` | 지역별 카드 명칭 · 서식 번호 대조표 | ❌ |
 | `GET /api/notices` | 알림 마당 · 서식 자료실 · FAQ | ❌ |
 | `GET /api/health` | 배포 확인. 키 값은 응답에 넣지 않는다 | ❌ |
-| `GET /api/welfare` | 공공 복지서비스 실데이터 (중앙부처복지서비스 · `source=local` 지자체 · `source=gov24`) | ❌ |
+| `GET /api/welfare` | 공공 복지서비스 실데이터 (중앙부처복지서비스 · `source=local` 지자체 · `source=gov24`). 상세가 실패하면 Supabase 의 마지막 원문을 `cached` 와 함께 낸다 | ❌ |
+| `GET /api/cron/sync` | 갱신 감지. Vercel Cron 하루 1번 (`vercel.json`). `CRON_SECRET` 없으면 401 | ❌ |
 | `POST /api/letter` | 안내문 문장화 | ⭕ |
 | `POST /api/lookup` | 빈칸 찾기 | ⭕ |
 
@@ -354,7 +361,8 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 
 ### 배포 — Vercel
 
-`vercel.json`을 두지 않는다. Next.js 프로젝트는 Vercel이 그대로 알아본다.
+`vercel.json`에는 **cron 한 줄만** 둔다 (`/api/cron/sync`, `0 18 * * *` UTC = 한국 새벽 3시경, Hobby 는 하루 1회까지).
+빌드 설정은 넣지 않는다 — Next.js 프로젝트는 Vercel이 그대로 알아본다.
 환경변수는 Project → Settings → Environment Variables 에 넣고 **다시 배포**해야 반영된다.
 올린 뒤 `/api/health`로 확인한다. AI 라우트에는 `maxDuration`을 명시했다
 (제미나이 응답이 Vercel 기본 한도보다 오래 걸린다).

@@ -11,6 +11,7 @@
 //  - 우리 데이터를 덮지 않는다. 위 표(우리가 확인한 값)와 나란히 두고 출처·기준 시점을 붙인다.
 //    둘이 다르면 담당자가 보고 판단한다 — 판정하지 않는다 (설계 원칙 1번).
 //  - 실패해도 카드는 그대로다. 공식 정보 칸만 「불러오지 못했다」고 알린다.
+//  - 공식 API 가 막히면 서버가 매일 받아 두는 마지막 원문(Supabase)을 대신 받는다. 그때는 받은 날짜를 밝힌다.
 
 import { useEffect, useRef, useState } from "react";
 import type { BokjiroDetail } from "../lib/bokjiro";
@@ -19,9 +20,10 @@ import { APPLY_FLOW_STEPS, bokjiroPageUrl, gov24PageUrl } from "../lib/screen";
 
 export type OfficialSource = "bokjiro" | "gov24";
 
-type Loaded =
+type Loaded = (
   | { kind: "bokjiro"; detail: BokjiroDetail; sourceName: string; updateCycle: string }
-  | { kind: "gov24"; detail: Gov24Detail; sourceName: string };
+  | { kind: "gov24"; detail: Gov24Detail; sourceName: string }
+) & { cachedAt?: string };
 type State = { status: "idle" | "loading" } | { status: "ok"; data: Loaded } | { status: "error"; message: string };
 
 const LABEL: Record<OfficialSource, { title: string; open: string; url: (id: string) => string }> = {
@@ -60,14 +62,16 @@ export function OfficialInfo({
       .then(async (res) => {
         const body = await res.json().catch(() => ({}));
         if (!res.ok || !body.detail) throw new Error(body.error || "공식 정보를 불러오지 못했습니다.");
+        const cachedAt: string | undefined = body.cached?.fetchedAt;
         const data: Loaded =
           source === "gov24"
-            ? { kind: "gov24", detail: body.detail, sourceName: body.source?.name ?? "공공서비스(혜택) 정보" }
+            ? { kind: "gov24", detail: body.detail, sourceName: body.source?.name ?? "공공서비스(혜택) 정보", cachedAt }
             : {
                 kind: "bokjiro",
                 detail: body.detail,
                 sourceName: body.source?.name ?? "중앙부처복지서비스",
                 updateCycle: body.source?.updateCycle ?? "",
+                cachedAt,
               };
         memo.set(key, data);
         if (!cancelled) setState({ status: "ok", data });
@@ -104,6 +108,12 @@ export function OfficialInfo({
         </p>
       )}
 
+      {state.status === "ok" && state.data.cachedAt && (
+        <p className="td-sub">
+          지금 공식 API 연결이 늦어 <strong>{cachedDate(state.data.cachedAt)}</strong>에 받아 둔 원문을 보여 드립니다.
+          최신 내용은 「{label.open}」로 확인해 주세요.
+        </p>
+      )}
       {state.status === "ok" && state.data.kind === "bokjiro" && <BokjiroBody data={state.data} />}
       {state.status === "ok" && state.data.kind === "gov24" && <Gov24Body data={state.data} />}
     </section>
@@ -111,6 +121,13 @@ export function OfficialInfo({
 }
 
 /* ─── 공통 조각 ─── */
+
+/** 받아 둔 시각을 「10월 19일」로. 한국 시간 기준 */
+function cachedDate(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "이전";
+  return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "long", day: "numeric" }).format(d);
+}
 
 function Row({ label, children, first }: { label: string; children: React.ReactNode; first?: boolean }) {
   return (
