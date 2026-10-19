@@ -6,7 +6,7 @@
 // children 은 「AI 빈칸 찾기」 패널이 들어가는 자리다 (LookupPanel).
 
 import type { ReactNode } from "react";
-import type { Track } from "../lib/data";
+import { localSourcesFor, type Track } from "../lib/data";
 import { TRACK_LABEL, type ResolvedProgram, type Sheet } from "../lib/build-sheet";
 import { TRACK_DESC, TRACK_ORDER, type TrackFilter, type ViewMode } from "../lib/screen";
 import { LocalPrograms } from "./LocalPrograms";
@@ -168,7 +168,7 @@ export function ProgramList({
         sido={sheet.region.name}
         sigungu={sigungu}
         age={sheet.age}
-        fallbackSources={sheet.localSources}
+        fallbackSources={localSourcesFor(sheet.region, sigungu)}
       />
 
       {children}

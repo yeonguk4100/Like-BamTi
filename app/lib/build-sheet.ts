@@ -16,7 +16,7 @@ import {
   NEEDS_OTHER_OFFICE,
   LEVELS,
   LOCAL_PROGRAMS,
-  LOCAL_SOURCES,
+  localSourcesFor,
   OVERLAP_RULES,
   PROCEDURES,
   PROCEDURE_FORMS_BY_REGION,
@@ -638,7 +638,8 @@ export function buildSheet(input: Input) {
   });
 
   /* 조사되지 않은 지역 자체사업 — 무엇이 비었는지 화면에 그대로 보여준다 */
-  const localSources = LOCAL_SOURCES[input.regionId] ?? [];
+  /* 시·군을 모르는 서버 쪽 값 — 화면은 거주 시·군을 넣어 다시 만든다 */
+  const localSources = localSourcesFor(region);
   const hasLocalPrograms = programs.some((p) => p.local);
 
   return {
