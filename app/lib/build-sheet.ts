@@ -282,14 +282,32 @@ export function age9EndOfMonth(birthDate: string): string | null {
  * 만 9세가 되는 달의 말일이 기준일(학년도 시작)보다 앞인가 — 이미 지났으면 발달지체로는 선정되지 않는다.
  * 오늘 날짜를 쓰지 않는다. 학년도 중에 지나는 아동은 「지나지 않음」으로 두고 날짜를 그대로 안내한다
  */
-export function age9PassedAtBase(birthDate: string): boolean {
+export function age9PassedAtBase(birthDate: string, rule: "endOfMonth" | "endOfSchoolYear" = "endOfMonth"): boolean {
+  const end = age9EndIso(birthDate, rule);
+  return end !== null && end < BASE_DATE;
+}
+
+/** 교육청 쪽 발달지체 종료일 (yyyy-mm-dd). 학년도는 3월 1일 ~ 다음 해 2월 말일 */
+function age9EndIso(birthDate: string, rule: "endOfMonth" | "endOfSchoolYear"): string | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
-  const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(BASE_DATE);
-  if (!m || !d) return false;
-  const year = Number(m[1]) + 9;
-  const month = Number(m[2]);
-  const end = `${year}-${String(month).padStart(2, "0")}-${String(new Date(year, month, 0).getDate()).padStart(2, "0")}`;
-  return end < BASE_DATE;
+  if (!m) return null;
+  let year = Number(m[1]) + 9;
+  let month = Number(m[2]);
+  if (rule === "endOfSchoolYear") {
+    // 만 9세가 되는 날이 속한 학년도의 끝 — 3~12월생은 다음 해 2월, 1~2월생은 그해 2월
+    if (month >= 3) year += 1;
+    month = 2;
+  }
+  const last = new Date(year, month, 0).getDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+}
+
+/** 교육청 쪽 발달지체 종료일 — 「2027년 2월 28일」 */
+export function age9EduEnd(birthDate: string, rule: "endOfMonth" | "endOfSchoolYear" = "endOfMonth"): string | null {
+  const iso = age9EndIso(birthDate, rule);
+  if (!iso) return null;
+  const [y, mo, d] = iso.split("-").map(Number);
+  return `${y}년 ${mo}월 ${d}일`;
 }
 
 /** 기준일(학년도 시작) 시점의 만 나이. 오늘 날짜를 쓰지 않아 렌더링이 어긋나지 않는다 */
@@ -366,7 +384,7 @@ export function buildSheet(input: Input) {
   const excludedByAge: { name: string; reason: string }[] = [];
   /** 신청 상황 때문에 지금은 해당하지 않는 제도 — 취학유예 · 면제 중에는 학교를 다니지 않는다 */
   const excludedBySituation: { name: string; reason: string }[] = [];
-  const notAttending = input.procedureId === "deferral";
+
 
   /* 지역 값을 먼저 덮는다 — 대상 조건(appliesTo)도 지역마다 달라서 거르기 전에 합쳐야 한다.
      지역 값의 verified·source·asOf 가 그 지역에서의 확인 여부다 */
@@ -382,8 +400,11 @@ export function buildSheet(input: Input) {
     if (a?.levels && !a.levels.includes(input.levelId)) return false;
     if (a?.disabilities && !a.disabilities.includes(input.disabilityId)) return false;
     if (a?.regions && !a.regions.includes(input.regionId)) return false;
-    if (notAttending && p.requiresAttendance) {
-      excludedBySituation.push({ name: p.name, reason: "학교에 다니는 동안 받는 지원 — 재취학하면 신청합니다" });
+    const blocked = p.notFor?.find(
+      (n) => n.procedures?.includes(input.procedureId) || n.levels?.includes(input.levelId)
+    );
+    if (blocked) {
+      excludedBySituation.push({ name: p.name, reason: blocked.reason });
       return false;
     }
 
@@ -443,11 +464,12 @@ export function buildSheet(input: Input) {
     });
   }
   if (input.levelId === "kinder" || input.levelId === "daycare") {
-    deadlines.unshift({
-      label: "유치원 배치 (처음학교로)",
-      when: "10월 말까지 선배치자 입력 · 11월 시행계획 안내",
-      urgent: true,
-    });
+    // 날짜는 지침에 적힌 지역만 쓴다. 없으면 공고를 확인하라고만 한다
+    deadlines.unshift(
+      region.kinderEntry
+        ? { label: "유치원 배치 (처음학교로)", when: region.kinderEntry, urgent: true }
+        : { label: "유치원 배치 (처음학교로)", when: "유치원 입학은 「처음학교로」로 합니다 — 일정은 교육지원청 공고를 확인하세요" }
+    );
   }
   if (input.levelId === "high") {
     deadlines.push({
@@ -458,11 +480,18 @@ export function buildSheet(input: Input) {
   }
 
   /* 생년월일을 안 넣었어도 발달지체면 만 9세 종료는 짚는다. 날짜 대신 계산 방식을 쓴다 */
+  /* 발달지체 종료 — 교육청 쪽은 지역 지침마다 다르고(강원 그달 말일 · 경남 그 학년도 끝), 복지부 쪽은 만 9세가 되는 달이다 */
+  const age9Rule = region.age9Rule ?? "endOfMonth";
+  const schoolYearRule = age9Rule === "endOfSchoolYear";
   const age9 =
     disability.reselection === "age9"
-      ? (age9EndOfMonth(input.birthDate) ?? AGE9_WITHOUT_DATE)
+      ? (age9EduEnd(input.birthDate, age9Rule) ??
+        (schoolYearRule ? "만 9세가 되는 학년도의 끝(2월 말일)" : AGE9_WITHOUT_DATE))
       : null;
-  const age9Passed = disability.reselection === "age9" && age9PassedAtBase(input.birthDate);
+  /** 복지부 쪽 — 장애 등록 없이 받는 발달재활서비스는 만 9세가 되는 달까지 */
+  const age9Welfare =
+    disability.reselection === "age9" ? (age9EndOfMonth(input.birthDate) ?? AGE9_WITHOUT_DATE) : null;
+  const age9Passed = disability.reselection === "age9" && age9PassedAtBase(input.birthDate, age9Rule);
   if (age9 && age9Passed) {
     deadlines.unshift({
       label: "발달지체 적용 종료",
@@ -474,7 +503,9 @@ export function buildSheet(input: Input) {
   } else if (age9) {
     deadlines.unshift({
       label: "발달지체 재선정 마감",
-      when: `${age9}까지 유지 후 종료 — 그 전에 재진단·재선정을 해야 방과후 교육활동·치료지원이 끊기지 않습니다`,
+      when: schoolYearRule
+        ? `만 9세가 될 때 재선정합니다 — 재선정되지 않으면 ${age9}(그 학년도 끝)까지 지원 후 종료됩니다`
+        : `${age9}까지 유지 후 종료 — 그 전에 재진단·재선정을 해야 방과후 교육활동·치료지원이 끊기지 않습니다`,
       urgent: true,
     });
   }
@@ -482,12 +513,28 @@ export function buildSheet(input: Input) {
   /* 담당자 인터뷰 Q2 — 지침에는 없지만 실제 대기 기간을 좌우하는 사실.
      「특수교육운영위원회를 거치게 되어있음. 한달에 한번. 회의 끝나고 바로 신청 들어오면
      한달 걸리시는거고 회의임박해서 신청하신 분들은 바로 결과나옴」 */
-  deadlines.push({
-    label: "특수교육운영위원회 심사",
-    when:
-      `${level.committee}가 월 1회 열립니다 — 회의 직후에 신청하면 다음 회의까지 최대 한 달을 ` +
-      "기다리고, 회의 직전에 신청하면 바로 심의됩니다. 다음 회의 날짜를 확인해 안내하세요",
+  /* 지침에 연간 개최일이 있으면 그대로 싣고, 지난 날짜는 빼고 보라고 밝힌다.
+     오늘 날짜로 거르지 않는다 — 서버와 화면 계산이 어긋나지 않게 (작업 규칙) */
+  const committeeDates = (region.highCommitteeDates ?? []).map((d) => {
+    const [, m, day] = d.split("-").map(Number);
+    return `${m}월 ${day}일`;
   });
+  const committeeYear = region.highCommitteeDates?.[0]?.slice(0, 4);
+  deadlines.push(
+    input.levelId === "high" && committeeDates.length > 0
+      ? {
+          label: "특수교육운영위원회 심사",
+          when:
+            `${level.committee} ${committeeYear}년 개최일 — ${committeeDates.join(" · ")} ` +
+            `(${region.highCommitteeNote ?? "일정은 바뀔 수 있음"}). 이미 지난 날짜는 빼고 다음 회의에 맞춰 안내하세요`,
+        }
+      : {
+          label: "특수교육운영위원회 심사",
+          when:
+            `${level.committee}가 열리는 날에 심의합니다 — 한 달에 한 번 여는 곳이 많아, 회의 직후에 신청하면 ` +
+            "다음 회의까지 기다릴 수 있습니다. 다음 회의 날짜를 확인해 안내하세요",
+        }
+  );
 
   deadlines.push(...APPEAL_DEADLINES.map((d) => ({ ...d })));
 
@@ -562,9 +609,15 @@ export function buildSheet(input: Input) {
   } else if (age9) {
     warnings.push({
       kind: "age9Cross",
-      title: `만 9세에 두 부처의 지원이 같이 끝납니다 — ${age9}`,
-      detail:
-        "교육청 쪽은 발달지체 특수교육대상자 지위가 이 날까지 유지된 뒤 종료됩니다. " +
+      title:
+        schoolYearRule && age9Welfare !== age9
+          ? `만 9세에 두 부처의 지원이 끝납니다 — 복지부 ${age9Welfare} · 교육청 ${age9}`
+          : `만 9세에 두 부처의 지원이 같이 끝납니다 — ${age9}`,
+      detail: schoolYearRule
+        ? `교육청 쪽은 만 9세가 될 때 발달지체를 재선정하고, 재선정되지 않으면 그 학년도 끝(${age9})까지 지원한 뒤 종료합니다. ` +
+          `복지부 쪽은 장애 등록 없이 발달재활서비스를 받고 있다면 만 9세가 되는 달(${age9Welfare})까지만 지원됩니다. ` +
+          "소관이 달라 어느 쪽도 다른 쪽을 알려주지 않습니다. 그 전에 ① 재진단·재선정과 ② 장애 등록 여부를 함께 확인하도록 보호자에게 안내하세요."
+        : "교육청 쪽은 발달지체 특수교육대상자 지위가 이 날까지 유지된 뒤 종료됩니다. " +
         "복지부 쪽은 장애 등록 없이 발달재활서비스를 받고 있다면 만 9세가 되는 달까지만 지원됩니다. " +
         "소관이 달라 어느 쪽도 다른 쪽을 알려주지 않습니다. " +
         "그 전에 ① 재진단·재선정과 ② 장애 등록 여부를 함께 확인하도록 보호자에게 안내하세요.",
@@ -633,6 +686,7 @@ export function buildSheet(input: Input) {
     programs,
     deadlines,
     age9,
+    age9Welfare,
     age9Passed,
     sender: input.sender,
   });
@@ -660,7 +714,9 @@ export function buildSheet(input: Input) {
     localSources,
     hasLocalPrograms,
     age9,
-    /** 만 9세 달 말일이 학년도 시작보다 앞 — 발달지체로는 선정되지 않는다 */
+    /** 복지부 쪽 종료 (만 9세가 되는 달) — 교육청 쪽(age9)과 다른 지역이 있다 */
+    age9Welfare,
+    /** 교육청 쪽 종료일이 학년도 시작보다 앞 — 발달지체로는 선정되지 않는다 */
     age9Passed,
     programs,
     deadlines,
@@ -685,6 +741,7 @@ function buildParentLetter(args: {
   programs: ResolvedProgram[];
   deadlines: Deadline[];
   age9: string | null;
+  age9Welfare: string | null;
   age9Passed: boolean;
   sender?: { org?: string; name?: string; tel?: string };
 }) {
@@ -699,6 +756,7 @@ function buildParentLetter(args: {
     programs,
     deadlines,
     age9,
+    age9Welfare,
     age9Passed,
     sender,
   } = args;
@@ -775,6 +833,12 @@ function buildParentLetter(args: {
     lines.push(`  ※ 만 9세가 지나(${age9}) 「발달지체」로는 선정되지 않습니다.`);
     lines.push("     · 교육청 — 다른 장애영역으로 진단·평가를 받을 수 있는지 신청처에 확인하세요.");
     lines.push("     · 읍면동 — 장애 등록 없이 받던 발달재활서비스는 만 9세가 된 달에 끝났습니다.");
+    lines.push("       장애 등록을 하시면 만 18세 미만까지 이어집니다. 읍면동에서 확인하세요.");
+  } else if (age9 && age9Welfare && age9Welfare !== age9) {
+    lines.push("");
+    lines.push("  ※ 만 9세가 되면 두 가지가 끝납니다.");
+    lines.push(`     · 교육청 — 만 9세가 될 때 다시 검사(재선정)합니다. 재선정되지 않으면 ${age9}까지 지원됩니다.`);
+    lines.push(`     · 읍면동 — 장애 등록 없이 발달재활서비스를 받고 계시면 ${age9Welfare}에 지원이 끝납니다.`);
     lines.push("       장애 등록을 하시면 만 18세 미만까지 이어집니다. 읍면동에서 확인하세요.");
   } else if (age9) {
     lines.push("");

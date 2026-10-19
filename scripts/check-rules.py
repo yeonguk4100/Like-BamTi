@@ -20,6 +20,25 @@ PROCS = ["new", "advance", "reassign", "deferral", "reenroll"]
 BIRTHS = ["", "2024-06-15", "2022-01-10", "2020-05-10", "2019-12-31", "2017-02-15", "2017-03-01",
           "2016-01-15", "2014-02-20", "2011-08-08", "2008-03-03"]
 
+# 지침 원문 「제출서류」 표 (강원 2026 길잡이 6~7쪽 · 경남 2026 지침 13~14 · 42~56쪽)
+EXPECTED_DOCS = {
+    "gangwon": {
+        "new": ["applicantList", "requestForm", "basicSurvey", "privacyConsent", "residentCopy",
+                "disabilityProof", "medicalRecords", "graduationCert"],
+        "advance": ["advanceList", "advanceRequest", "privacyConsent", "residentCopy", "principalOpinionHigh", "iepMinutes"],
+        "reassign": ["reassignRequest", "privacyConsent", "iepMinutes", "placementResultCopy", "residentCopy"],
+        "deferral": ["deferralRequest", "iepMinutes", "deferralProof"],
+        "reenroll": ["reenrollRequest", "residentCopy", "placementResultCopy", "privacyConsent"],
+    },
+    "gyeongnam": {
+        "new": ["applicantList", "requestForm", "basicSurvey", "placementRequest", "principalOpinion", "privacyConsent"],
+        "advance": ["advanceList", "advanceRequest", "privacyConsent", "placementResultCopy"],
+        "reassign": ["reassignList", "reassignRequest", "privacyConsent", "placementResultCopy", "iepMinutes", "residentCopy"],
+        "deferral": ["deferralList", "deferralRequest", "privacyConsent", "iepMinutes", "placementResultCopy", "deferralProof"],
+        "reenroll": ["reenrollList", "reenrollRequest", "privacyConsent", "placementResultCopy", "residentCopy"],
+    },
+}
+
 
 def post(body):
     req = urllib.request.Request(BASE + "/api/sheet", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
@@ -70,7 +89,7 @@ for region, dis, level, proc, birth in itertools.product(REGIONS, DIS, LEVELS, P
                 *(ln for ln in L.splitlines() if "만 9세" in ln or "까지" in ln)]:
         for m in DATE.finditer(src):
             iso = f"{m[1]}-{int(m[2]):02d}-{int(m[3]):02d}"
-            if iso < BASE_DATE and "지났" not in src and "지나" not in src:
+            if iso < BASE_DATE and not any(w in src for w in ("지났", "지나", "지난")):
                 problems["지난 날짜를 앞으로 할 일처럼"].append(f"{tag}: {m[0]}")
     # 서류
     keys = [x["key"] for x in s["documents"]]
@@ -99,6 +118,35 @@ for region, dis, level, proc, birth in itertools.product(REGIONS, DIS, LEVELS, P
         problems["나이·학교급 불일치인데 알림 없음"].append(tag)
     if (s["age"] is None or lo <= s["age"] <= hi) and flagged:
         problems["맞는 입력에 불일치 알림"].append(tag)
+    # ── 원문과 맞는가 (강원 2026 길잡이 · 경남 2026 지침 · 행안부 공공서비스 원문, 2026-10-19 대조) ──
+    got = sorted(x["key"] for x in s["documents"])
+    if got != sorted(EXPECTED_DOCS[region][proc]):
+        problems["제출 서류가 지침 원문과 다름"].append(f"{region}/{proc}: {got}")
+    names = [p["name"] for p in s["programs"]]
+    if level == "daycare":
+        for bad in ("치료지원", "지원인력", "통학비", "방과후학교", "특기적성"):
+            if any(bad in nm for nm in names):
+                problems["어린이집 아동에게 교육청 서비스"].append(f"{tag}: {bad}")
+    if dis == "developmentalDelay" and birth:
+        y, m = int(birth[:4]) + 9, int(birth[5:7])
+        if region == "gyeongnam":
+            ey, em = (y + 1 if m >= 3 else y), 2
+        else:
+            ey, em = y, m
+        import calendar
+        want = f"{ey}년 {em}월 {calendar.monthrange(ey, em)[1]}일"
+        if s["age9"] != want:
+            problems["만 9세 종료일이 지역 규칙과 다름"].append(f"{tag}: {s['age9']} ≠ {want}")
+    committee = next((x["when"] for x in s["deadlines"] if x["label"] == "특수교육운영위원회 심사"), "")
+    if region == "gyeongnam" and level == "high" and "10월 15일" not in committee:
+        problems["경남 고등 운영위원회 일정 빠짐"].append(tag)
+    if "월 1회 열립니다" in committee:
+        problems["운영위원회 주기를 단정"].append(tag)
+    kinder = next((x["when"] for x in s["deadlines"] if "처음학교로" in x["label"]), "")
+    if region == "gyeongnam" and "10월 말" in kinder:
+        problems["경남에 강원 처음학교로 날짜"].append(tag)
+    if level == "kinder" and "교육지원청" not in s["level"]["submitTo"]:
+        problems["유치원 신청처"].append(tag)
     if s["programs"] == []:
         problems["제도 0개"].append(tag)
     front[len(s["keyWarnings"])] += 1

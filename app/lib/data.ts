@@ -39,6 +39,17 @@ export type Region = {
   legacyTermInGuide: boolean;
   guideName: string;
   /**
+   * 발달지체 특수교육대상자 지위가 끝나는 때 — 지역 지침마다 다르다 (2026-10-19 원문 대조).
+   *  - endOfMonth : 만 9세가 되는 달 말일까지 유지 후 종료 (강원 길잡이 — 「2026.3.14 → 2026.3월 말일」)
+   *  - endOfSchoolYear : 만 9세가 될 때 재선정, 안 되면 그 학년도까지 지원 (경남 지침 — 「해당 학년도까지」)
+   */
+  age9Rule?: "endOfMonth" | "endOfSchoolYear";
+  /** 유치원 입학(처음학교로) 일정 — 지침에 날짜가 있는 지역만 */
+  kinderEntry?: string;
+  /** 도 특수교육운영위원회(고등학교) 개최일 — 지침에 있는 지역만. 기준일 이후 것만 화면에 낸다 */
+  highCommitteeDates?: string[];
+  highCommitteeNote?: string;
+  /**
    * MVP 구현 대상인지.
    *
    * false 인 지역은 **대조만 했고 구현하지 않았다.** 화면에서 고를 수 없고
@@ -84,6 +95,9 @@ export const REGIONS: Region[] = [
     basicSurveyName: "기초조사 카드(보호자용 / 담임교사용)",
     legacyTermInGuide: false,
     guideName: "특수교육대상자 선정·배치 업무 길잡이",
+    age9Rule: "endOfMonth",
+    // 2026 길잡이 상급학교 진학 — 「처음학교로 시행계획(11월 안내) 확인, 10월말 선배치자 입력」
+    kinderEntry: "10월 말까지 선배치자 입력 · 11월 시행계획 안내 (특수학교 유치원과정은 처음학교로 대상이 아닙니다)",
     implemented: true,
     eduContact: {
       tel: "033-258-5390",
@@ -109,6 +123,10 @@ export const REGIONS: Region[] = [
     // 2026 지침에도 「장애등급」이 14회 남아 있다 (신청서류 목록의 「장애등급 결정서」, 배치 신청서의 「장애등급(정도)」 등)
     legacyTermInGuide: true,
     guideName: "2026. 특수교육대상자 선정 배치 업무 처리 지침",
+    age9Rule: "endOfSchoolYear",
+    // 2026 지침 「경상남도교육청 특수교육운영위원회 개최 일정」 — 개최일 10일 전까지 서류 제출, 변경될 수 있음
+    highCommitteeDates: ["2026-02-04", "2026-04-08", "2026-06-10", "2026-10-15", "2026-12-03"],
+    highCommitteeNote: "개최일 10일 전까지 서류 제출 · 일정은 바뀔 수 있음",
     // 2026 지침 원문(128쪽)에서 서식 번호를 다시 확인했다 (2026-10-17). 2025판보다 3번부터 2~3씩 밀렸다
     implemented: true,
     eduContact: {
@@ -333,7 +351,8 @@ export const LEVELS: Level[] = [
   {
     id: "kinder",
     name: "유치원",
-    submitTo: "해당 지역 특수교육지원센터",
+    // 강원 「영·유·초·중 → 해당 교육지원청」 · 경남 「유·초·중 → 지역교육지원청」 (영유아만 센터)
+    submitTo: "지역 교육지원청 (특수교육지원센터)",
     committee: "시·군 특수교육운영위원회",
     decider: "교육장",
   },
@@ -438,10 +457,10 @@ export type Program = {
   /** 행안부 「공공서비스(혜택) 정보」 서비스ID — 지역 값(byRegion)에서만 채워진다. 있으면 카드가 교육청 원문을 띄운다 */
   gov24Id?: string;
   /**
-   * 학교에 다니는 동안 학교를 통해 받는 지원 (방과후 · 지원인력 · 통학).
-   * 취학유예 · 면제 중에는 목록에서 빼고 「재취학하면 신청」으로 따로 보여준다
+   * 이 상황에서는 지금 해당하지 않는 제도 — 목록에서 빼고 이유와 함께 따로 보여준다 (숨기지 않는다).
+   * 예: 학교를 통해 받는 지원은 취학유예 중 · 어린이집 재원 중에는 받지 않는다
    */
-  requiresAttendance?: boolean;
+  notFor?: { procedures?: ProcedureId[]; levels?: LevelId[]; reason: string }[];
 } & Sourced;
 
 /** 한 지역에서만 다른 제도 값 — Program.byRegion */
@@ -483,6 +502,8 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "therapy",
+    // 강원 원문 「영아의 경우 재택 보육하고 있는 경우만」 · 길잡이 Q&A 「영아: 어린이집 다닐 경우 특수교육관련서비스 제공 불가」
+    notFor: [{ levels: ["daycare"], reason: "유치원 · 학교(영아는 특수교육지원센터)에 배치된 특수교육대상자 지원 — 어린이집 재원 중에는 받지 않고 배치 뒤 신청합니다. 장애영유아 지정 어린이집이면 교육지원청에 확인하세요" }],
     name: "치료지원",
     // 복지로 「(특수교육대상자) 치료지원서비스」(교육부). 금액·절차는 시도마다 달라 우리 값은 계속 「예시」다
     bokjiroId: "WLF00001113",
@@ -553,7 +574,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "afterschool",
-    requiresAttendance: true,
+    notFor: [{ procedures: ["deferral"], reason: "학교에 다니는 동안 받는 지원 — 재취학하면 신청합니다" }, { levels: ["daycare"], reason: "유치원 · 학교(영아는 특수교육지원센터)에 배치된 특수교육대상자 지원 — 어린이집 재원 중에는 받지 않고 배치 뒤 신청합니다. 장애영유아 지정 어린이집이면 교육지원청에 확인하세요" }],
     name: "방과후 교육활동 지원",
     track: "education",
     authority: "교육청",
@@ -615,7 +636,7 @@ export const PROGRAMS: Program[] = [
     // 담당자 인터뷰 Q3 — 「대부분 특수교육대상자가 되면 교육청에서 어떤 혜택을 주는지를
     // 가장 궁금해함」이고, 예로 든 것이 방과후 보조 인력이었다. 목록에 없던 제도다.
     id: "aideStaff",
-    requiresAttendance: true,
+    notFor: [{ procedures: ["deferral"], reason: "학교에 다니는 동안 받는 지원 — 재취학하면 신청합니다" }, { levels: ["daycare"], reason: "유치원 · 학교(영아는 특수교육지원센터)에 배치된 특수교육대상자 지원 — 어린이집 재원 중에는 받지 않고 배치 뒤 신청합니다. 장애영유아 지정 어린이집이면 교육지원청에 확인하세요" }],
     name: "지원인력 (보조인력) 배치",
     track: "education",
     authority: "교육청",
@@ -636,7 +657,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "commute",
-    requiresAttendance: true,
+    notFor: [{ procedures: ["deferral"], reason: "학교에 다니는 동안 받는 지원 — 재취학하면 신청합니다" }, { levels: ["daycare"], reason: "유치원 · 학교(영아는 특수교육지원센터)에 배치된 특수교육대상자 지원 — 어린이집 재원 중에는 받지 않고 배치 뒤 신청합니다. 장애영유아 지정 어린이집이면 교육지원청에 확인하세요" }],
     name: "통학 지원",
     track: "education",
     authority: "교육청",

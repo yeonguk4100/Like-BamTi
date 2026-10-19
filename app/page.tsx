@@ -17,8 +17,6 @@ import {
   type Track,
 } from "./lib/data";
 import {
-  AGE9_WITHOUT_DATE,
-  age9EndOfMonth,
   buildSheet,
   TRACK_LABEL,
 } from "./lib/build-sheet";
@@ -198,7 +196,8 @@ export default function Home() {
   const urgentCount = sheet.deadlines.filter((d) => d.urgent).length;
   const otherTrackCount = counts.welfare + counts.medical;
   const firstUrgent = sheet.deadlines.find((d) => d.urgent);
-  const age9Date = sheet.disability.reselection === "age9" ? age9EndOfMonth(birthDate) : null;
+  // 지역마다 종료 규칙이 달라(강원 그달 말일 · 경남 학년도 끝) 규칙이 낸 날짜를 쓴다. 생년월일이 없으면 카드가 따로 안내한다
+  const age9Date = sheet.disability.reselection === "age9" && birthDate ? sheet.age9 : null;
   const outOfScope =
     sheet.age !== null && (sheet.age < SCOPE_AGE_MIN || sheet.age > SCOPE_AGE_MAX);
 
@@ -835,8 +834,9 @@ export default function Home() {
                 <p className="tint-title">발달지체 지원 종료 예정일</p>
                 <p className="tint-status">{age9Date}</p>
                 <p className="tint-note">
-                  이 날짜까지 유지된 뒤 종료됩니다. 그 전에 재진단·재선정을 해야 방과후 교육활동과
-                  치료지원이 끊기지 않습니다.
+                  {sheet.region.age9Rule === "endOfSchoolYear"
+                    ? "만 9세가 될 때 재선정합니다. 재선정되지 않으면 이 날짜(그 학년도 끝)까지 지원된 뒤 종료됩니다."
+                    : "이 날짜까지 유지된 뒤 종료됩니다. 그 전에 재진단·재선정을 해야 방과후 교육활동과 치료지원이 끊기지 않습니다."}
                 </p>
                 <div className="card-actions">
                   <a href="#deadlines" className="card-action">
@@ -853,7 +853,7 @@ export default function Home() {
                 <p className="tint-title">발달지체 지원 종료 예정일</p>
                 <p className="tint-status">생년월일 입력 필요</p>
                 <p className="tint-note">
-                  {AGE9_WITHOUT_DATE}까지 유지된 뒤 종료됩니다. 생년월일을 넣으면 날짜가 계산되어
+                  {sheet.age9}까지 유지된 뒤 종료됩니다. 생년월일을 넣으면 날짜가 계산되어
                   안내문에도 들어갑니다.
                 </p>
                 <div className="card-actions">
