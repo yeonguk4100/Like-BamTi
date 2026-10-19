@@ -14,8 +14,19 @@ export class SupabaseError extends Error {
   }
 }
 
+/** 대시보드에서 `…supabase.co/rest/v1/` 처럼 경로까지 복사해 넣어도 동작하게 주소의 앞부분만 쓴다 */
+function origin(raw: string | undefined): string | undefined {
+  const v = raw?.trim().replace(/^["']|["']$/g, "");
+  if (!v) return undefined;
+  try {
+    return new URL(v).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 function env() {
-  const url = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "");
+  const url = origin(process.env.SUPABASE_URL);
   const key = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)?.trim();
   return url && key ? { url, key } : null;
 }
