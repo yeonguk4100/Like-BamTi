@@ -821,7 +821,16 @@ export default function Home() {
               </section>
             )}
 
-            {age9Date ? (
+            {age9Date && sheet.age9Passed ? (
+              <div className="tint-card rel">
+                <p className="tint-title">발달지체 적용 종료</p>
+                <p className="tint-status">{age9Date} (이미 지남)</p>
+                <p className="tint-note">
+                  만 9세가 지나 발달지체로는 선정되지 않습니다. 다른 장애영역으로 진단·평가를 의뢰할지
+                  신청처와 확인하세요.
+                </p>
+              </div>
+            ) : age9Date ? (
               <div className="tint-card rel">
                 <p className="tint-title">발달지체 지원 종료 예정일</p>
                 <p className="tint-status">{age9Date}</p>

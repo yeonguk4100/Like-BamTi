@@ -2846,3 +2846,12 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   display: block;
   margin-top: 6px;
 }
+
+/* 해당하는 경우만 내는 서류 — 서류 이름 아래 한 줄 */
+.doc-when {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--amber);
+}

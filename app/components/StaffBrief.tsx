@@ -12,10 +12,10 @@
 import type { Deadline, Warning } from "../lib/build-sheet";
 import { alertClass, alertTag } from "../lib/screen";
 
-type Doc = { key: string; label: string; where: string };
+type Doc = { key: string; label: string; where: string; when?: string };
 
 export function StaffBrief({
-  documentsFirst,
+  documentsFirst: allFirst,
   urgentDeadlines,
   keyWarnings,
 }: {
@@ -23,6 +23,9 @@ export function StaffBrief({
   urgentDeadlines: Deadline[];
   keyWarnings: Warning[];
 }) {
+  /* 1면에는 늘 내는 서류만 — 해당자 서류는 개수만 알리고 안내문 · 제출 서류 표에서 조건과 함께 보여준다 */
+  const documentsFirst = allFirst.filter((d) => !d.when);
+  const conditional = allFirst.filter((d) => d.when);
   const nothing =
     documentsFirst.length === 0 && urgentDeadlines.length === 0 && keyWarnings.length === 0;
 
@@ -63,6 +66,12 @@ export function StaffBrief({
                 ))}
               </tbody>
             </table>
+            {conditional.length > 0 && (
+              <p className="hint">
+                해당하는 경우에만 내는 서류 {conditional.length}종({conditional.map((d) => d.label).join(" · ")})은
+                안내문에 조건과 함께 들어 있습니다.
+              </p>
+            )}
           </div>
         )}
 

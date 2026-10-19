@@ -19,6 +19,7 @@ import {
   LOCAL_SOURCES,
   OVERLAP_RULES,
   PROCEDURES,
+  PROCEDURE_FORMS_BY_REGION,
   PROGRAMS,
   REGIONS,
   type CurrentServiceId,
@@ -48,7 +49,7 @@ export type Input = {
 };
 
 export type Warning = {
-  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered" | "age9Cross" | "noticeGap";
+  kind: "term" | "overlap" | "crossTrack" | "easyToMiss" | "unregistered" | "age9Cross" | "noticeGap" | "inputCheck";
   title: string;
   detail: string;
   /**
@@ -253,7 +254,15 @@ export const FORM_NO_UNKNOWN = "서식 번호 미확인";
  * 학부모가 받을 종이에 「미확인」이 찍혀 나가면 안내 전체를 믿지 못하게 된다.
  */
 export function formNoTag(formNo: string): string {
-  return formNo === FORM_NO_UNKNOWN ? "" : ` [${formNo}]`;
+  return formNo === FORM_NO_UNKNOWN || formNo === FORM_NO_NONE ? "" : ` [${formNo}]`;
+}
+
+/** 서식이 아닌 발급 서류의 서식 칸 */
+export const FORM_NO_NONE = "—";
+
+/** 해당자 서류에 붙는 꼬리말 */
+export function whenTag(when?: string): string {
+  return when ? ` (해당하는 경우: ${when})` : "";
 }
 
 /** 생년월일이 없을 때 날짜 자리에 들어가는 말. 「○○까지 유지 후 종료」에 그대로 이어 붙는다 */
@@ -269,6 +278,20 @@ export function age9EndOfMonth(birthDate: string): string | null {
   return `${year}년 ${month}월 ${lastDay}일`;
 }
 
+/**
+ * 만 9세가 되는 달의 말일이 기준일(학년도 시작)보다 앞인가 — 이미 지났으면 발달지체로는 선정되지 않는다.
+ * 오늘 날짜를 쓰지 않는다. 학년도 중에 지나는 아동은 「지나지 않음」으로 두고 날짜를 그대로 안내한다
+ */
+export function age9PassedAtBase(birthDate: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
+  const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(BASE_DATE);
+  if (!m || !d) return false;
+  const year = Number(m[1]) + 9;
+  const month = Number(m[2]);
+  const end = `${year}-${String(month).padStart(2, "0")}-${String(new Date(year, month, 0).getDate()).padStart(2, "0")}`;
+  return end < BASE_DATE;
+}
+
 /** 기준일(학년도 시작) 시점의 만 나이. 오늘 날짜를 쓰지 않아 렌더링이 어긋나지 않는다 */
 function ageAtBase(birthDate: string): number | null {
   const b = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
@@ -281,6 +304,15 @@ function ageAtBase(birthDate: string): number | null {
   return age < 0 ? null : age;
 }
 
+/** 학교급별로 흔히 있는 만 나이 (기준일 시점). 유예 · 조기입학 · 전공과를 감안해 넉넉하게 */
+const LEVEL_AGE_RANGE: Record<string, [number, number]> = {
+  daycare: [0, 7],
+  kinder: [2, 7],
+  elementary: [5, 14],
+  middle: [11, 17],
+  high: [14, 21],
+};
+
 export const AGE_BASIS = `${BASE_SCHOOL_YEAR}학년도 기준 (${BASE_DATE})`;
 
 export function buildSheet(input: Input) {
@@ -291,13 +323,22 @@ export function buildSheet(input: Input) {
 
   /* 서류 목록 — 서식 번호는 지역마다 다르다 */
   const formNos = FORM_NO[input.regionId];
-  const documents = procedure.forms.map((key) => {
-    const no = formNos[key];
+  const entries = PROCEDURE_FORMS_BY_REGION[input.regionId]?.[input.procedureId] ?? procedure.forms;
+  const documents = entries.map((entry) => {
+    const key = typeof entry === "string" ? entry : entry.key;
+    /** 해당하는 경우만 내는 서류의 조건. 없으면 늘 내는 서류 */
+    const when = typeof entry === "string" ? undefined : entry.when;
+    // 건강장애용 기초조사서(경남 서식 6)는 「기타」로 건강장애를 적을 수 있을 때만 붙인다.
+    // 고를 수 있는 영역(자폐 · 지적 · 발달지체)에는 해당하지 않아 학부모가 필요 없는 서식을 찾게 된다
+    const health = key === "basicSurvey" && disability.id === "other" ? formNos.healthSurvey : undefined;
+    const no = health && formNos[key] ? `${formNos[key]} · ${health} (건강장애)` : formNos[key];
     const src = formSource(input.regionId, key);
     return {
       key,
       label: FORM_LABEL[key],
-      formNo: no ?? FORM_NO_UNKNOWN,
+      // 서식이 아닌 발급 서류(등본 · 진단서 · 사본 · 회의록)에는 번호가 없다 — 「미확인」으로 보이면 빈칸처럼 읽힌다
+      formNo: no ?? (src.sources.includes("eduForm") ? FORM_NO_UNKNOWN : FORM_NO_NONE),
+      when,
       /** 어디서 떼는가. 이 칸이 비어 있어서 미비 접수가 생겼다 */
       where: src.where,
       whereVerified: src.verified,
@@ -323,6 +364,9 @@ export function buildSheet(input: Input) {
 
   /** 나이 조건에 걸려 목록에서 빠진 제도. 숨기지 않고 개수와 이름을 보여준다 */
   const excludedByAge: { name: string; reason: string }[] = [];
+  /** 신청 상황 때문에 지금은 해당하지 않는 제도 — 취학유예 · 면제 중에는 학교를 다니지 않는다 */
+  const excludedBySituation: { name: string; reason: string }[] = [];
+  const notAttending = input.procedureId === "deferral";
 
   /* 지역 값을 먼저 덮는다 — 대상 조건(appliesTo)도 지역마다 달라서 거르기 전에 합쳐야 한다.
      지역 값의 verified·source·asOf 가 그 지역에서의 확인 여부다 */
@@ -338,6 +382,10 @@ export function buildSheet(input: Input) {
     if (a?.levels && !a.levels.includes(input.levelId)) return false;
     if (a?.disabilities && !a.disabilities.includes(input.disabilityId)) return false;
     if (a?.regions && !a.regions.includes(input.regionId)) return false;
+    if (notAttending && p.requiresAttendance) {
+      excludedBySituation.push({ name: p.name, reason: "학교에 다니는 동안 받는 지원 — 재취학하면 신청합니다" });
+      return false;
+    }
 
     if (age !== null) {
       if (a?.ageMin !== undefined && age < a.ageMin) {
@@ -361,11 +409,19 @@ export function buildSheet(input: Input) {
         .replace(/\{\{requestFormNo\}\}/g, region.requestFormNo)
         .replace(/\{\{basicSurveyName\}\}/g, region.basicSurveyName);
 
+    // 템플릿 자리(「{{submitTo}}」 등)는 모든 문자열 칸에서 채운다 — 채우지 않은 원문 칸이 응답 · 안내문으로 새지 않게
+    const filled = Object.fromEntries(
+      Object.entries(p).map(([k, v]) => [
+        k,
+        typeof v === "string" ? fill(v) : Array.isArray(v) && v.every((x) => typeof x === "string") ? v.map(fill) : v,
+      ])
+    ) as typeof p;
+
     return {
-      ...p,
+      ...filled,
       resolvedName: p.usesRegionCard ? `${p.name} — ${cardLabel}` : p.name,
-      resolvedApplyTo: fill(p.applyTo),
-      resolvedDocuments: p.documents.map(fill),
+      resolvedApplyTo: filled.applyTo,
+      resolvedDocuments: filled.documents,
     };
   });
 
@@ -406,7 +462,16 @@ export function buildSheet(input: Input) {
     disability.reselection === "age9"
       ? (age9EndOfMonth(input.birthDate) ?? AGE9_WITHOUT_DATE)
       : null;
-  if (age9) {
+  const age9Passed = disability.reselection === "age9" && age9PassedAtBase(input.birthDate);
+  if (age9 && age9Passed) {
+    deadlines.unshift({
+      label: "발달지체 적용 종료",
+      when:
+        `${age9}에 이미 지났습니다 — 발달지체로는 새로 선정되거나 유지되지 않습니다. ` +
+        "다른 장애영역으로 진단·평가를 의뢰할지 신청처와 확인하세요",
+      urgent: true,
+    });
+  } else if (age9) {
     deadlines.unshift({
       label: "발달지체 재선정 마감",
       when: `${age9}까지 유지 후 종료 — 그 전에 재진단·재선정을 해야 방과후 교육활동·치료지원이 끊기지 않습니다`,
@@ -428,6 +493,19 @@ export function buildSheet(input: Input) {
 
   /* ── 3. 확인이 필요한 항목 ── */
   const warnings: Warning[] = [];
+
+  /* 입력 확인 — 생년월일과 학교급이 맞지 않으면 둘 중 하나를 잘못 넣었을 수 있다.
+     유예 · 조기입학 · 전공과를 생각해 넉넉하게 잡고, 벗어날 때만 알린다 (판정하지 않는다) */
+  const range = LEVEL_AGE_RANGE[input.levelId];
+  if (age !== null && range && (age < range[0] || age > range[1])) {
+    warnings.push({
+      kind: "inputCheck",
+      title: `생년월일과 학교급을 다시 확인해 주세요 — 만 ${age}세 · ${level.name}`,
+      detail:
+        `${level.name}은 보통 만 ${range[0]}~${range[1]}세입니다. 입력이 맞다면 그대로 안내하셔도 되지만, ` +
+        "생년월일이나 학교급을 잘못 넣으면 나이로 걸러지는 제도와 기한이 달라집니다.",
+    });
+  }
 
   if (disability.id === "other") {
     warnings.push({
@@ -471,7 +549,17 @@ export function buildSheet(input: Input) {
   /* 소관이 갈려 있어서 아무도 알려주지 않는 것.
      교육청 쪽 발달지체 종료와 복지부 쪽 발달재활서비스 종료가 같은 시점이다.
      (사회서비스 전자바우처 「발달재활서비스」 — 장애 등록이 없으면 만 9세가 되는 달까지) */
-  if (age9) {
+  if (age9 && age9Passed) {
+    warnings.push({
+      kind: "age9Cross",
+      title: `만 9세가 지나 발달지체로는 선정되지 않습니다 — ${age9}에 종료`,
+      detail:
+        "발달지체 영역은 만 9세 미만에게만 적용됩니다. 지금 발달지체로 신청하면 선정되지 않으니, " +
+        "다른 장애영역(지적 · 자폐성 등)으로 진단·평가를 의뢰할지 신청처와 확인하세요. " +
+        "복지부 쪽도 장애 등록 없이 받던 발달재활서비스는 만 9세가 된 달에 끝났습니다 — " +
+        "계속 받으려면 장애 등록이 필요한지 읍면동에서 확인하도록 보호자에게 안내하세요.",
+    });
+  } else if (age9) {
     warnings.push({
       kind: "age9Cross",
       title: `만 9세에 두 부처의 지원이 같이 끝납니다 — ${age9}`,
@@ -525,7 +613,8 @@ export function buildSheet(input: Input) {
       w.kind === "overlap" ||
       w.kind === "unregistered" ||
       w.kind === "age9Cross" ||
-      w.kind === "noticeGap") &&
+      w.kind === "noticeGap" ||
+      w.kind === "inputCheck") &&
     // 근거를 확인하지 못한 것은 1면에 올리지 않는다. verified 를 안 쓰는 종류는 통과
     w.verified !== false;
 
@@ -544,6 +633,7 @@ export function buildSheet(input: Input) {
     programs,
     deadlines,
     age9,
+    age9Passed,
     sender: input.sender,
   });
 
@@ -565,9 +655,12 @@ export function buildSheet(input: Input) {
     age,
     ageBasis: AGE_BASIS,
     excludedByAge,
+    excludedBySituation,
     localSources,
     hasLocalPrograms,
     age9,
+    /** 만 9세 달 말일이 학년도 시작보다 앞 — 발달지체로는 선정되지 않는다 */
+    age9Passed,
     programs,
     deadlines,
     warnings,
@@ -585,12 +678,13 @@ function buildParentLetter(args: {
   disability: (typeof DISABILITIES)[number];
   disabilityLabel: string;
   procedure: (typeof PROCEDURES)[number];
-  documentsFirst: { label: string; formNo: string; where: string }[];
-  documentsAtOffice: { label: string; formNo: string; where: string }[];
+  documentsFirst: { label: string; formNo: string; where: string; when?: string }[];
+  documentsAtOffice: { label: string; formNo: string; where: string; when?: string }[];
   level: (typeof LEVELS)[number];
   programs: ResolvedProgram[];
   deadlines: Deadline[];
   age9: string | null;
+  age9Passed: boolean;
   sender?: { org?: string; name?: string; tel?: string };
 }) {
   const {
@@ -604,6 +698,7 @@ function buildParentLetter(args: {
     programs,
     deadlines,
     age9,
+    age9Passed,
     sender,
   } = args;
 
@@ -621,14 +716,14 @@ function buildParentLetter(args: {
     lines.push("  서류가 누락된 경우 보완 제출이 필요할 수 있습니다.");
     // □ 는 출력해서 하나씩 지워 가는 체크 칸이다. 빠진 서류로 되돌아오는 일을 줄이려는 것
     for (const d of documentsFirst) {
-      lines.push(`□ ${d.label}`);
+      lines.push(`□ ${d.label}${whenTag(d.when)}`);
       lines.push(`   → ${d.where}`);
     }
     lines.push("");
   }
   lines.push(`■ ${documentsFirst.length > 0 ? "2단계 — " : ""}${level.submitTo}에서 작성할 서류`);
   for (const d of documentsAtOffice) {
-    lines.push(`□ ${d.label}${formNoTag(d.formNo)}`);
+    lines.push(`□ ${d.label}${formNoTag(d.formNo)}${whenTag(d.when)}`);
   }
   lines.push("  □ 칸을 하나씩 지우며 챙겨 오시면 서류가 빠져 다시 오시는 일을 줄일 수 있습니다.");
   lines.push("");
@@ -662,7 +757,7 @@ function buildParentLetter(args: {
   // 담당자에게 검수 숙제를 남기지 않는 유일한 방법이다.
   lines.push("  교육청 소관이 아닙니다. 지원 대상 여부와 신청 방법은 아래 기관에서 확인해 주세요.");
   for (const p of otherPrograms) {
-    lines.push(`· ${p.name} — ${p.applyTo}`);
+    lines.push(`· ${p.name} — ${p.resolvedApplyTo}`);
   }
   lines.push("");
   lines.push("  ※ 장애인 등록이 되어 있어도 특수교육대상자로 자동 선정되지 않습니다.");
@@ -674,7 +769,13 @@ function buildParentLetter(args: {
     for (const d of urgent) lines.push(`· ${d.label} — ${d.when}`);
   }
 
-  if (age9) {
+  if (age9 && age9Passed) {
+    lines.push("");
+    lines.push(`  ※ 만 9세가 지나(${age9}) 「발달지체」로는 선정되지 않습니다.`);
+    lines.push("     · 교육청 — 다른 장애영역으로 진단·평가를 받을 수 있는지 신청처에 확인하세요.");
+    lines.push("     · 읍면동 — 장애 등록 없이 받던 발달재활서비스는 만 9세가 된 달에 끝났습니다.");
+    lines.push("       장애 등록을 하시면 만 18세 미만까지 이어집니다. 읍면동에서 확인하세요.");
+  } else if (age9) {
     lines.push("");
     lines.push(`  ※ 만 9세가 되면 두 가지가 같이 끝납니다. ${age9}까지입니다.`);
     lines.push("     · 교육청 — 발달지체 특수교육대상자 지위가 종료됩니다. 그 전에 다시 검사를 받아야 이어집니다.");

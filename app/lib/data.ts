@@ -105,7 +105,7 @@ export const REGIONS: Region[] = [
     cardSource: "경상남도교육청 「2025 특수교육대상자 선정·배치 업무 처리 지침」 (2026 지침 Q&A에도 같은 표기)",
     requestFormNo: "서식 2",
     // 2026 지침에서 보호자용 · 담임교사용이 나뉘었다 (강원과 같은 구조). 건강장애는 따로
-    basicSurveyName: "기초조사서(보호자용 / 담임교사용 / 건강장애)",
+    basicSurveyName: "기초조사서(보호자용 / 담임교사용)",
     // 2026 지침에도 「장애등급」이 14회 남아 있다 (신청서류 목록의 「장애등급 결정서」, 배치 신청서의 「장애등급(정도)」 등)
     legacyTermInGuide: true,
     guideName: "2026. 특수교육대상자 선정 배치 업무 처리 지침",
@@ -437,6 +437,11 @@ export type Program = {
   byRegion?: Partial<Record<RegionId, RegionalProgram>>;
   /** 행안부 「공공서비스(혜택) 정보」 서비스ID — 지역 값(byRegion)에서만 채워진다. 있으면 카드가 교육청 원문을 띄운다 */
   gov24Id?: string;
+  /**
+   * 학교에 다니는 동안 학교를 통해 받는 지원 (방과후 · 지원인력 · 통학).
+   * 취학유예 · 면제 중에는 목록에서 빼고 「재취학하면 신청」으로 따로 보여준다
+   */
+  requiresAttendance?: boolean;
 } & Sourced;
 
 /** 한 지역에서만 다른 제도 값 — Program.byRegion */
@@ -548,6 +553,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "afterschool",
+    requiresAttendance: true,
     name: "방과후 교육활동 지원",
     track: "education",
     authority: "교육청",
@@ -609,6 +615,7 @@ export const PROGRAMS: Program[] = [
     // 담당자 인터뷰 Q3 — 「대부분 특수교육대상자가 되면 교육청에서 어떤 혜택을 주는지를
     // 가장 궁금해함」이고, 예로 든 것이 방과후 보조 인력이었다. 목록에 없던 제도다.
     id: "aideStaff",
+    requiresAttendance: true,
     name: "지원인력 (보조인력) 배치",
     track: "education",
     authority: "교육청",
@@ -629,6 +636,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "commute",
+    requiresAttendance: true,
     name: "통학 지원",
     track: "education",
     authority: "교육청",
@@ -866,6 +874,86 @@ export const LOCAL_SOURCES: Partial<Record<RegionId, string[]>> = {
   ],
 };
 
+/**
+ * 지역별 · 신청 상황별 제출 서류 — 지침 원문의 「제출서류」 표를 그대로 옮긴다.
+ *
+ * 공통 목록(PROCEDURES[].forms)을 두 지역에 같이 쓰다가 강원에서 틀렸다 (2026-10-19 원문 대조).
+ * 강원 신규 선정에는 「배치 신청서」 · 「학교장 의견서 또는 복지카드 택 1」이 없고(경남 서식이다),
+ * 대신 주민등록등본이 필수이고 장애인 증명 · 진단 자료는 「해당자」 서류다.
+ * 새 지역을 열 때 이 표부터 채운다. 없으면 공통 목록으로 나가지만 그 지역 원문과 다를 수 있다.
+ */
+export const PROCEDURE_FORMS_BY_REGION: Partial<Record<RegionId, Partial<Record<ProcedureId, FormEntry[]>>>> = {
+  // 「2026 특수교육대상자 선정·배치 업무 길잡이」 6~7쪽 제출서류 요약 · 상급학교 진학 제출서류 (2026-03-27 게시)
+  gangwon: {
+    new: [
+      "applicantList",
+      "requestForm",
+      "basicSurvey",
+      "privacyConsent",
+      "residentCopy",
+      { key: "disabilityProof", when: "장애인 등록이 되어 있는 경우" },
+      { key: "medicalRecords", when: "진단 · 치료 · 검사 기록이 있는 경우" },
+      { key: "graduationCert", when: "졸업했거나 졸업을 앞둔 경우" },
+    ],
+    advance: [
+      "advanceList",
+      "advanceRequest",
+      "privacyConsent",
+      "residentCopy",
+      { key: "principalOpinionHigh", when: "특목고 · 특성화고 · 자사고 · 대안학교에 진학하려는 경우" },
+      { key: "iepMinutes", when: "배치 유형(일반학급 · 특수학급 등)을 바꾸는 경우" },
+    ],
+    reassign: [
+      "reassignRequest",
+      "privacyConsent",
+      { key: "iepMinutes", when: "배치 유형을 바꾸는 경우 (거주지 이전만이면 생략)" },
+      { key: "placementResultCopy", when: "다른 시 · 군이나 다른 시 · 도로 전학하는 경우" },
+      { key: "residentCopy", when: "다른 시 · 군이나 다른 시 · 도로 주소를 옮긴 경우" },
+    ],
+    deferral: [
+      "deferralRequest",
+      "iepMinutes",
+      { key: "deferralProof", when: "질병 · 유학 등 사유를 증명해야 하는 경우" },
+    ],
+    reenroll: ["reenrollRequest", "residentCopy", "placementResultCopy", "privacyConsent"],
+  },
+  // 「2026. 특수교육대상자 선정 배치 업무 처리 지침」 13~14쪽 · 42~56쪽 (2026-03-04 게시)
+  gyeongnam: {
+    new: [
+      "applicantList",
+      "requestForm",
+      "basicSurvey",
+      "placementRequest",
+      "principalOpinion",
+      "privacyConsent",
+    ],
+    advance: ["advanceList", "advanceRequest", "privacyConsent", "placementResultCopy"],
+    reassign: [
+      "reassignList",
+      "reassignRequest",
+      "privacyConsent",
+      "placementResultCopy",
+      { key: "iepMinutes", when: "단순 거주지 이전이 아닌 경우" },
+      { key: "residentCopy", when: "거주지를 옮긴 경우 (또는 거주지 확인 증명서)" },
+    ],
+    deferral: [
+      "deferralList",
+      "deferralRequest",
+      "privacyConsent",
+      { key: "iepMinutes", when: "학교에 다니고 있는 경우" },
+      { key: "placementResultCopy", when: "이미 배치를 받은 경우" },
+      "deferralProof",
+    ],
+    reenroll: [
+      "reenrollList",
+      "reenrollRequest",
+      "privacyConsent",
+      "placementResultCopy",
+      { key: "residentCopy", when: "해외에서 귀국한 경우 — 귀국 뒤 발행분 (재학 · 성적증명서도 필요)" },
+    ],
+  },
+};
+
 /* ─────────────────── 현재 이용 중인 서비스 (중복 확인용) ─────────────────── */
 
 export const CURRENT_SERVICES = [
@@ -948,6 +1036,7 @@ export type FormKey =
   | "requestForm"
   | "basicSurvey"
   | "placementRequest"
+  | "healthSurvey"
   | "principalOpinion"
   | "privacyConsent"
   | "ldRecord"
@@ -957,13 +1046,35 @@ export type FormKey =
   | "reassignRequest"
   | "deferralRequest"
   | "reenrollRequest"
-  | "medicalCertificate";
+  /** 유예·면제 사유 증빙 (질병 — 진단서 · 유학 — 출입국 사실증명서) */
+  | "deferralProof"
+  /** 주민등록등본 */
+  | "residentCopy"
+  /** 장애인복지카드 사본 또는 장애인 증명서 */
+  | "disabilityProof"
+  /** 의사 진단서 · 소견서 · 의무기록 사본 · 심리평가 보고서 등 */
+  | "medicalRecords"
+  | "graduationCert"
+  /** 강원 서식 16 — 특목고 · 특성화고 · 자사고 · 대안학교 진학 때만 */
+  | "principalOpinionHigh"
+  | "iepMinutes"
+  /** 경남 서식 1-❷ · 1-❸ · 1-❺ — 학교가 엑셀로 취합 */
+  | "reassignList"
+  | "deferralList"
+  | "reenrollList";
+
+/**
+ * 신청 상황마다 내는 서류 한 줄. 문자열이면 늘 내는 서류, `when` 이 있으면 **해당하는 경우만** 내는 서류다.
+ * 「해당자」 서류를 빼면 반송이 생기고, 늘 내는 것처럼 적으면 학부모가 필요 없는 서류를 찾아다닌다.
+ */
+export type FormEntry = FormKey | { key: FormKey; when: string };
 
 export const FORM_LABEL: Record<FormKey, string> = {
   applicantList: "선정·배치 신청자 명단 (엑셀)",
   requestForm: "진단·평가 의뢰서",
   basicSurvey: "기초조사 서류",
   placementRequest: "배치 신청서",
+  healthSurvey: "기초조사서 (건강장애)",
   principalOpinion: "학교장 의견서 또는 장애인증명서·복지카드 중 택 1",
   privacyConsent: "개인정보 수집·이용 및 제공 동의서",
   ldRecord: "학습장애 선정을 위한 기초조사서 · 중재반응 기록지",
@@ -973,7 +1084,16 @@ export const FORM_LABEL: Record<FormKey, string> = {
   reassignRequest: "재배치(배치변경) 신청서",
   deferralRequest: "취학유예·면제 승인 신청서",
   reenrollRequest: "재취학 신청서",
-  medicalCertificate: "의사 진단서 (최근 3개월 이내)",
+  deferralProof: "유예·면제 사유를 증명하는 서류",
+  residentCopy: "주민등록등본",
+  disabilityProof: "장애인복지카드 사본 또는 장애인 증명서",
+  medicalRecords: "의사 진단서 · 소견서 · 의무기록 사본 · 심리평가 보고서 등",
+  graduationCert: "졸업증명서 또는 졸업예정증명서",
+  principalOpinionHigh: "진학 희망 고등학교 학교장 의견서",
+  iepMinutes: "개별화교육지원팀 회의록 사본",
+  reassignList: "배치(재배치 · 배치변경) 의뢰자 명단 (엑셀)",
+  deferralList: "유예(면제) 의뢰자 명단 (엑셀)",
+  reenrollList: "재취학 의뢰자 명단 (엑셀)",
 };
 
 /** 지역별 서식 번호. 확인하지 못한 지역은 비워 두고 화면에서 「서식 미확인」으로 보여준다 */
@@ -989,6 +1109,8 @@ export const FORM_NO: Record<RegionId, Partial<Record<FormKey, string>>> = {
     reenrollRequest: "서식 11",
     privacyConsent: "서식 12",
     ldRecord: "서식 25·26",
+    healthSurvey: "서식 6",
+    principalOpinionHigh: "서식 16",
   },
   // 경남 2026 지침 「2026. 특수교육대상자 선정 배치 업무 처리 지침」(2026-03-04 게시, 128쪽 — 파일명에 「(안)」)
   // 기초조사서가 보호자용 · 담임교사용으로 나뉘면서 3번부터 번호가 밀렸다. 2025판 번호로 안내하면 다른 서식을 찾게 된다
@@ -996,7 +1118,9 @@ export const FORM_NO: Record<RegionId, Partial<Record<FormKey, string>>> = {
     applicantList: "서식 1-❶",
     advanceList: "서식 1-❷",
     requestForm: "서식 2",
-    basicSurvey: "서식 3·4 (보호자용 / 담임교사용) · 서식 6 (건강장애)",
+    basicSurvey: "서식 3·4 (보호자용 / 담임교사용)",
+    // 건강장애는 기초조사서가 따로다. 「기타」로 건강장애를 적을 수 있을 때만 basicSurvey 옆에 붙인다
+    healthSurvey: "서식 6",
     placementRequest: "서식 7",
     // 상급학교 진학도 배치 신청서 [서식 7]을 쓴다 (2026 운영계획 94쪽)
     advanceRequest: "서식 7",
@@ -1006,6 +1130,9 @@ export const FORM_NO: Record<RegionId, Partial<Record<FormKey, string>>> = {
     principalOpinion: "서식 12",
     privacyConsent: "서식 13",
     ldRecord: "서식 5",
+    reassignList: "서식 1-❷",
+    deferralList: "서식 1-❸",
+    reenrollList: "서식 1-❺",
   },
   chungnam: {},
   gyeonggi: {},
@@ -1048,11 +1175,65 @@ export type FormSourceInfo = {
 } & Sourced;
 
 export const FORM_SOURCE: Record<FormKey, FormSourceInfo> = {
-  medicalCertificate: {
+  deferralProof: {
     sources: ["hospital"],
-    where: "병원에서 발급받습니다 (최근 3개월 이내)",
+    where: "사유에 맞는 서류를 냅니다 — 질병이면 병원 진단서, 유학 · 해외 출국이면 출입국 사실증명서 등",
     verified: true,
-    source: "서류 이름 자체가 발급처를 정한다 — 강원 지침 취학유예·면제 제출 서류",
+    source: "강원 2026 길잡이 6쪽(추가제출) · 경남 2026 지침 43~44쪽",
+  },
+  residentCopy: {
+    sources: ["townOffice"],
+    where: "읍면동 행정복지센터나 정부24에서 뗍니다 (주민등록번호 뒷자리는 가립니다)",
+    verified: true,
+    source: "강원 2026 길잡이 6쪽 · 경남 2026 지침 재배치 제출서류",
+  },
+  disabilityProof: {
+    sources: ["townOffice"],
+    where: "장애인 등록이 되어 있으면 복지카드를 복사하거나, 행정복지센터 · 정부24에서 장애인 증명서를 뗍니다",
+    verified: true,
+    source: "강원 2026 길잡이 6쪽(추가제출 · 해당자)",
+  },
+  medicalRecords: {
+    sources: ["hospital"],
+    where: "진료 · 검사를 받은 병원이나 치료기관에서 받습니다",
+    verified: true,
+    source: "강원 2026 길잡이 6쪽(추가제출 · 해당자)",
+  },
+  graduationCert: {
+    sources: ["school"],
+    where: "졸업했거나 다니는 학교에서 받습니다",
+    verified: true,
+    source: "강원 2026 길잡이 6쪽(추가제출 · 해당자)",
+  },
+  principalOpinionHigh: {
+    sources: ["school"],
+    where: "진학하려는 고등학교의 학교장 의견서를 받아, 지금 다니는 중학교를 통해 냅니다",
+    verified: true,
+    source: "강원 2026 길잡이 상급학교 진학 — 서식 16 (특목고 · 특성화고 · 자사고 · 대안학교)",
+  },
+  iepMinutes: {
+    sources: ["staff"],
+    where: "학교가 개별화교육지원팀 회의를 열고 회의록을 붙입니다",
+    verified: true,
+    source: "강원 2026 길잡이 6~7쪽 · 경남 2026 지침 재배치 · 유예 제출서류",
+  },
+  reassignList: {
+    sources: ["staff"],
+    where: "학교가 취합합니다. 보호자가 준비할 서류가 아닙니다",
+    verified: true,
+    source: "경남 2026 지침 서식 1-❷",
+  },
+  deferralList: {
+    sources: ["staff"],
+    where: "학교 · 교육지원청이 취합합니다. 보호자가 준비할 서류가 아닙니다",
+    verified: true,
+    source: "경남 2026 지침 서식 1-❸",
+  },
+  reenrollList: {
+    sources: ["staff"],
+    where: "학교가 취합합니다. 보호자가 준비할 서류가 아닙니다",
+    verified: true,
+    source: "경남 2026 지침 서식 1-❺",
   },
   principalOpinion: {
     // ⚠ 한 항목에 서로 다른 두 기관이 섞여 있다. 학부모가 판단하게 두면 안 된다
@@ -1068,6 +1249,13 @@ export const FORM_SOURCE: Record<FormKey, FormSourceInfo> = {
     where: "보호자용은 직접 작성하시고, 담임교사용은 학교에 요청합니다",
     verified: true,
     source: "강원 지침 — 기초조사 카드(보호자용 / 담임교사용)",
+  },
+  // 단독 서류로 목록에 오르지 않는다 — 기초조사 서류 옆에 서식 번호만 붙는다 (build-sheet)
+  healthSurvey: {
+    sources: ["eduForm", "school"],
+    where: "건강장애일 때 기초조사서 대신 씁니다",
+    verified: true,
+    source: "경남 2026 선정·배치 업무 처리 지침 서식 6",
   },
   ldRecord: {
     sources: ["school"],
@@ -1171,7 +1359,8 @@ export type Procedure = {
   name: string;
   /** 어떤 문의일 때 고르는지 */
   when: string;
-  forms: FormKey[];
+  /** 지역 목록(PROCEDURE_FORMS_BY_REGION)이 없을 때 쓰는 공통 목록 */
+  forms: FormEntry[];
   /** 서류 목록에 덧붙일 주의사항 */
   notes: string[];
   deadlines: { label: string; when: string; urgent?: boolean }[];
@@ -1257,7 +1446,7 @@ export const PROCEDURES: Procedure[] = [
     id: "deferral",
     name: "취학유예 · 면제",
     when: "질병이나 장기입원 등으로 취학을 미루려는 경우",
-    forms: ["deferralRequest", "medicalCertificate", "privacyConsent"],
+    forms: ["deferralRequest", "deferralProof", "privacyConsent"],
     notes: [
       "취학유예 기간은 1년 이내입니다. 연장하려면 특수교육운영위원회 심의를 거쳐야 합니다.",
       "특수교육대상자는 고등학교까지 의무교육이므로 유예·면제는 예외적으로만 인정됩니다.",

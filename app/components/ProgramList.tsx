@@ -129,6 +129,21 @@ export function ProgramList({
         <p className="hint">이 조건에 해당하는 제도가 없습니다.</p>
       )}
 
+      {sheet.excludedBySituation.length > 0 && (
+        <details className="fold">
+          <summary>
+            지금 신청 상황({sheet.procedure.name})에서는 해당하지 않는 제도 {sheet.excludedBySituation.length}건
+          </summary>
+          <ul className="notes">
+            {sheet.excludedBySituation.map((x, i) => (
+              <li key={i}>
+                {x.name} — {x.reason}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
       {sheet.excludedByAge.length > 0 && (
         <details className="fold">
           <summary>

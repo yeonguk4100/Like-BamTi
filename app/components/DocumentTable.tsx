@@ -12,6 +12,8 @@ type Doc = {
   whereVerified: boolean;
   fromOtherOffice: boolean;
   staffOnly: boolean;
+  /** 해당하는 경우만 내는 서류의 조건 */
+  when?: string;
 };
 
 export function DocumentTable({
@@ -58,6 +60,7 @@ export function DocumentTable({
               <th scope="row">
                 {d.fromOtherOffice && <span className="badge badge-danger">먼저</span>}{" "}
                 {d.label}
+                {d.when && <span className="doc-when">해당하는 경우 — {d.when}</span>}
               </th>
               <td className="td-sub">
                 {d.where}

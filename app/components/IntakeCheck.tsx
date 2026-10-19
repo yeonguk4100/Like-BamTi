@@ -18,6 +18,8 @@ type Doc = {
   whereVerified: boolean;
   fromOtherOffice: boolean;
   staffOnly: boolean;
+  /** 해당하는 경우만 내는 서류 — 체크가 없어도 「빠진 서류」로 세지 않는다 */
+  when?: string;
 };
 
 export function IntakeCheck({ documents, submitTo }: { documents: Doc[]; submitTo: string }) {
@@ -30,7 +32,9 @@ export function IntakeCheck({ documents, submitTo }: { documents: Doc[]; submitT
     ...documents.filter((d) => !d.staffOnly && !d.fromOtherOffice),
   ];
   const fromStaff = documents.filter((d) => d.staffOnly);
-  const missing = fromParent.filter((d) => !have[d.key]);
+  const missing = fromParent.filter((d) => !have[d.key] && !d.when);
+  /** 해당자 서류 중 체크되지 않은 것 — 해당하면 필요하다고만 알린다 (판정하지 않는다) */
+  const ifApplies = fromParent.filter((d) => !have[d.key] && d.when);
   const missingStaff = fromStaff.filter((d) => !have[d.key]);
   const checkedCount = documents.filter((d) => have[d.key]).length;
 
@@ -46,6 +50,9 @@ export function IntakeCheck({ documents, submitTo }: { documents: Doc[]; submitT
       `${submitTo}에 내실 서류 중 아래 서류가 빠져 있습니다.`,
       "",
       ...missing.flatMap((d) => [`□ ${d.label}`, `   → ${d.where}`]),
+      ...(ifApplies.length > 0
+        ? ["", "아래 서류는 해당하는 경우에만 내시면 됩니다.", ...ifApplies.flatMap((d) => [`□ ${d.label} (${d.when})`, `   → ${d.where}`])]
+        : []),
       "",
       "위 서류를 갖추어 다시 제출해 주세요.",
     ];
@@ -69,6 +76,7 @@ export function IntakeCheck({ documents, submitTo }: { documents: Doc[]; submitT
           <input type="checkbox" checked={Boolean(have[d.key])} onChange={() => toggle(d.key)} />
           <span className="intake-name">
             {d.fromOtherOffice && <span className="badge badge-danger">먼저</span>} {d.label}
+            {d.when && <span className="doc-when">해당하는 경우 — {d.when}</span>}
           </span>
         </label>
         <span className="intake-where td-sub">
@@ -107,6 +115,11 @@ export function IntakeCheck({ documents, submitTo }: { documents: Doc[]; submitT
         )}
 
         <div className={`intake-result ${missing.length === 0 ? "intake-ok" : ""}`}>
+          {missing.length === 0 && ifApplies.length > 0 && (
+            <p className="td-sub">
+              해당하는 경우에만 내는 서류 {ifApplies.length}종이 체크되지 않았습니다 — 해당 여부를 확인해 주세요.
+            </p>
+          )}
           {missing.length === 0 ? (
             <p>
               보호자 서류 {fromParent.length}종이 모두 체크되었습니다.

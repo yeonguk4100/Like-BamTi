@@ -99,7 +99,7 @@ export type LookupResult = {
 
 export function alertClass(kind: string) {
   if (kind === "term" || kind === "age9Cross" || kind === "noticeGap") return "alert-danger";
-  if (kind === "overlap" || kind === "easyToMiss" || kind === "unregistered")
+  if (kind === "overlap" || kind === "easyToMiss" || kind === "unregistered" || kind === "inputCheck")
     return "alert-warning";
   return "alert-info";
 }
@@ -111,6 +111,7 @@ export function alertTag(kind: string) {
   if (kind === "overlap") return "중복 확인";
   if (kind === "easyToMiss") return "놓치기 쉬움";
   if (kind === "unregistered") return "미등록 영역";
+  if (kind === "inputCheck") return "입력 확인";
   return "안내";
 }
 
