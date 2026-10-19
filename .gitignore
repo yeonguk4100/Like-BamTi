@@ -14,3 +14,6 @@ next-env.d.ts
 
 # 옛 빌드 산출물
 web-preview/
+
+# 운영 비밀값을 잠깐 담은 파일 — 절대 커밋하지 않는다
+cron.txt

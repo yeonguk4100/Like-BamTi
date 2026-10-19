@@ -2719,3 +2719,130 @@ body:has(.preset-rail:not(.preset-rail-shut)) {
   border-color: #c2d6ec;
   color: #fff;
 }
+
+/* ───────────── 운영자 검토 화면 (/review) — 데이터 갱신 파이프라인 2단계 ───────────── */
+
+.review-lock {
+  max-width: 560px;
+}
+
+.review-lock-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.review-error {
+  margin-top: 10px;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.review-sync {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.review-runs {
+  margin-top: 12px;
+}
+
+.review-tabs {
+  margin: 28px 0 14px;
+  align-items: center;
+}
+
+.review-empty {
+  padding: 28px 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r);
+  color: var(--text-sub);
+  text-align: center;
+}
+
+.review-list {
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.review-card {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--canvas);
+}
+
+.review-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.review-name {
+  font-size: 16px;
+  color: var(--navy);
+}
+
+.review-ours {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  background: var(--amber-tint);
+  border: 1px solid var(--amber-line);
+  color: var(--amber);
+  font-size: 13.5px;
+}
+
+.review-diff {
+  margin-top: 12px;
+}
+
+.review-diff td {
+  white-space: pre-line;
+  vertical-align: top;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.review-before {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+
+.review-act {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.review-act .text-input {
+  flex: 1 1 280px;
+  max-width: none;
+}
+
+.review-doc {
+  margin-top: 30px;
+}
+
+.review-doc summary {
+  cursor: pointer;
+}
+
+.review-doc-form {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  margin-top: 12px;
+}
+
+.review-doc-form .text-input {
+  display: block;
+  margin-top: 6px;
+}

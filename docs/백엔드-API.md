@@ -89,6 +89,16 @@ Vercel Cron 이 하루 한 번 부른다. 헤더 `Authorization: Bearer {CRON_SE
 
 `/api/health` 의 `supabase.lastRun` · `supabase.pendingReviews` 로 마지막 실행과 검토 대기 수를 본다.
 
+### `GET · POST /api/review` — 검토 목록 (운영자 화면 `/review`)
+
+헤더 `Authorization: Bearer {REVIEW_SECRET}` (없으면 `CRON_SECRET`). 아동 정보는 오가지 않는다.
+
+| 요청 | 하는 일 |
+|---|---|
+| `GET ?status=pending\|approved\|rejected` | 항목(바뀐 칸 전/후 · 우리 데이터 위치) · 상태별 건수 · 최근 동기화 7번 · 보관 원문 수 |
+| `POST { action: "approve" \| "reject", id, note? }` | 승인 · 반려 기록. `data.ts`는 고치지 않는다 |
+| `POST { action: "document", regionId, title, url, note? }` | 교육청 문서 확인 올리기 (구현 지역 · https 주소만) |
+
 ## 공공데이터 라우트 (`DATA_GO_KR_KEY` 필요)
 
 ### `GET /api/welfare` — 공공 복지서비스 실데이터

@@ -113,3 +113,60 @@ export function alertTag(kind: string) {
   if (kind === "unregistered") return "미등록 영역";
   return "안내";
 }
+
+/* ─── 운영자 검토 화면 (/review) ─── */
+
+/** 원문 출처 이름 */
+export const REVIEW_SOURCE_LABELS: Record<string, string> = {
+  bokjiro: "복지로 (중앙부처복지서비스)",
+  gov24: "교육청 원문 (행안부 공공서비스)",
+  local: "지역 자체사업 (지자체복지서비스)",
+  document: "교육청 문서 확인 (사람이 올림)",
+};
+
+/** 바뀐 칸 이름 — sync.ts 가 비교하는 원문 칸 */
+export const REVIEW_FIELD_LABELS: Record<string, string> = {
+  name: "서비스 이름",
+  ministry: "소관",
+  overview: "개요",
+  purpose: "목적",
+  summary: "요약",
+  target: "지원 대상",
+  criteria: "선정 기준",
+  content: "지원 내용",
+  baseYear: "기준 연도",
+  supportCycle: "지원 주기",
+  provisionType: "제공 방식",
+  lifeCycle: "생애주기",
+  themes: "관심 주제",
+  household: "가구 유형",
+  applyFlow: "신청 경로",
+  contacts: "문의처",
+  sites: "관련 누리집",
+  laws: "근거 법령",
+  forms: "서식",
+  applyMethod: "신청 방법",
+  deadline: "신청 기한",
+  documents: "구비서류",
+  documentsCheckedByOfficial: "공무원 확인 서류",
+  documentsNeedConsent: "본인 확인 필요 서류",
+  receiver: "접수 기관",
+  contact: "문의처",
+  onlineUrl: "온라인 신청",
+  org: "소관 기관",
+  adminRules: "행정규칙",
+  localRules: "자치법규",
+  conditions: "지원 조건",
+  sido: "시도",
+  sigungu: "시군구",
+  department: "담당 부서",
+  detailUrl: "상세 주소",
+  memo: "확인 메모",
+};
+
+/** 원문을 열어 볼 주소. 지역 자체사업은 목록 응답에만 주소가 있어 비워 둔다 */
+export function reviewOriginalUrl(source: string, servId: string): string | null {
+  if (source === "bokjiro") return bokjiroPageUrl(servId);
+  if (source === "gov24") return gov24PageUrl(servId);
+  return null;
+}

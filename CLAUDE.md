@@ -283,7 +283,8 @@ npm run dev
 | `DATA_GO_KR_KEY` | 공공데이터포털 **일반 인증키(Decoding)**. `/api/welfare`가 쓴다. **Vercel에만 넣어 두었다** — 로컬 `.env.local`에는 없다 |
 | `SUPABASE_URL` | Supabase 프로젝트 주소 (`https://○○.supabase.co`). 갱신 파이프라인 저장소. **Vercel에만** |
 | `SUPABASE_SECRET_KEY` | Supabase **secret 키**(`sb_secret_…`, 옛 `service_role`도 됨 — `SUPABASE_SERVICE_ROLE_KEY` 이름도 읽는다). 서버에서만 쓴다. **publishable/anon 키가 아니다** |
-| `CRON_SECRET` | `/api/cron/sync` 를 부를 수 있는 값. Vercel Cron 이 `Authorization: Bearer` 로 붙여 보낸다 |
+| `CRON_SECRET` | `/api/cron/sync` 를 부를 수 있는 값. Vercel Cron 이 `Authorization: Bearer` 로 붙여 보낸다. 바꾸면 **Redeploy** 해야 반영된다 |
+| `REVIEW_SECRET` | 선택. 운영자 검토 화면(`/review`)을 여는 값. **없으면 `CRON_SECRET`으로 연다** |
 
 **키가 없어도 화면과 규칙 계산은 그대로 동작한다.** AI는 버튼을 눌렀을 때만 호출된다.
 
@@ -307,6 +308,9 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `app/lib/gov24.ts` | 행정안전부 「공공서비스(혜택) 정보」 API. 구비서류·지원조건(장애인·연령) |
 | `app/lib/supabase.ts` | Supabase PostgREST 를 `fetch` 로 (SDK 없음). secret 키는 서버에서만. 마지막 원문 조회 · 동기화 기록 |
 | `app/lib/sync.ts` | **갱신 파이프라인 1단계(감지).** 공식 원문을 받아 해시 비교 → `raw_snapshots` · 바뀐 것은 `review_queue`. `data.ts`는 고치지 않는다 |
+| `app/lib/review.ts` | **갱신 파이프라인 2단계(검토).** 검토 목록 조회 · 승인/반려 · 교육청 문서 확인 올리기. 승인은 기록일 뿐 `data.ts`를 고치지 않는다 |
+| `app/lib/secret.ts` | 운영자 비밀값 확인 (`Authorization: Bearer`). 로그인·계정 대신 쓴다 |
+| `app/review/` | **운영자 화면** `/review` — 상담 화면과 별개, 검색 제외(noindex), 상담 화면에서 들어오는 링크 없음. 비밀값은 그 탭의 sessionStorage 에만 |
 | `supabase/migrations/` | 테이블 3개 (`sync_runs` · `raw_snapshots` · `review_queue`). RLS 를 켜고 정책을 두지 않아 secret 키로만 다룬다 |
 | `app/lib/screen.ts` | 화면 상수 (REPO · STEPS · FIGURES · 나이 구간)와 표현용 헬퍼 |
 | `app/lib/demo.ts` | ⚠ **데모용.** 조건 입력을 빠르게 바꾸는 가상 사례 7개. 발표 후 파일째 삭제 |
@@ -350,6 +354,7 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 | `GET /api/health` | 배포 확인. 키 값은 응답에 넣지 않는다 | ❌ |
 | `GET /api/welfare` | 공공 복지서비스 실데이터 (중앙부처복지서비스 · `source=local` 지자체 · `source=gov24`). 상세가 실패하면 Supabase 의 마지막 원문을 `cached` 와 함께 낸다 | ❌ |
 | `GET /api/cron/sync` | 갱신 감지. Vercel Cron 하루 1번 (`vercel.json`). `CRON_SECRET` 없으면 401 | ❌ |
+| `GET · POST /api/review` | 검토 목록 · 승인/반려 · 교육청 문서 확인 올리기. `REVIEW_SECRET`(없으면 `CRON_SECRET`) | ❌ |
 | `POST /api/letter` | 안내문 문장화 | ⭕ |
 | `POST /api/lookup` | 빈칸 찾기 | ⭕ |
 

@@ -7,6 +7,7 @@
 // 그 값이 없거나 다르면 아무것도 하지 않는다 — 누구나 불러 하루 API 한도를 쓰게 두지 않는다.
 // 결과에는 건수와 오류 메시지만 싣는다. 원문 · 키는 싣지 않는다.
 
+import { checkBearer } from "@/app/lib/secret";
 import { supabaseConfigured } from "@/app/lib/supabase";
 import { runSync } from "@/app/lib/sync";
 import { fail } from "@/app/lib/validate";
@@ -16,17 +17,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
-  // 대시보드에 붙여 넣을 때 따라온 공백 · 따옴표 · 줄바꿈은 값이 아니다
-  const clean = (v: string | null | undefined) => v?.trim().replace(/^["']|["']$/g, "").trim() ?? "";
-  const secret = clean(process.env.CRON_SECRET);
-  if (!secret) return fail("CRON_SECRET 이 설정되지 않았습니다.", 503);
-  const header = request.headers.get("authorization");
-  if (!header) return fail("권한이 없습니다. Authorization 헤더가 없습니다.", 401);
-  const sent = clean(header.replace(/^\s*Bearer\s+/i, ""));
-  if (sent !== secret) {
-    // 값은 싣지 않는다. 길이만 알려 어느 쪽에 공백·빠진 글자가 있는지 짐작하게 한다
-    return fail(`권한이 없습니다. 보낸 값(${sent.length}자)이 CRON_SECRET(${secret.length}자)과 다릅니다.`, 401);
-  }
+  const denied = checkBearer(request, ["CRON_SECRET"]);
+  if (denied) return denied;
   if (!supabaseConfigured()) return fail("SUPABASE_URL · SUPABASE_SECRET_KEY 가 설정되지 않았습니다.", 503);
 
   const manual = new URL(request.url).searchParams.get("manual") === "1";
