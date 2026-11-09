@@ -71,6 +71,19 @@ export const STEPS = [
   { no: 3, title: "안내문 전달", desc: "학부모용 안내문을 출력해 전달합니다", href: "#step3" },
 ];
 
+/**
+ * 상담 화면 위에 따라다니는 이동 바 (2026-11). 담당자가 원하는 부분으로 바로 간다.
+ * result: 결과를 보기 전에는 누를 수 없다 · open: 접혀 있는 칸이라 이동하면서 연다
+ */
+export const CONSULT_NAV: { id: string; label: string; result?: boolean; open?: boolean }[] = [
+  { id: "step1", label: "조건 입력" },
+  { id: "brief", label: "안내 전 확인사항", result: true },
+  { id: "step3", label: "학부모 안내문", result: true },
+  { id: "intake", label: "접수 확인", result: true, open: true },
+  { id: "detail", label: "자세히 보기", result: true, open: true },
+  { id: "reference", label: "참고 자료" },
+];
+
 /* 출처: 교육부 「2026 특수교육통계」(2026.4.1 기준) 3~4쪽. 2016년 87,950명 대비 +41.2%.
    일반학교 91,986명 ÷ 124,195명 = 74.1% */
 export const FIGURES = [

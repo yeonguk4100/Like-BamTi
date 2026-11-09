@@ -145,7 +145,7 @@ export default function ReviewPage() {
             <span className="logo-name">복지그루</span>
           </a>
           <nav className="gnb-menu" aria-label="운영 메뉴">
-            <a href="/" className="gnb-link">
+            <a href="/consult" className="gnb-link">
               상담 화면
             </a>
             {secret && (

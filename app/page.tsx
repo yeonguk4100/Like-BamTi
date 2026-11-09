@@ -1,954 +1,353 @@
-"use client";
+// 랜딩페이지 (2026-11 멘토링) — 상담 화면은 /consult.
+//
+// 참고한 구조: B2B 상담 도구 랜딩(채널톡 · Intercom) — 큰 두 줄 제목 + 짧은 설명 + 검은 알약 버튼,
+// 그 아래 은은한 그라데이션 판 위에 실제 제품 화면, 출처 띠, 기능을 좌우로 번갈아 설명, 현장 목소리,
+// 자주 묻는 질문, 마지막 CTA. 로고 · 문구는 가져오지 않았다 — 출처 표식은 글자로만 쓴다.
+//
+// 표현 규칙: 판정하지 않는다 · 대신하지 않는다(반복 확인을 줄여 직접 상담 시간을 늘린다) ·
+// 최종 수혜자는 학생 · 학부모. 수치는 정부기관 원문만, 조사 대상을 함께 적는다.
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  CURRENT_SERVICES,
-  DISABILITIES,
-  LEVELS,
-  PROCEDURES,
-  REGIONS,
-  SIGUNGU,
-  UNREGISTERED_AREAS,
-  type CurrentServiceId,
-  type DisabilityId,
-  type LevelId,
-  type ProcedureId,
-  type RegionId,
-  type Track,
-} from "./lib/data";
-import {
-  buildSheet,
-  TRACK_LABEL,
-} from "./lib/build-sheet";
-import { isRealDate } from "./lib/validate";
-import {
-  FIGURES,
-  formatBirthInput,
-  REPO,
-  REPO_DOCS,
-  SCOPE_AGE_MAX,
-  SCOPE_AGE_MIN,
-  STEPS,
-  type LookupResult,
-  type TrackFilter,
-  type ViewMode,
-} from "./lib/screen";
-import { ProgramItem } from "./components/ProgramItem";
-import { Faq } from "./components/Faq";
-import { SiteFooter } from "./components/SiteFooter";
-import { LetterPanel } from "./components/LetterPanel";
-import { DetailPanel } from "./components/DetailPanel";
-import { StaffBrief } from "./components/StaffBrief";
-import { Reference } from "./components/Reference";
-import { IntakeCheck } from "./components/IntakeCheck";
-import { ReadAloud } from "./components/ReadAloud";
-/* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
-import { type Preset } from "./lib/demo";
-import { DemoPresets } from "./components/DemoPresets";
+import Link from "next/link";
+import { REPO } from "./lib/screen";
 
-export default function Home() {
-  const [regionId, setRegionId] = useState<RegionId>("gangwon");
-  /* 거주 시·군 (선택). 지역 자체사업을 거르는 데만 쓰고 서버로 보내지 않는다 */
-  const [sigungu, setSigungu] = useState("");
-  const [disabilityId, setDisabilityId] = useState<DisabilityId>("autism");
-  const [levelId, setLevelId] = useState<LevelId>("elementary");
-  const [procedureId, setProcedureId] = useState<ProcedureId>("new");
+const SOURCES = ["교육청 선정·배치 지침", "복지로", "정부24 · 행정안전부 공공서비스", "국가법령정보센터"];
 
-  /**
-   * 처음에는 아무것도 고르지 않은 화면을 보여준다.
-   *
-   * 조건 기본값은 그대로 두되(규칙 계층이 늘 유효한 값을 받아야 한다) 담당자가
-   * 직접 고르기 전까지는 고른 것처럼 보이지 않게 한다. 입력하지 않았는데 결과와
-   * 안내문이 이미 나와 있으면 「조건을 넣으면 나옵니다」가 성립하지 않는다.
-   */
-  const [picked, setPicked] = useState({
-    procedure: false,
-    region: false,
-    disability: false,
-    level: false,
-  });
-  const allPicked = picked.procedure && picked.region && picked.disability && picked.level;
-  /** 「결과 확인하기」를 누른 뒤에만 2·3단계를 보여준다 */
-  const [showResult, setShowResult] = useState(false);
-  /* 칸에 보이는 글자. 치는 도중의 「2019-0」 같은 값도 담는다 */
-  /* 비워 둔다. 기본값을 넣어 두면 입력하지 않아도 가짜 날짜로 마감일이 계산돼 안내문에 나간다 */
-  const [birthText, setBirthText] = useState("");
-  /* 규칙에 넘기는 값. 달력에 있는 날짜가 다 쳐졌을 때만 채워진다 */
-  const birthDate = isRealDate(birthText) ? birthText : "";
-  const birthInvalid = birthText.length === 10 && !birthDate;
-  /* 고른 적 없는 항목이 체크돼 있으면 안 된다. 선택 항목이므로 빈 배열로 시작한다 */
-  const [currentServices, setCurrentServices] = useState<CurrentServiceId[]>([]);
-  const [otherDisabilityLabel, setOtherDisabilityLabel] = useState("");
-  const [detailNote, setDetailNote] = useState("");
+const STATS = [
+  { value: "83%", label: "교원이 꼽은 스트레스 1위 — 학부모 민원 대응", source: "교원 10,888명 · 국가인권위원회 2024" },
+  { value: "48.3%", label: "민원 대응 때문에 본 업무에 지장", source: "기초자치단체 공무원 · 한국행정연구원 2024" },
+  { value: "52,005명", label: "한 해 선정·배치 신청을 센터 교사 1,740명이 받습니다", source: "「2026 특수교육 연차보고서」" },
+  { value: "+41%", label: "특수교육대상자 10년 증가 — 124,195명", source: "「2026 특수교육통계」" },
+];
 
-  /* 안내문 발신 정보 — 담당자 본인 정보이며 저장하지 않는다 */
-  const [senderOrg, setSenderOrg] = useState("");
-  const [senderName, setSenderName] = useState("");
-  const [senderTel, setSenderTel] = useState("");
+const FAQ = [
+  {
+    q: "AI가 틀린 제도를 안내하면 어떡하나요?",
+    a: "제도를 고르는 것은 AI가 아니라 규칙입니다. 같은 조건에는 늘 같은 결과가 나옵니다. AI는 안내문을 쉬운 말로 다듬고, 데이터에 없는 칸을 출처와 함께 찾는 일만 합니다. 출처가 없으면 답하지 않습니다.",
+  },
+  {
+    q: "지원 금액이나 서식이 바뀌면요?",
+    a: "복지로 · 정부24 공식 원문을 매일 두 번 다시 받아 바뀐 칸을 찾습니다. 바뀐 것은 자동으로 덮지 않고 운영자가 확인한 뒤 반영합니다. API가 없는 교육청 지침은 게시 시기에 맞춰 사람이 확인합니다.",
+  },
+  {
+    q: "학생 개인정보는 어디에 저장되나요?",
+    a: "저장하지 않습니다. 이름 · 연락처를 받지 않고, 조건 계산은 담당자의 브라우저에서 합니다. 공식 원문을 불러올 때 서버로 가는 것은 서비스 번호와 시도 이름뿐입니다.",
+  },
+  {
+    q: "우리 지역도 쓸 수 있나요?",
+    a: "지금은 강원 · 경남을 지침 원문으로 채웠고, 서울을 뺀 16개 시도의 출처를 확인했습니다. 지역마다 제출 서류 표와 서식 번호를 채우면 열립니다. 지역을 늘리는 일은 개발이 아니라 데이터입니다.",
+  },
+  {
+    q: "도입은 어떻게 하나요?",
+    a: "교육지원청 한 곳에서 한 달 시범 운영으로 시작해, 반송 · 재문의 건수와 상담 확인 시간을 함께 재 보려고 합니다. 시범을 함께할 교육청 · 센터를 찾고 있습니다.",
+  },
+];
 
-  const [copied, setCopied] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>("grouped");
-
-  /* 숫자 카드의 「제도 자세히 보기」. 버튼 바로 밑에서 열고 닫는다 —
-     아래쪽 「자세히 보기」로 스크롤해 데려가면 화면이 튀어 어디로 갔는지 알 수 없다. */
-  const [readAloudOpen, setReadAloudOpen] = useState(false);
-  const [trackFilter, setTrackFilter] = useState<TrackFilter>("all");
-
-  /* AI 안내문 — 조건별로 캐시한다 */
-  const [aiCache, setAiCache] = useState<Record<string, string>>({});
-  const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [aiError, setAiError] = useState("");
-
-  /* AI 웹 검색 — 지역+항목별로 캐시한다 */
-  const [lookupCache, setLookupCache] = useState<Record<string, LookupResult>>({});
-  const [lookupBusy, setLookupBusy] = useState("");
-  const [lookupError, setLookupError] = useState("");
-
-  /* ⚠ 데모용 — 발표 후 삭제 */
-  const [presetId, setPresetId] = useState("a");
-
-  function applyPreset(p: Preset) {
-    setPresetId(p.id);
-    setRegionId(p.regionId);
-    setSigungu("");
-    setDisabilityId(p.disabilityId);
-    setLevelId(p.levelId);
-    setProcedureId(p.procedureId ?? "new");
-    setBirthText(p.birthDate);
-    setCurrentServices(p.currentServices);
-    setOtherDisabilityLabel("");
-    setDetailNote("");
-    /* 데모 사례는 조건을 한 번에 채우므로 고른 것으로 본다 */
-    setPicked({ procedure: true, region: true, disability: true, level: true });
-    setShowResult(true);
-  }
-
-  /**
-   * 새 상담 — 다음 전화를 받을 때 이전 아동 조건을 하나씩 지우지 않게 한 번에 비운다.
-   * 담당자 본인 정보(안내문 발신 정보)는 남긴다. 상담마다 다시 칠 값이 아니다.
-   */
-  function startNewConsult() {
-    setPicked({ procedure: false, region: false, disability: false, level: false });
-    setShowResult(false);
-    setBirthText("");
-    setSigungu("");
-    setCurrentServices([]);
-    setOtherDisabilityLabel("");
-    setDetailNote("");
-    setReadAloudOpen(false);
-    setTrackFilter("all");
-    setAiStatus("idle");
-    setAiError("");
-    setCopied(false);
-    setActiveStep(1);
-    setScrollToInput((n) => n + 1);
-  }
-
-  /* 새 상담은 화면 맨 위에서 시작한다 — 입력 칸이 첫 화면에 들어오도록 줄여 두었다.
-     결과 영역이 사라진 뒤에 스크롤한다. 같은 순간에 하면 페이지 높이가 바뀌어 중간에 끊긴다 */
-  const [scrollToInput, setScrollToInput] = useState(0);
-  useEffect(() => {
-    if (scrollToInput === 0) return;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [scrollToInput]);
-
-  const sheet = useMemo(
-    () =>
-      buildSheet({
-        regionId,
-        disabilityId,
-        levelId,
-        procedureId,
-        birthDate,
-        currentServices,
-        otherDisabilityLabel,
-        detailNote,
-        sender: { org: senderOrg, name: senderName, tel: senderTel },
-      }),
-    [
-      regionId,
-      disabilityId,
-      levelId,
-      procedureId,
-      birthDate,
-      currentServices,
-      otherDisabilityLabel,
-      detailNote,
-      senderOrg,
-      senderName,
-      senderTel,
-    ]
-  );
-
-  const counts = useMemo(() => {
-    const c: Record<Track, number> = { education: 0, welfare: 0, medical: 0 };
-    for (const p of sheet.programs) c[p.track] += 1;
-    return c;
-  }, [sheet.programs]);
-
-  const visiblePrograms = useMemo(
-    () =>
-      trackFilter === "all" ? sheet.programs : sheet.programs.filter((p) => p.track === trackFilter),
-    [sheet.programs, trackFilter]
-  );
-
-  const urgentCount = sheet.deadlines.filter((d) => d.urgent).length;
-  const otherTrackCount = counts.welfare + counts.medical;
-  const firstUrgent = sheet.deadlines.find((d) => d.urgent);
-  // 지역마다 종료 규칙이 달라(강원 그달 말일 · 경남 학년도 끝) 규칙이 낸 날짜를 쓴다. 생년월일이 없으면 카드가 따로 안내한다
-  const age9Date = sheet.disability.reselection === "age9" && birthDate ? sheet.age9 : null;
-  const outOfScope =
-    sheet.age !== null && (sheet.age < SCOPE_AGE_MIN || sheet.age > SCOPE_AGE_MAX);
-
-  /* 서버로 보내는 조건. 규칙 계산은 서버가 다시 하고, 그 결과만 AI 에 넘어간다.
-     생년월일은 마감일 계산에 필요해 서버까지 가지만 AI 에는 넘기지 않는다 (app/api/letter) */
-  const aiPayload = useMemo(
-    () => ({
-      regionId,
-      disabilityId,
-      levelId,
-      procedureId,
-      birthDate,
-      currentServices,
-      otherDisabilityLabel,
-      sender: { org: senderOrg, name: senderName, tel: senderTel },
-    }),
-    [
-      regionId,
-      disabilityId,
-      levelId,
-      procedureId,
-      birthDate,
-      currentServices,
-      otherDisabilityLabel,
-      senderOrg,
-      senderName,
-      senderTel,
-    ]
-  );
-
-  const aiKey = useMemo(() => JSON.stringify(aiPayload), [aiPayload]);
-  const aiLetter = aiCache[aiKey];
-  const shownLetter = aiLetter ?? sheet.parentLetter;
-
-  async function rewriteWithAi() {
-    if (aiStatus === "loading") return;
-    setAiStatus("loading");
-    setAiError("");
-    try {
-      const res = await fetch("/api/letter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(aiPayload),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.letter) {
-        setAiError(data.error ?? "안내문을 받지 못했습니다.");
-        setAiStatus("error");
-        return;
-      }
-      setAiCache((prev) => ({ ...prev, [aiKey]: data.letter }));
-      setAiStatus("idle");
-    } catch {
-      setAiError("요청을 보내지 못했습니다. 네트워크를 확인하세요.");
-      setAiStatus("error");
-    }
-  }
-
-  async function runLookup(target: string) {
-    const cacheKey = `${regionId}:${target}`;
-    if (lookupBusy || lookupCache[cacheKey]) return;
-    setLookupBusy(target);
-    setLookupError("");
-    try {
-      const res = await fetch("/api/lookup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target, regionId }),
-      });
-      const data = await res.json();
-      if (!res.ok) setLookupError(data.error ?? "검색에 실패했습니다.");
-      else setLookupCache((prev) => ({ ...prev, [cacheKey]: data }));
-    } catch {
-      setLookupError("요청을 보내지 못했습니다.");
-    } finally {
-      setLookupBusy("");
-    }
-  }
-
-  function toggleService(id: CurrentServiceId) {
-    setCurrentServices((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  }
-
-  /* AI 안내문을 버리고 규칙이 만든 기본 서식으로 돌아간다 */
-  function resetLetter() {
-    setAiCache((prev) => {
-      const next = { ...prev };
-      delete next[aiKey];
-      return next;
-    });
-  }
-
-  async function copyLetter() {
-    try {
-      await navigator.clipboard.writeText(shownLetter);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  }
-
+export default function Landing() {
   return (
-    <div>
-      <a className="skip" href="#main">
-        본문 바로가기
-      </a>
-
-      {/* ⚠ 데모용 — 발표 후 이 줄과 import 를 지운다 */}
-      <DemoPresets presetId={presetId} onPick={applyPreset} />
-
-      <div className="util-bar">
-        <div className="util-inner">
-          <span className="util-flag">학습용 시연 화면입니다. 실제 행정 서비스가 아닙니다.</span>
-          <a href={REPO_DOCS} target="_blank" rel="noreferrer">
-            기획서
-          </a>
-          <a href={REPO} target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-        </div>
-      </div>
-
-      <header className="gnb">
-        <div className="gnb-inner">
-          <a href="#main" className="logo">
+    <div className="lp">
+      <header className="lp-nav">
+        <div className="lp-wrap lp-nav-inner">
+          <Link href="/" className="logo">
             <span className="logo-mark">특수교육</span>
             <span className="logo-name">복지그루</span>
-          </a>
-          <nav className="gnb-menu" aria-label="주 메뉴">
-            <a href="#step1" className="gnb-link">
-              상담 지원
-            </a>
-            <a href="#step2" className="gnb-link">
-              확인 시트
-            </a>
-            <a href="#reference" className="gnb-link">
-              참고 자료
-            </a>
-            <button type="button" className="btn btn-primary" onClick={startNewConsult}>
-              새 상담
-            </button>
+          </Link>
+          <nav className="lp-links" aria-label="랜딩 메뉴">
+            <a href="#features">기능</a>
+            <a href="#why">왜 필요한가</a>
+            <a href="#trust">믿을 수 있는 이유</a>
+            <a href="#faq">자주 묻는 질문</a>
           </nav>
+          <Link href="/consult" className="lp-pill">
+            상담 시작하기
+          </Link>
         </div>
       </header>
 
-      <nav className="tabnav" aria-label="단계">
-        <div className="tabnav-inner">
-          {STEPS.map((s) => (
-            <a
-              key={s.no}
-              href={s.href}
-              className={`tab ${activeStep === s.no ? "tab-on" : ""}`}
-              onClick={() => setActiveStep(s.no)}
-            >
-              {s.no}. {s.title}
-            </a>
-          ))}
-          <a href="#reference" className="tab">
-            참고 자료
-          </a>
-        </div>
-      </nav>
-
-      <div className="notice">
-        <div className="notice-inner">
-          <span className="notice-tag">안내</span>
-          <p>
-            <strong>이름과 연락처는 수집하지 않습니다.</strong> 제도 및 일정 계산은 브라우저에서
-            처리하며, AI 안내문 생성 시 필요한 조건만 서버로 전달합니다. 공식 정보와 지역 사업을
-            불러올 때는 서비스 번호와 시도 이름만 보냅니다. 전달된 정보는 저장하지 않습니다.
-            <span className="notice-sub">
-              ※ 화면에 표시되는 아동 정보는 모두 가상 사례입니다.
-            </span>
-          </p>
-        </div>
-      </div>
-
       <main id="main">
-        <div className="page-head">
-          <div className="page-head-inner rel">
-            {/* 첫 화면에 입력 칸이 보이도록 한 줄로 줄였다 (경로 표시 · 긴 설명 삭제) */}
-            <h1 className="h-xl">특수교육 지원제도 상담 지원</h1>
-            <p className="lead">
-              조건을 넣으면 <strong>안내문 · 확인사항</strong>이 나오고, 서류를 받을 때는{" "}
-              <strong>빠진 서류</strong>를 찾아 줍니다. 판정하지 않습니다 — 확인 목록을 드립니다.
-              (만 {SCOPE_AGE_MIN}~{SCOPE_AGE_MAX}세 기준)
+        {/* ── 첫 화면 — 두 줄 제목 + 오른쪽 설명 ── */}
+        <section className="lp-hero lp-wrap">
+          <h1 className="lp-title">
+            확인은 복지그루가,
+            <br />
+            상담은 담당자가
+          </h1>
+          <div className="lp-hero-side">
+            <p>
+              특수교육 학부모 문의에 — 어디에 · 무엇을 들고 · 언제까지를 한 장으로 정리하는 상담 업무
+              도구. 반복 확인을 줄여 학부모와 마주 앉는 시간을 늘립니다.
             </p>
-          </div>
-          {/* 단계 카드는 위 탭(1·2·3)과 같은 내용이라 뺐다 — 입력 칸이 첫 화면에 들어오게 */}
-        </div>
-
-        {/* ═══ 1단계 ═══ */}
-        <section className="section wrap" id="step1">
-          <div className="section-head">
-            <h2 className="h-lg">1. 조건 입력</h2>
-            <span className="b-sm subtle right">상담에 필요한 기본 정보만 입력합니다</span>
-          </div>
-
-          <table className="form-table">
-            <caption className="skip">아동 조건 입력</caption>
-            <tbody>
-              <tr>
-                <th scope="row">
-                  신청 상황<span className="req">*</span>
-                </th>
-                <td>
-                  <div className="chip-row">
-                    {PROCEDURES.map((x) => (
-                      <button
-                        key={x.id}
-                        type="button"
-                        className={`chip ${picked.procedure && x.id === procedureId ? "chip-on" : ""}`}
-                        aria-pressed={x.id === procedureId}
-                        onClick={() => {
-                          setProcedureId(x.id);
-                          setPicked((v) => ({ ...v, procedure: true }));
-                        }}
-                      >
-                        {x.name}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="hint">{sheet.procedure.when}</span>
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">
-                  거주 지역<span className="req">*</span>
-                </th>
-                <td>
-                  <div className="chip-row">
-                    {REGIONS.map((r) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        className={`chip ${picked.region && r.id === regionId ? "chip-on" : ""}`}
-                        aria-pressed={r.id === regionId}
-                        onClick={() => {
-                          if (r.id !== regionId) setSigungu("");
-                          setRegionId(r.id);
-                          setPicked((v) => ({ ...v, region: true }));
-                        }}
-                        disabled={!r.implemented}
-                        title={
-                          r.implemented
-                            ? undefined
-                            : `${r.name}은 지침 대조만 했고 아직 구현하지 않았습니다`
-                        }
-                      >
-                        {r.name}
-                        {!r.implemented && " (대조만)"}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="hint">
-                    현재 <strong>강원특별자치도</strong>와 <strong>경상남도</strong>를 지원합니다. 두
-                    지역은 지침 원문을 기준으로 서식 번호와 명칭까지 확인했으며, 다른 지역은 검증 후
-                    순차적으로 추가할 예정입니다. 지역별 대조 결과는{" "}
-                    <a href="#reference">참고 자료</a>에서 확인할 수 있습니다.
-                  </span>
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">
-                  <label htmlFor="sigungu">거주 시·군</label>
-                </th>
-                <td>
-                  <select
-                    id="sigungu"
-                    value={sigungu}
-                    onChange={(e) => setSigungu(e.target.value)}
-                    disabled={!picked.region}
-                  >
-                    <option value="">선택 안 함 (도 전체 사업만)</option>
-                    {(SIGUNGU[regionId] ?? []).map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="hint">
-                    지역 자체사업을 고르는 데만 씁니다. 시·군은 서버로 보내지 않고 화면 안에서 거릅니다.
-                  </span>
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">
-                  장애영역<span className="req">*</span>
-                </th>
-                <td>
-                  <div className="chip-row">
-                    {DISABILITIES.map((d) => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        className={`chip ${picked.disability && d.id === disabilityId ? "chip-on" : ""}`}
-                        aria-pressed={d.id === disabilityId}
-                        onClick={() => {
-                          setDisabilityId(d.id);
-                          setPicked((v) => ({ ...v, disability: true }));
-                        }}
-                      >
-                        {d.name}
-                      </button>
-                    ))}
-                  </div>
-
-                  {disabilityId === "other" && (
-                    <div className="sub-field">
-                      <label htmlFor="otherArea" className="sub-label">
-                        영역명 직접 입력
-                      </label>
-                      <input
-                        id="otherArea"
-                        type="text"
-                        className="text-input"
-                        value={otherDisabilityLabel}
-                        onChange={(e) => setOtherDisabilityLabel(e.target.value)}
-                        placeholder="예: 정서·행동장애"
-                      />
-                      <span className="hint">
-                        특수교육법상 11개 영역 가운데 위 세 가지가 아니면 「기타」를 고르고 영역명을
-                        적습니다. 적은 이름이 확인 시트와 학부모 안내문에 그대로 들어갑니다. 아직
-                        검사 도구가 등록되지 않은 영역: {UNREGISTERED_AREAS}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="sub-field">
-                    <label htmlFor="detailNote" className="sub-label">
-                      {sheet.disability.detailLabel} <span className="opt">선택</span>
-                    </label>
-                    <input
-                      id="detailNote"
-                      type="text"
-                      className="text-input"
-                      value={detailNote}
-                      onChange={(e) => setDetailNote(e.target.value)}
-                      placeholder={sheet.disability.detailPlaceholder}
-                    />
-                    <span className="hint">
-                      {sheet.disability.detailHint} 확인 시트에만 참고로 표시되며 판정이나 검사
-                      선택에는 쓰이지 않습니다.
-                    </span>
-                  </div>
-
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">
-                  학교급<span className="req">*</span>
-                </th>
-                <td>
-                  <div className="chip-row">
-                    {LEVELS.map((l) => (
-                      <button
-                        key={l.id}
-                        type="button"
-                        className={`chip ${picked.level && l.id === levelId ? "chip-on" : ""}`}
-                        aria-pressed={l.id === levelId}
-                        onClick={() => {
-                          setLevelId(l.id);
-                          setPicked((v) => ({ ...v, level: true }));
-                        }}
-                      >
-                        {l.name}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="hint">
-                    아동이 속한(또는 배치받을) 학교급입니다. <strong>신규 선정인지 상급학교 진학인지는
-                    위의 「신청 상황」이 가릅니다.</strong>
-                  </span>
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">
-                  <label htmlFor="birth">생년월일</label>
-                </th>
-                <td>
-                  <input
-                    id="birth"
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    placeholder="예: 20190314"
-                    maxLength={10}
-                    value={birthText}
-                    aria-invalid={birthInvalid}
-                    aria-describedby="birth-hint"
-                    onChange={(e) => setBirthText(formatBirthInput(e.target.value))}
-                  />
-                  <span className="hint" id="birth-hint">
-                    숫자 8자리로 입력합니다. 재선정 마감일 계산에만 사용하며 저장하지 않습니다.
-                    (발달지체는 만 9세 생일 기준)
-                  </span>
-                  {birthInvalid && (
-                    <span className="hint" style={{ color: "var(--danger)" }}>
-                      달력에 없는 날짜입니다. 월과 일을 다시 확인해 주세요.
-                    </span>
-                  )}
-                  {outOfScope && (
-                    <span className="hint" style={{ color: "var(--amber)" }}>
-                      만 {sheet.age}세는 이 도구가 정리한 구간(만 {SCOPE_AGE_MIN}~{SCOPE_AGE_MAX}세)
-                      밖입니다. 절차와 서류는 같지만, 제도 목록과 마감일은 다시 확인해야 합니다.
-                    </span>
-                  )}
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">현재 이용 중인 서비스</th>
-                <td>
-                  <div className="chip-row">
-                    {CURRENT_SERVICES.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className={`chip ${currentServices.includes(s.id) ? "chip-on" : ""}`}
-                        aria-pressed={currentServices.includes(s.id)}
-                        onClick={() => toggleService(s.id)}
-                      >
-                        {s.name}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="hint">중복 이용 제한이 있는 조합을 확인합니다.</span>
-                </td>
-              </tr>
-
-              <tr>
-                <th scope="row">안내문 발신 정보</th>
-                <td>
-                  <div className="field-grid">
-                    <input
-                      type="text"
-                      className="text-input"
-                      value={senderOrg}
-                      onChange={(e) => setSenderOrg(e.target.value)}
-                      placeholder="기관명"
-                      aria-label="기관명"
-                    />
-                    <input
-                      type="text"
-                      className="text-input"
-                      value={senderName}
-                      onChange={(e) => setSenderName(e.target.value)}
-                      placeholder="담당자"
-                      aria-label="담당자"
-                    />
-                    <input
-                      type="text"
-                      className="text-input"
-                      value={senderTel}
-                      onChange={(e) => setSenderTel(e.target.value)}
-                      placeholder="연락처"
-                      aria-label="연락처"
-                    />
-                  </div>
-                  <span className="hint">
-                    안내문 맨 끝 줄에 그대로 들어갑니다. 비워 두면 기관명만 나옵니다. 담당자 본인
-                    정보이며 아동 정보와 마찬가지로 저장하지 않습니다.
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="btn-row">
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={!allPicked}
-              onClick={() => {
-                setShowResult(true);
-                setActiveStep(2);
-                /* 상태가 그려진 뒤에 옮겨 간다 */
-                requestAnimationFrame(() =>
-                  document.getElementById("step2")?.scrollIntoView({ behavior: "smooth" })
-                );
-              }}
-            >
-              결과 확인하기
-            </button>
-            {!allPicked && (
-              <span className="hint">
-                신청 상황 · 거주 지역 · 장애영역 · 학교급을 고르면 결과를 확인할 수 있습니다.
-              </span>
-            )}
-          </div>
-        </section>
-
-        {/* ═══ 2단계 — 「결과 확인하기」를 누르기 전에는 나오지 않는다 ═══ */}
-        {showResult && (
-        <section className="section section-gray" id="step2">
-          <div className="wrap">
-            <div className="section-head">
-              <h2 className="h-lg">2. 결과 확인</h2>
-              <span className="b-sm subtle right">입력 조건에 따라 결과가 실시간으로 변경됩니다</span>
-            </div>
-
-            <div className="summary-bar">
-              <span className="sum-label">현재 조건</span>
-              <span className="sum-item">{sheet.region.name}</span>
-              <span className="sum-sep">|</span>
-              <span className="sum-item">{sheet.disabilityLabel}</span>
-              <span className="sum-sep">|</span>
-              <span className="sum-item">{sheet.level.name}</span>
-              {sheet.age !== null && (
-                <>
-                  <span className="sum-sep">|</span>
-                  <span className="sum-item">만 {sheet.age}세</span>
-                </>
-              )}
-              <a href="#step1" onClick={() => setActiveStep(1)}>
-                조건 수정
+            <div className="lp-hero-cta">
+              <Link href="/consult" className="lp-pill lp-pill-lg">
+                상담 시작하기
+              </Link>
+              <a href="#features" className="lp-link">
+                기능 둘러보기 →
               </a>
-              <button type="button" className="sum-new" onClick={startNewConsult}>
-                새 상담
-              </button>
-            </div>
-
-            <div className="tint-card rel">
-              <p className="tint-title">이번 상담에서 확인할 항목</p>
-              <p className="tint-line">
-                {sheet.region.name} · {sheet.disabilityLabel} · {sheet.level.name} ·{" "}
-                {sheet.procedure.name}
-              </p>
-              <p className="tint-line">
-                진단·평가 제출처 : {sheet.level.submitTo} · 결정 : {sheet.level.decider}
-                {sheet.age !== null && ` · 만 ${sheet.age}세 (${sheet.ageBasis})`}
-              </p>
-
-              <div className="subcard-grid">
-                <div className="subcard">
-                  <span className="subcard-label">확인할 제도</span>
-                  <p className="subcard-val">
-                    {sheet.programs.length}
-                    <span className="unit">건</span>
-                  </p>
-                  <span className="subcard-sub">교육청 {counts.education}건 포함</span>
-                </div>
-                <div className="subcard">
-                  <span className="subcard-label">교육청 외 지원제도</span>
-                  <p className="subcard-val">
-                    {otherTrackCount}
-                    <span className="unit">건</span>
-                  </p>
-                  <span className="subcard-sub">복지부·의료 — 별도 신청 필요</span>
-                </div>
-                <div className="subcard">
-                  <span className="subcard-label">날짜가 있는 마감</span>
-                  <p className="subcard-val">
-                    {sheet.deadlines.length}
-                    <span className="unit">개</span>
-                  </p>
-                  <span className="subcard-sub">그중 긴급 {urgentCount}개</span>
-                </div>
-                <div className="subcard subcard-alert">
-                  <span className="subcard-label">확인이 필요한 항목</span>
-                  <p className="subcard-val">
-                    {/* 아래 「안내 전 확인사항」과 같은 수를 센다. 접힌 일반 안내까지 세면 두 숫자가 어긋난다 */}
-                    {sheet.keyWarnings.length}
-                    <span className="unit">건</span>
-                  </p>
-                  <span className="subcard-sub">아래 「안내 전 확인사항」에 표시</span>
-                </div>
-              </div>
-
-              <div className="click-pill-row">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  aria-expanded={readAloudOpen}
-                  aria-controls="readaloud-panel"
-                  onClick={() => setReadAloudOpen((v) => !v)}
-                >
-                  {readAloudOpen
-                    ? "제도 자세히 보기 닫기"
-                    : `제도 자세히 보기 — ${sheet.programs.length}건`}
-                </button>
-              </div>
-
-              <div className="card-actions">
-                <button type="button" className="card-action" onClick={() => window.print()}>
-                  인쇄하기
-                </button>
-                <span className="divider" />
-                <button type="button" className="card-action" onClick={copyLetter}>
-                  {copied ? "복사했습니다" : "안내문 복사"}
-                </button>
-              </div>
-            </div>
-
-            {/* 버튼 바로 밑. 전화 상담 중에 담당자가 화면을 보며 그대로 읽는 자리다.
-                소관 필터를 거치지 않은 제도 전부를 넘긴다 — 버튼에 적힌 건수와 맞아야 한다. */}
-            {readAloudOpen && (
-              <section className="panel" id="readaloud-panel">
-                <div className="panel-head">
-                  <h3 className="h-sm">제도 자세히 보기</h3>
-                  <span className="b-sm subtle right">
-                    전화 상담 중에 그대로 읽어 주시면 됩니다
-                  </span>
-                </div>
-                <div className="panel-body">
-                  <ReadAloud
-                    programs={sheet.programs}
-                    office={sheet.region.eduContact}
-                    withTrackFilter
-                  />
-                </div>
-              </section>
-            )}
-
-            {age9Date && sheet.age9Passed ? (
-              <div className="tint-card rel">
-                <p className="tint-title">발달지체 적용 종료</p>
-                <p className="tint-status">{age9Date} (이미 지남)</p>
-                <p className="tint-note">
-                  만 9세가 지나 발달지체로는 선정되지 않습니다. 다른 장애영역으로 진단·평가를 의뢰할지
-                  신청처와 확인하세요.
-                </p>
-              </div>
-            ) : age9Date ? (
-              <div className="tint-card rel">
-                <p className="tint-title">발달지체 지원 종료 예정일</p>
-                <p className="tint-status">{age9Date}</p>
-                <p className="tint-note">
-                  {sheet.region.age9Rule === "endOfSchoolYear"
-                    ? "만 9세가 될 때 재선정합니다. 재선정되지 않으면 이 날짜(그 학년도 끝)까지 지원된 뒤 종료됩니다."
-                    : "이 날짜까지 유지된 뒤 종료됩니다. 그 전에 재진단·재선정을 해야 방과후 교육활동과 치료지원이 끊기지 않습니다."}
-                </p>
-                <div className="card-actions">
-                  <a href="#deadlines" className="card-action">
-                    마감일 전체 보기
-                  </a>
-                  <span className="divider" />
-                  <a href="#step3" className="card-action">
-                    안내문 확인
-                  </a>
-                </div>
-              </div>
-            ) : sheet.disability.reselection === "age9" ? (
-              <div className="tint-card rel">
-                <p className="tint-title">발달지체 지원 종료 예정일</p>
-                <p className="tint-status">생년월일 입력 필요</p>
-                <p className="tint-note">
-                  {sheet.age9}까지 유지된 뒤 종료됩니다. 생년월일을 넣으면 날짜가 계산되어
-                  안내문에도 들어갑니다.
-                </p>
-                <div className="card-actions">
-                  <a href="#birth" className="card-action">
-                    생년월일 입력
-                  </a>
-                </div>
-              </div>
-            ) : (
-              firstUrgent && (
-                <div className="tint-card">
-                  <p className="tint-title">{firstUrgent.label}</p>
-                  <p className="tint-status">기한 확인 필요</p>
-                  <p className="tint-note">{firstUrgent.when}</p>
-                  <div className="card-actions">
-                    <a href="#deadlines" className="card-action">
-                      마감일 전체 보기
-                    </a>
-                  </div>
-                </div>
-              )
-            )}
-
-            <div className="result-stack rel">
-
-              {/* 담당자가 먼저 짚고(안내 전 확인사항) 그다음 안내문을 건넨다 — 「안내 전」이라는 이름대로 */}
-              <StaffBrief
-                documentsFirst={sheet.documentsFirst}
-                urgentDeadlines={sheet.deadlines.filter((d) => d.urgent)}
-                keyWarnings={sheet.keyWarnings}
-              />
-
-              <LetterPanel
-                letter={shownLetter}
-                isAi={Boolean(aiLetter)}
-                aiStatus={aiStatus}
-                aiError={aiError}
-                copied={copied}
-                onCopy={copyLetter}
-                onRewrite={rewriteWithAi}
-                onReset={resetLetter}
-              />
-
-              {/* 조건이 바뀌면 체크를 처음부터 — key 가 바뀌면 상태가 새로 시작된다 */}
-              <IntakeCheck
-                key={`${regionId}-${procedureId}-${levelId}`}
-                documents={sheet.documents}
-                submitTo={sheet.level.submitTo}
-              />
-
-              <DetailPanel
-                sheet={sheet}
-                visible={visiblePrograms}
-                counts={counts}
-                viewMode={viewMode}
-                trackFilter={trackFilter}
-                onViewMode={setViewMode}
-                onTrackFilter={setTrackFilter}
-                sigungu={sigungu}
-                lookup={{
-                  regionId,
-                  cache: lookupCache,
-                  busy: lookupBusy,
-                  error: lookupError,
-                  onLookup: runLookup,
-                }}
-              />
             </div>
           </div>
         </section>
-        )}
 
-
-        <Faq />
-
-        {/* 숫자로 보는 현장 — 맨 위에 있던 것을 내렸다. 담당자는 열자마자 입력부터 한다 */}
-        <div className="figures">
-          <dl className="figure-row">
-            {FIGURES.map((f) => (
-              <div className="figure" key={f.key}>
-                <dt>{f.key}</dt>
-                <dd>
-                  {f.value}
-                  <span className="unit">{f.unit}</span>
-                </dd>
-                <p>{f.note}</p>
+        {/* ── 그라데이션 판 위의 제품 화면 ── */}
+        <section className="lp-wrap">
+          <div className="lp-stage">
+            <div className="lp-app" aria-label="상담 화면 미리보기">
+              <div className="lp-app-bar">
+                <span className="lp-dots" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="lp-app-url">복지그루 · 상담</span>
               </div>
-            ))}
-          </dl>
-        </div>
+              <div className="lp-app-body">
+                <aside className="lp-app-side">
+                  <p className="lp-app-label">조건</p>
+                  {["강원특별자치도", "발달지체", "유치원", "신규 선정"].map((c) => (
+                    <span key={c} className="lp-app-chip">
+                      {c}
+                    </span>
+                  ))}
+                  <p className="lp-app-label">진행</p>
+                  <ol className="lp-app-steps">
+                    <li className="done">조건 입력</li>
+                    <li className="done">안내 전 확인사항</li>
+                    <li className="now">학부모 안내문</li>
+                    <li>접수 확인</li>
+                  </ol>
+                </aside>
+                <div className="lp-app-main">
+                  <p className="lp-app-h">안내 전 확인사항</p>
+                  <div className="lp-app-alert">
+                    <b>만 9세에 두 부처의 지원이 같이 끝납니다 — 2029년 5월 31일</b>
+                    <span>교육청 발달지체 지위와 복지부 발달재활서비스가 같은 달에 끝납니다</span>
+                    <em>출처 · 강원 2026 선정·배치 길잡이 · 복지로</em>
+                  </div>
+                  <p className="lp-app-h">학부모용 안내문</p>
+                  <ul className="lp-app-letter">
+                    <li>□ 기초조사 서류 — 보호자용은 직접, 담임교사용은 학교에 요청</li>
+                    <li>□ 주민등록등본 — 행정복지센터 · 정부24</li>
+                    <li>□ 진단·평가 의뢰서 [서식 3]</li>
+                    <li>□ 개인정보 수집·이용 및 제공 동의서 [서식 12]</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="lp-float lp-float-a">
+              <b>갈림길을 먼저</b>
+              <span>만 9세 · 진학 · 어린이집 공문 공백</span>
+            </div>
+            <div className="lp-float lp-float-b">
+              <b>빠진 서류 2종</b>
+              <span>주민등록등본 · 기초조사 서류 → 발급처까지</span>
+            </div>
+          </div>
+        </section>
 
-        <Reference regionId={regionId} />
+        {/* ── 출처 띠 ── */}
+        <section className="lp-wrap lp-sources">
+          <p>모든 항목을 공식 원문으로 확인합니다</p>
+          <ul>
+            {SOURCES.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ── 기능 — 좌우로 번갈아 ── */}
+        <section className="lp-sec" id="features">
+          <div className="lp-wrap">
+            <p className="lp-eyebrow">기능</p>
+            <h2 className="lp-h2">상담 한 건, 네 단계면 끝납니다</h2>
+
+            <div className="lp-row">
+              <div>
+                <span className="lp-num">01</span>
+                <h3 className="lp-h3">조건 네 개만 고르세요</h3>
+                <p className="lp-p">
+                  지역 · 장애영역 · 학교급 · 신청 상황. 상담 중 어차피 묻는 것만 고르면 교육 · 복지 · 의료
+                  제도와 제출 서류, 기한이 정리됩니다. 학생 이름 · 연락처는 받지 않습니다.
+                </p>
+              </div>
+              <div className="lp-visual">
+                <div className="lp-seg">
+                  <span className="on">신규 선정</span>
+                  <span>상급학교 진학</span>
+                  <span>전학 · 재배치</span>
+                </div>
+                <div className="lp-seg">
+                  <span className="on">강원</span>
+                  <span>경남</span>
+                </div>
+                <div className="lp-seg">
+                  <span>자폐성장애</span>
+                  <span>지적장애</span>
+                  <span className="on">발달지체</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lp-row lp-row-rev">
+              <div>
+                <span className="lp-num">02</span>
+                <h3 className="lp-h3">담당자가 먼저 짚을 것만 1면에</h3>
+                <p className="lp-p">
+                  만 9세에 교육청 · 복지부 지원이 같이 끝나는 갈림길처럼, 소관이 달라 어느 쪽도 알려 주지 않는
+                  것을 먼저 보여 줍니다. 모든 항목에 지침 · 원문 출처가 붙습니다. 판정하지 않고 확인 목록을
+                  드립니다.
+                </p>
+              </div>
+              <div className="lp-visual">
+                <div className="lp-mini-alert">
+                  <b>어린이집 아동에게는 교육청 공문이 가지 않습니다</b>
+                  <span>신청 시기를 직접 안내하세요 · 담당자 인터뷰</span>
+                </div>
+                <div className="lp-mini-alert lp-mini-amber">
+                  <b>생년월일과 학교급을 다시 확인해 주세요</b>
+                  <span>잘못 넣은 입력을 그대로 안내하지 않습니다</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lp-row">
+              <div>
+                <span className="lp-num">03</span>
+                <h3 className="lp-h3">학부모에게는 종이 한 장</h3>
+                <p className="lp-p">
+                  어디에 · 무엇을 들고 · 언제까지를 □ 체크리스트로. 담당자가 읽고 고친 뒤 건넵니다. 소관 밖
+                  제도를 말로 설명하지 않아도 종이가 설명합니다.
+                </p>
+              </div>
+              <div className="lp-visual">
+                <div className="lp-paper">
+                  <p>■ 1단계 — 먼저 준비할 서류</p>
+                  <p>□ 기초조사 서류</p>
+                  <p>□ 주민등록등본</p>
+                  <p>□ 장애인복지카드 사본 (해당하는 경우)</p>
+                  <p>■ 2단계 — 지역 교육지원청에서 작성할 서류</p>
+                  <p>□ 진단·평가 의뢰서 [서식 3]</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="lp-row lp-row-rev">
+              <div>
+                <span className="lp-num">04</span>
+                <h3 className="lp-h3">접수할 때 빠진 서류를 바로</h3>
+                <p className="lp-p">
+                  가져온 서류에 체크하면 빠진 서류와 발급처, 보완 안내 문구가 나옵니다. 되돌려 보내고 다시
+                  받는 일을 줄입니다.
+                </p>
+              </div>
+              <div className="lp-visual">
+                <ul className="lp-check">
+                  <li className="ok">☑ 진단·평가 의뢰서</li>
+                  <li className="ok">☑ 개인정보 수집·이용 동의서</li>
+                  <li>☐ 주민등록등본 — 행정복지센터 · 정부24</li>
+                  <li>☐ 기초조사 서류 — 담임교사용은 학교에 요청</li>
+                </ul>
+                <p className="lp-check-sum">빠진 서류 2종 · 보완 안내 복사</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 왜 필요한가 — 수치 띠 ── */}
+        <section className="lp-sec lp-sec-tint" id="why">
+          <div className="lp-wrap">
+            <p className="lp-eyebrow">왜 필요한가</p>
+            <h2 className="lp-h2">사람을 늘리기 어려운 자리입니다</h2>
+            <div className="lp-stats">
+              {STATS.map((s) => (
+                <div key={s.value} className="lp-stat">
+                  <p className="lp-stat-value">{s.value}</p>
+                  <p className="lp-stat-label">{s.label}</p>
+                  <p className="lp-stat-src">{s.source}</p>
+                </div>
+              ))}
+            </div>
+            <p className="lp-fine">수치마다 조사 대상이 다릅니다. 모두 정부기관 원문에서 확인한 값입니다.</p>
+
+            <figure className="lp-quote">
+              <blockquote>
+                「지원제도별로 각각 전화해서 확인해야 하는 점이 어려움. 센터 관할이 아닌 경우 홈페이지나
+                전화번호를 찾아서 안내하고 있음.」
+              </blockquote>
+              <figcaption>교육지원청 특수교육지원센터 담당자 인터뷰 · 2026.08</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        {/* ── 신뢰 ── */}
+        <section className="lp-sec" id="trust">
+          <div className="lp-wrap">
+            <p className="lp-eyebrow">믿을 수 있는 이유</p>
+            <h2 className="lp-h2">그대로 건네도 되는 한 장</h2>
+            <div className="lp-cards">
+              <div className="lp-card">
+                <p className="lp-card-title">규칙이 고릅니다</p>
+                <p className="lp-card-body">같은 조건에는 같은 결과. AI는 문장을 다듬고 빈칸을 출처와 함께 찾는 일만 합니다.</p>
+              </div>
+              <div className="lp-card">
+                <p className="lp-card-title">하루 두 번 원문 확인</p>
+                <p className="lp-card-body">복지로 · 정부24 원문을 12시 · 18시경 다시 받아, 바뀐 것은 사람이 확인한 뒤 반영합니다.</p>
+              </div>
+              <div className="lp-card">
+                <p className="lp-card-title">아무것도 저장하지 않습니다</p>
+                <p className="lp-card-body">이름 · 연락처를 받지 않고 계산은 브라우저에서. 개인정보 처리 위탁 절차가 붙지 않습니다.</p>
+              </div>
+              <div className="lp-card">
+                <p className="lp-card-title">학생 · 학부모가 최종 수혜자</p>
+                <p className="lp-card-body">한 번에 갖춰 가서 다시 오지 않습니다. 받을 지원을 놓치지 않고 상담 만족도가 오릅니다.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 자주 묻는 질문 ── */}
+        <section className="lp-sec lp-sec-tint" id="faq">
+          <div className="lp-wrap lp-faq-wrap">
+            <div>
+              <p className="lp-eyebrow">자주 묻는 질문</p>
+              <h2 className="lp-h2">궁금한 점</h2>
+            </div>
+            <div className="lp-faq">
+              {FAQ.map((f) => (
+                <details key={f.q}>
+                  <summary>{f.q}</summary>
+                  <p>{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 마지막 CTA ── */}
+        <section className="lp-wrap">
+          <div className="lp-end">
+            <h2>다음 상담부터 써 보세요</h2>
+            <p>설치 · 가입 없이 바로 열립니다. 지금 운영 지역은 강원 · 경남입니다.</p>
+            <Link href="/consult" className="lp-pill lp-pill-lg lp-pill-light">
+              상담 시작하기
+            </Link>
+          </div>
+        </section>
       </main>
 
-      <SiteFooter />
+      <footer className="lp-foot">
+        <div className="lp-wrap lp-foot-inner">
+          <div>
+            <p className="lp-foot-brand">복지그루</p>
+            <p>특수교육 상담 업무 도구 · 멋쟁이사자처럼 Campus AX-Ton 강원대 · 멋쟁이 밤티들</p>
+          </div>
+          <nav className="lp-foot-links" aria-label="바닥 메뉴">
+            <Link href="/consult">상담 시작하기</Link>
+            <a href="#faq">자주 묻는 질문</a>
+            <a href={REPO} target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
