@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CURRENT_SERVICES,
@@ -363,20 +364,15 @@ export default function Home() {
       <div className="sticky-head">
       <header className="gnb">
         <div className="gnb-inner">
-          <a href="#main" className="logo">
+          {/* 로고는 랜딩페이지로 — 상담 화면 안의 이동은 아래 이동 바가 맡는다 */}
+          <Link href="/" className="logo" title="서비스 소개로">
             <span className="logo-mark">특수교육</span>
             <span className="logo-name">복지그루</span>
-          </a>
+          </Link>
           <nav className="gnb-menu" aria-label="주 메뉴">
-            <a href="#step1" className="gnb-link">
-              상담 지원
-            </a>
-            <a href="#step2" className="gnb-link">
-              확인 시트
-            </a>
-            <a href="#reference" className="gnb-link">
-              참고 자료
-            </a>
+            <Link href="/" className="gnb-link">
+              서비스 소개
+            </Link>
             <button type="button" className="btn btn-primary" onClick={startNewConsult}>
               새 상담
             </button>
