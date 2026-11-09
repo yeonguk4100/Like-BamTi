@@ -392,7 +392,8 @@ Next.js 15 (App Router) · React 19 · TypeScript. **새 npm 의존성 없음** 
 
 ### 배포 — Vercel
 
-`vercel.json`에는 **cron 두 줄만** 둔다 (`/api/cron/sync?slot=noon` `0 3 * * *` · `?slot=evening` `0 9 * * *` UTC = 한국 12시 · 18시경, 2026-11 멘토링).
+`vercel.json`에는 **cron 두 줄만** 둔다 (`/api/cron/sync` `0 3 * * *` · `/api/cron/sync-evening` `0 9 * * *` UTC = 한국 12시 · 18시경, 2026-11 멘토링).
+**cron 경로에 `?쿼리`를 붙이지 않는다** — 붙였더니 Vercel 이 배포를 시작하지 않았다(2026-11-09). 저녁 경로는 같은 핸들러를 다시 내보낸다
 Hobby 는 cron 하나당 하루 1번까지라 두 개로 나눴고, 실행 시각은 그 시간대 안에서 흔들린다(±59분).
 빌드 설정은 넣지 않는다 — Next.js 프로젝트는 Vercel이 그대로 알아본다.
 환경변수는 Project → Settings → Environment Variables 에 넣고 **다시 배포**해야 반영된다.
