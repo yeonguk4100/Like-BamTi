@@ -1,0 +1,10 @@
+[
+  {"name":"h_acrc","url":"https://www.korea.kr/briefing/policyBriefingView.do?newsId=156721832",
+   "phrases":["393개 공공기관의 공직자 1,097명","전체 응답자의 86%가 최근 3년간 특이민원을 경험","상습·반복적인 민원 청구가 70.9%"],"pad":90},
+  {"name":"h_kedi","url":"https://www.kedi.re.kr/khome/main/announce/selectBroadAnnounceForm.do?selectTp=0&board_sq_no=3&article_sq_no=36149",
+   "phrases":["56.9","41.6"]},
+  {"name":"h_index1547","url":"https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=1547",
+   "phrases":["취업률"]},
+  {"name":"h_index1544","url":"https://www.index.go.kr/unify/idx-info.do?idxCd=1544",
+   "phrases":["124,195"]}
+]

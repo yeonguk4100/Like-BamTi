@@ -17,3 +17,6 @@ web-preview/
 
 # 운영 비밀값을 잠깐 담은 파일 — 절대 커밋하지 않는다
 cron.txt
+
+# 발표 PPT 빌드 중간 파일 (결과는 docs/발표/ 로 복사된다)
+scripts/발표/deck/deck.pptx
