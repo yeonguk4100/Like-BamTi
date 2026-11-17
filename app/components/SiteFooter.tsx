@@ -39,7 +39,7 @@ export function SiteFooter() {
         </div>
         <div className="footer-legal">
           <p>
-            멋쟁이사자처럼 Campus AX-Ton 강원대 · 팀 멋쟁이 밤티들 ·{" "}
+            멋쟁이사자처럼 Campus AX-Ton 강원대 · 팀 어영부영 ·{" "}
             <a href={REPO} target="_blank" rel="noreferrer">
               GitHub
             </a>

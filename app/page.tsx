@@ -337,7 +337,7 @@ export default function Landing() {
         <div className="lp-wrap lp-foot-inner">
           <div>
             <p className="lp-foot-brand">복지그루</p>
-            <p>특수교육 상담 업무 도구 · 멋쟁이사자처럼 Campus AX-Ton 강원대 · 멋쟁이 밤티들</p>
+            <p>특수교육 상담 업무 도구 · 멋쟁이사자처럼 Campus AX-Ton 강원대 · 어영부영</p>
           </div>
           <nav className="lp-foot-links" aria-label="바닥 메뉴">
             <Link href="/consult">상담 시작하기</Link>
