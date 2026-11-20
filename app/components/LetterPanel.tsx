@@ -12,6 +12,7 @@ export function LetterPanel({
   onCopy,
   onRewrite,
   onReset,
+  onOpenIntake,
 }: {
   letter: string;
   isAi: boolean;
@@ -21,6 +22,7 @@ export function LetterPanel({
   onCopy: () => void;
   onRewrite: () => void;
   onReset: () => void;
+  onOpenIntake: () => void;
 }) {
   return (
     <section className="panel letter" id="step3">
@@ -64,6 +66,9 @@ export function LetterPanel({
         </p>
 
         <pre className="letter-body">{letter}</pre>
+        <a href="#intake" className="btn btn-outline intake-link" onClick={onOpenIntake}>
+          서류 누락 확인으로 이동 ↓
+        </a>
       </div>
     </section>
   );

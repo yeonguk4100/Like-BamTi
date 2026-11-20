@@ -129,7 +129,7 @@ export default function Landing() {
                       <li className="done">조건 입력</li>
                       <li className="done">안내 전 확인사항</li>
                       <li className="now">학부모 안내문</li>
-                      <li>접수 확인</li>
+                      <li>서류 누락 확인</li>
                     </ol>
                   </aside>
                   <div className="lp-app-main">
@@ -154,8 +154,8 @@ export default function Landing() {
                 <span>만 9세 · 진학 · 어린이집 공문 공백</span>
               </div>
               <div className="lp-float lp-float-b">
-                <b>빠진 서류 2종</b>
-                <span>주민등록등본 · 기초조사 서류 → 발급처까지</span>
+                <b>서류 누락 확인</b>
+                <span>준비된 서류를 체크하면 보완할 항목과 발급처가 남습니다</span>
               </div>
             </div>
           </div>

@@ -1286,11 +1286,6 @@ input::placeholder {
   color: var(--muted);
 }
 
-.letter {
-  position: sticky;
-  top: calc(var(--head-h, 126px) + 10px);
-}
-
 .letter-body {
   font-family: var(--font);
   font-size: 14.5px;
@@ -1820,10 +1815,6 @@ input::placeholder {
 @media (max-width: 1180px) {
   .result-grid {
     grid-template-columns: 1fr;
-  }
-
-  .letter {
-    position: static;
   }
 
   .quick-grid {
@@ -2560,34 +2551,39 @@ input::placeholder {
   list-style: none;
 }
 .intake-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 12px;
-  padding: 8px 0;
   border-top: 1px solid var(--line-soft);
+  padding-bottom: 8px;
 }
 .intake-label {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  min-width: 260px;
+  min-height: 44px;
+  padding-block: 6px;
   cursor: pointer;
 }
 .intake-label input {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   accent-color: var(--primary);
 }
-.intake-done .intake-name {
-  color: var(--muted);
-  text-decoration: line-through;
+.intake-name,
+.intake-where {
+  overflow-wrap: anywhere;
 }
 .intake-where {
+  margin-inline-start: 28px;
   font-size: 13px;
 }
+.intake-hint {
+  margin-top: 0;
+}
+.intake-link {
+  margin-top: 12px;
+}
 .intake-result {
-  margin-top: 6px;
+  margin-block: 10px 16px;
   padding: 12px 14px;
   border: 1px solid var(--amber-line);
   border-radius: var(--r);
