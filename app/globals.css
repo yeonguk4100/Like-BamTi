@@ -3622,8 +3622,8 @@ html:has(.lp) {
     margin-block: 0;
   }
 
-  .lp-feature-intro .lp-row {
-    margin-top: 40px;
+  .lp-feature-pair {
+    row-gap: clamp(24px, 4svh, 44px);
   }
 }
 
