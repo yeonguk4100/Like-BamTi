@@ -230,7 +230,6 @@ export default function Landing() {
               <figcaption>교육지원청 특수교육지원센터 담당자 인터뷰 · 2026.08</figcaption>
             </figure>
             <div className="lp-hero-cta">
-              <Link href="/consult" className="lp-pill">상담 시작하기</Link>
               <a href="#features" className="lp-link">상담 기능 둘러보기 →</a>
             </div>
           </div>
