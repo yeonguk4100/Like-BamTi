@@ -3585,12 +3585,28 @@ html:has(.lp) {
 }
 
 /* 랜딩의 작동 흐름과 조사 근거 */
+@media (prefers-reduced-motion: reduce) {
+  html:has(.lp) {
+    scroll-behavior: auto;
+  }
+}
+
 @media (min-width: 1001px) {
+  html:has(.lp) {
+    scroll-snap-type: y mandatory;
+  }
+
   .lp-screen {
     display: grid;
     align-content: center;
     min-block-size: calc(100svh - var(--lp-nav-height));
     padding-block: clamp(32px, 6svh, 72px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .lp-foot {
+    scroll-snap-align: end;
   }
 
   .lp-screen > .lp-wrap {
