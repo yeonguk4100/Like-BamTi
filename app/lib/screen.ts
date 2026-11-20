@@ -79,7 +79,7 @@ export const CONSULT_NAV: { id: string; label: string; result?: boolean; open?: 
   { id: "step1", label: "조건 입력" },
   { id: "brief", label: "안내 전 확인사항", result: true },
   { id: "step3", label: "학부모 안내문", result: true },
-  { id: "intake", label: "접수 확인", result: true, open: true },
+  { id: "intake", label: "서류 누락 확인", result: true, open: true },
   { id: "detail", label: "자세히 보기", result: true, open: true },
   { id: "reference", label: "참고 자료" },
 ];

@@ -43,6 +43,11 @@ import { StaffBrief } from "../components/StaffBrief";
 import { Reference } from "../components/Reference";
 import { IntakeCheck } from "../components/IntakeCheck";
 import { ReadAloud } from "../components/ReadAloud";
+
+function openResultSection(id: string) {
+  const details = document.querySelector<HTMLDetailsElement>(`#${id} details`);
+  if (details) details.open = true;
+}
 /* ⚠ 데모용 — 발표 후 아래 두 줄과 쓰는 곳을 지운다 */
 
 export default function Home() {
@@ -398,10 +403,7 @@ export default function Home() {
                   }
                   setNavOn(n.id);
                   /* 접혀 있는 칸은 열면서 간다 */
-                  if (n.open) {
-                    const d = document.querySelector<HTMLDetailsElement>(`#${n.id} details`);
-                    if (d) d.open = true;
-                  }
+                  if (n.open) openResultSection(n.id);
                 }}
               >
                 {n.label}
@@ -967,12 +969,13 @@ export default function Home() {
                 onCopy={copyLetter}
                 onRewrite={rewriteWithAi}
                 onReset={resetLetter}
+                onOpenIntake={() => openResultSection("intake")}
               />
 
               {/* 조건이 바뀌면 체크를 처음부터 — key 가 바뀌면 상태가 새로 시작된다 */}
               <div id="intake" className="nav-target">
               <IntakeCheck
-                key={`${regionId}-${procedureId}-${levelId}`}
+                key={`${regionId}-${procedureId}-${levelId}-${disabilityId}`}
                 documents={sheet.documents}
                 submitTo={sheet.level.submitTo}
               />
