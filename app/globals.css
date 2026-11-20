@@ -22,6 +22,7 @@
   --lp-glow-1: #dbe6fb;
   --lp-glow-2: #c9d8f5;
   --lp-ink: #16191d;
+  --lp-nav-height: 68px;
   --navy: #10315c;
   --navy-deep: #0b2444;
   --primary: #1256a0;
@@ -2794,6 +2795,10 @@ input::placeholder {
    B2B 상담 도구 랜딩의 짜임새(큰 두 줄 제목 · 그라데이션 판 위 제품 화면 · 기능 교차 · FAQ)를
    우리 색(남색 · 파랑 · 회색) 안에서 옮겼다 */
 
+html:has(.lp) {
+  scroll-padding-top: var(--lp-nav-height);
+}
+
 .lp {
   background: var(--canvas);
   color: var(--text);
@@ -2817,7 +2822,7 @@ input::placeholder {
   display: flex;
   align-items: center;
   gap: 28px;
-  height: 68px;
+  height: var(--lp-nav-height);
 }
 
 .lp-links {
@@ -3110,8 +3115,7 @@ input::placeholder {
   align-items: center;
   gap: 28px;
   flex-wrap: wrap;
-  padding-top: 40px;
-  padding-bottom: 8px;
+  margin-bottom: 28px;
 }
 
 .lp-sources p {
@@ -3581,16 +3585,34 @@ input::placeholder {
 }
 
 /* 랜딩의 작동 흐름과 조사 근거 */
-.lp #trust,
-.lp #why,
-.lp #features,
-.lp #faq {
-  scroll-margin-top: 72px;
-}
+@media (min-width: 1001px) {
+  .lp-screen {
+    display: grid;
+    align-content: center;
+    min-block-size: calc(100svh - var(--lp-nav-height));
+    padding-block: clamp(32px, 6svh, 72px);
+  }
 
-.lp #trust,
-.lp #why {
-  padding-block: 56px;
+  .lp-screen > .lp-wrap {
+    width: 100%;
+  }
+
+  .lp-intro .lp-hero {
+    padding-top: 0;
+  }
+
+  .lp-features {
+    padding-block: 0;
+  }
+
+  .lp-features .lp-row,
+  .lp-screen .lp-end {
+    margin-block: 0;
+  }
+
+  .lp-feature-intro .lp-row {
+    margin-top: 40px;
+  }
 }
 
 .lp-flow,
@@ -3639,16 +3661,16 @@ input::placeholder {
   }
 }
 
-.lp-evidence-heading {
-  margin-top: 24px;
-}
-
 .lp-evidence-grid {
-  margin-top: 12px;
+  margin-top: 28px;
 }
 
 .lp-evidence-grid .lp-stat {
   padding: 16px 20px;
+}
+
+.lp-fieldwork .lp-stat {
+  background: var(--surface);
 }
 
 .lp-evidence-grid .lp-stat-src a {

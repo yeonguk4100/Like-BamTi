@@ -66,7 +66,8 @@ export default function Landing() {
           </Link>
           <nav className="lp-links" aria-label="랜딩 메뉴">
             <a href="#trust">작동 흐름</a>
-            <a href="#why">통계와 현장 조사</a>
+            <a href="#why">공식 통계</a>
+            <a href="#fieldwork">현장 조사</a>
             <a href="#features">기능</a>
             <a href="#faq">자주 묻는 질문</a>
           </nav>
@@ -77,97 +78,97 @@ export default function Landing() {
       </header>
 
       <main id="main">
-        {/* ── 첫 화면 — 두 줄 제목 + 오른쪽 설명 ── */}
-        <section className="lp-hero lp-wrap">
-          <h1 className="lp-title">
-            확인은 복지그루가,
-            <br />
-            상담은 담당자가
-          </h1>
-          <div className="lp-hero-side">
-            <p>
-              특수교육 학부모 문의에 — 어디에 · 무엇을 들고 · 언제까지를 한 장으로 정리하는 상담 업무
-              도구. 반복 확인을 줄여 학부모와 마주 앉는 시간을 늘립니다.
-            </p>
-            <div className="lp-hero-cta">
-              <Link href="/consult" className="lp-pill lp-pill-lg">
-                상담 시작하기
-              </Link>
-              <a href="#trust" className="lp-link">
-                작동 흐름 보기 →
-              </a>
+        <section className="lp-screen lp-intro" aria-labelledby="landing-title">
+          {/* ── 첫 화면 — 두 줄 제목 + 오른쪽 설명 ── */}
+          <div className="lp-hero lp-wrap">
+            <h1 className="lp-title" id="landing-title">
+              확인은 복지그루가,
+              <br />
+              상담은 담당자가
+            </h1>
+            <div className="lp-hero-side">
+              <p>
+                특수교육 학부모 문의에 — 어디에 · 무엇을 들고 · 언제까지를 한 장으로 정리하는 상담 업무
+                도구. 반복 확인을 줄여 학부모와 마주 앉는 시간을 늘립니다.
+              </p>
+              <div className="lp-hero-cta">
+                <Link href="/consult" className="lp-pill lp-pill-lg">
+                  상담 시작하기
+                </Link>
+                <a href="#trust" className="lp-link">
+                  작동 흐름 보기 →
+                </a>
+              </div>
             </div>
           </div>
-        </section>
 
-        {/* ── 그라데이션 판 위의 제품 화면 ── */}
-        <section className="lp-wrap">
-          <div className="lp-stage">
-            <div className="lp-app" aria-label="상담 화면 미리보기">
-              <div className="lp-app-bar">
-                <span className="lp-dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="lp-app-url">복지그루 · 상담</span>
-              </div>
-              <div className="lp-app-body">
-                <aside className="lp-app-side">
-                  <p className="lp-app-label">조건</p>
-                  {["강원특별자치도", "발달지체", "유치원", "신규 선정"].map((c) => (
-                    <span key={c} className="lp-app-chip">
-                      {c}
-                    </span>
-                  ))}
-                  <p className="lp-app-label">진행</p>
-                  <ol className="lp-app-steps">
-                    <li className="done">조건 입력</li>
-                    <li className="done">안내 전 확인사항</li>
-                    <li className="now">학부모 안내문</li>
-                    <li>접수 확인</li>
-                  </ol>
-                </aside>
-                <div className="lp-app-main">
-                  <p className="lp-app-h">안내 전 확인사항</p>
-                  <div className="lp-app-alert">
-                    <b>만 9세에 두 부처의 지원이 같이 끝납니다 — 2029년 5월 31일</b>
-                    <span>교육청 발달지체 지위와 복지부 발달재활서비스가 같은 달에 끝납니다</span>
-                    <em>출처 · 강원 2026 선정·배치 길잡이 · 복지로</em>
+          {/* ── 그라데이션 판 위의 제품 화면 ── */}
+          <div className="lp-wrap">
+            <div className="lp-stage">
+              <div className="lp-app" aria-label="상담 화면 미리보기">
+                <div className="lp-app-bar">
+                  <span className="lp-dots" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <span className="lp-app-url">복지그루 · 상담</span>
+                </div>
+                <div className="lp-app-body">
+                  <aside className="lp-app-side">
+                    <p className="lp-app-label">조건</p>
+                    {["강원특별자치도", "발달지체", "유치원", "신규 선정"].map((c) => (
+                      <span key={c} className="lp-app-chip">
+                        {c}
+                      </span>
+                    ))}
+                    <p className="lp-app-label">진행</p>
+                    <ol className="lp-app-steps">
+                      <li className="done">조건 입력</li>
+                      <li className="done">안내 전 확인사항</li>
+                      <li className="now">학부모 안내문</li>
+                      <li>접수 확인</li>
+                    </ol>
+                  </aside>
+                  <div className="lp-app-main">
+                    <p className="lp-app-h">안내 전 확인사항</p>
+                    <div className="lp-app-alert">
+                      <b>만 9세에 두 부처의 지원이 같이 끝납니다 — 2029년 5월 31일</b>
+                      <span>교육청 발달지체 지위와 복지부 발달재활서비스가 같은 달에 끝납니다</span>
+                      <em>출처 · 강원 2026 선정·배치 길잡이 · 복지로</em>
+                    </div>
+                    <p className="lp-app-h">학부모용 안내문</p>
+                    <ul className="lp-app-letter">
+                      <li>□ 기초조사 서류 — 보호자용은 직접, 담임교사용은 학교에 요청</li>
+                      <li>□ 주민등록등본 — 행정복지센터 · 정부24</li>
+                      <li>□ 진단·평가 의뢰서 [서식 3]</li>
+                      <li>□ 개인정보 수집·이용 및 제공 동의서 [서식 12]</li>
+                    </ul>
                   </div>
-                  <p className="lp-app-h">학부모용 안내문</p>
-                  <ul className="lp-app-letter">
-                    <li>□ 기초조사 서류 — 보호자용은 직접, 담임교사용은 학교에 요청</li>
-                    <li>□ 주민등록등본 — 행정복지센터 · 정부24</li>
-                    <li>□ 진단·평가 의뢰서 [서식 3]</li>
-                    <li>□ 개인정보 수집·이용 및 제공 동의서 [서식 12]</li>
-                  </ul>
                 </div>
               </div>
-            </div>
-            <div className="lp-float lp-float-a">
-              <b>갈림길을 먼저</b>
-              <span>만 9세 · 진학 · 어린이집 공문 공백</span>
-            </div>
-            <div className="lp-float lp-float-b">
-              <b>빠진 서류 2종</b>
-              <span>주민등록등본 · 기초조사 서류 → 발급처까지</span>
+              <div className="lp-float lp-float-a">
+                <b>갈림길을 먼저</b>
+                <span>만 9세 · 진학 · 어린이집 공문 공백</span>
+              </div>
+              <div className="lp-float lp-float-b">
+                <b>빠진 서류 2종</b>
+                <span>주민등록등본 · 기초조사 서류 → 발급처까지</span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── 출처 띠 ── */}
-        <section className="lp-wrap lp-sources">
-          <p>모든 항목을 공식 원문으로 확인합니다</p>
-          <ul>
-            {SOURCES.map((s) => (
-              <li key={s}>{s}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="lp-sec" id="trust" aria-labelledby="flow-title">
+        <section className="lp-sec lp-screen" id="trust" aria-labelledby="flow-title">
           <div className="lp-wrap">
+            <div className="lp-sources">
+              <p>모든 항목을 공식 원문으로 확인합니다</p>
+              <ul>
+                {SOURCES.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ul>
+            </div>
             <h2 className="lp-h2" id="flow-title">공식 자료에서 상담 안내까지</h2>
             <ol className="lp-cards lp-flow">
               {FLOW.map((step, index) => (
@@ -180,16 +181,15 @@ export default function Landing() {
             </ol>
             <p className="lp-fine">조건 계산은 브라우저에서 진행하며, 기본 안내문은 AI 없이도 생성됩니다.</p>
             <div className="lp-hero-cta">
-              <a href="#why" className="lp-link">통계와 현장 조사 보기 →</a>
+              <a href="#why" className="lp-link">공식 통계 보기 →</a>
               <Link href="/consult" className="lp-link">상담 화면 열기 →</Link>
             </div>
           </div>
         </section>
 
-        <section className="lp-sec lp-sec-tint" id="why" aria-labelledby="evidence-title">
+        <section className="lp-sec lp-sec-tint lp-screen" id="why" aria-labelledby="evidence-title">
           <div className="lp-wrap">
-            <h2 className="lp-h2" id="evidence-title">공식 통계와 현장 조사</h2>
-            <h3 className="lp-h3 lp-evidence-heading">공식 통계</h3>
+            <h2 className="lp-h2" id="evidence-title">공식 통계</h2>
             <ul className="lp-stats lp-evidence-grid">
               {STATS.map((stat) => (
                 <li key={stat.value} className="lp-stat">
@@ -202,7 +202,15 @@ export default function Landing() {
               ))}
             </ul>
 
-            <h3 className="lp-h3 lp-evidence-heading">팀 현장 조사</h3>
+            <div className="lp-hero-cta">
+              <a href="#fieldwork" className="lp-link">현장 조사 보기 →</a>
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-sec lp-screen" id="fieldwork" aria-labelledby="fieldwork-title">
+          <div className="lp-wrap">
+            <h2 className="lp-h2" id="fieldwork-title">팀 현장 조사</h2>
             <ul className="lp-stats lp-evidence-grid lp-fieldwork">
               {FIELDWORK.map((item) => (
                 <li key={item.label} className="lp-stat">
@@ -227,39 +235,41 @@ export default function Landing() {
         </section>
 
         {/* ── 기능 — 좌우로 번갈아 ── */}
-        <section className="lp-sec" id="features">
+        <section className="lp-sec lp-features" id="features">
           <div className="lp-wrap">
-            <p className="lp-eyebrow">기능</p>
-            <h2 className="lp-h2">상담 한 건, 네 단계면 끝납니다</h2>
+            <div className="lp-screen lp-feature-intro">
+              <p className="lp-eyebrow">기능</p>
+              <h2 className="lp-h2">상담 한 건, 네 단계면 끝납니다</h2>
 
-            <div className="lp-row">
-              <div>
-                <span className="lp-num">01</span>
-                <h3 className="lp-h3">조건 네 개만 고르세요</h3>
-                <p className="lp-p">
-                  지역 · 장애영역 · 학교급 · 신청 상황. 상담 중 어차피 묻는 것만 고르면 교육 · 복지 · 의료
-                  제도와 제출 서류, 기한이 정리됩니다. 학생 이름 · 연락처는 받지 않습니다.
-                </p>
-              </div>
-              <div className="lp-visual">
-                <div className="lp-seg">
-                  <span className="on">신규 선정</span>
-                  <span>상급학교 진학</span>
-                  <span>전학 · 재배치</span>
+              <div className="lp-row">
+                <div>
+                  <span className="lp-num">01</span>
+                  <h3 className="lp-h3">조건 네 개만 고르세요</h3>
+                  <p className="lp-p">
+                    지역 · 장애영역 · 학교급 · 신청 상황. 상담 중 어차피 묻는 것만 고르면 교육 · 복지 · 의료
+                    제도와 제출 서류, 기한이 정리됩니다. 학생 이름 · 연락처는 받지 않습니다.
+                  </p>
                 </div>
-                <div className="lp-seg">
-                  <span className="on">강원</span>
-                  <span>경남</span>
-                </div>
-                <div className="lp-seg">
-                  <span>자폐성장애</span>
-                  <span>지적장애</span>
-                  <span className="on">발달지체</span>
+                <div className="lp-visual">
+                  <div className="lp-seg">
+                    <span className="on">신규 선정</span>
+                    <span>상급학교 진학</span>
+                    <span>전학 · 재배치</span>
+                  </div>
+                  <div className="lp-seg">
+                    <span className="on">강원</span>
+                    <span>경남</span>
+                  </div>
+                  <div className="lp-seg">
+                    <span>자폐성장애</span>
+                    <span>지적장애</span>
+                    <span className="on">발달지체</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="lp-row lp-row-rev">
+            <div className="lp-row lp-row-rev lp-screen">
               <div>
                 <span className="lp-num">02</span>
                 <h3 className="lp-h3">담당자가 먼저 짚을 것만 1면에</h3>
@@ -281,7 +291,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="lp-row">
+            <div className="lp-row lp-screen">
               <div>
                 <span className="lp-num">03</span>
                 <h3 className="lp-h3">학부모에게는 종이 한 장</h3>
@@ -302,7 +312,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="lp-row lp-row-rev">
+            <div className="lp-row lp-row-rev lp-screen">
               <div>
                 <span className="lp-num">04</span>
                 <h3 className="lp-h3">접수할 때 빠진 서류를 바로</h3>
@@ -325,7 +335,7 @@ export default function Landing() {
         </section>
 
         {/* ── 자주 묻는 질문 ── */}
-        <section className="lp-sec lp-sec-tint" id="faq">
+        <section className="lp-sec lp-sec-tint lp-screen" id="faq">
           <div className="lp-wrap lp-faq-wrap">
             <div>
               <p className="lp-eyebrow">자주 묻는 질문</p>
@@ -343,7 +353,7 @@ export default function Landing() {
         </section>
 
         {/* ── 마지막 CTA ── */}
-        <section className="lp-wrap">
+        <section className="lp-wrap lp-screen">
           <div className="lp-end">
             <h2>다음 상담부터 써 보세요</h2>
             <p>설치 · 가입 없이 바로 열립니다. 지금 운영 지역은 강원 · 경남입니다.</p>
