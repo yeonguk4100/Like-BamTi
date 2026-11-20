@@ -22,6 +22,7 @@
   --lp-glow-1: #dbe6fb;
   --lp-glow-2: #c9d8f5;
   --lp-ink: #16191d;
+  --lp-nav-height: 68px;
   --navy: #10315c;
   --navy-deep: #0b2444;
   --primary: #1256a0;
@@ -2794,6 +2795,10 @@ input::placeholder {
    B2B 상담 도구 랜딩의 짜임새(큰 두 줄 제목 · 그라데이션 판 위 제품 화면 · 기능 교차 · FAQ)를
    우리 색(남색 · 파랑 · 회색) 안에서 옮겼다 */
 
+html:has(.lp) {
+  scroll-padding-top: var(--lp-nav-height);
+}
+
 .lp {
   background: var(--canvas);
   color: var(--text);
@@ -2817,7 +2822,7 @@ input::placeholder {
   display: flex;
   align-items: center;
   gap: 28px;
-  height: 68px;
+  height: var(--lp-nav-height);
 }
 
 .lp-links {
@@ -3110,8 +3115,7 @@ input::placeholder {
   align-items: center;
   gap: 28px;
   flex-wrap: wrap;
-  padding-top: 40px;
-  padding-bottom: 8px;
+  margin-bottom: 28px;
 }
 
 .lp-sources p {
@@ -3578,4 +3582,123 @@ input::placeholder {
   .cond-strip .sum-item {
     font-size: 13px;
   }
+}
+
+/* 랜딩의 작동 흐름과 조사 근거 */
+@media (prefers-reduced-motion: reduce) {
+  html:has(.lp) {
+    scroll-behavior: auto;
+  }
+}
+
+@media (min-width: 1001px) {
+  html:has(.lp) {
+    scroll-snap-type: y mandatory;
+  }
+
+  .lp-screen {
+    display: grid;
+    align-content: center;
+    min-block-size: calc(100svh - var(--lp-nav-height));
+    padding-block: clamp(32px, 6svh, 72px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .lp-foot {
+    scroll-snap-align: end;
+  }
+
+  .lp-screen > .lp-wrap {
+    width: 100%;
+  }
+
+  .lp-intro .lp-hero {
+    padding-top: 0;
+  }
+
+  .lp-features {
+    padding-block: 0;
+  }
+
+  .lp-features .lp-row,
+  .lp-screen .lp-end {
+    margin-block: 0;
+  }
+
+  .lp-feature-intro .lp-row {
+    margin-top: 40px;
+  }
+}
+
+.lp-flow,
+.lp-evidence-grid {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.lp-flow {
+  margin-top: 24px;
+}
+
+.lp-flow .lp-card {
+  position: relative;
+  background: var(--canvas);
+}
+
+.lp-flow-index {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: white;
+  font-weight: 700;
+}
+
+@media (min-width: 1001px) {
+  .lp-flow .lp-card:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 40px;
+    right: -13px;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid var(--navy);
+    border-right: 2px solid var(--navy);
+    transform: rotate(45deg);
+  }
+
+  .lp-fieldwork {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.lp-evidence-grid {
+  margin-top: 28px;
+}
+
+.lp-evidence-grid .lp-stat {
+  padding: 16px 20px;
+}
+
+.lp-fieldwork .lp-stat {
+  background: var(--surface);
+}
+
+.lp-evidence-grid .lp-stat-src a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lp-evidence-quote {
+  margin-top: 20px;
+}
+
+.lp-evidence-quote blockquote {
+  font-size: 16px;
 }
