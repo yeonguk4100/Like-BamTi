@@ -3579,3 +3579,88 @@ input::placeholder {
     font-size: 13px;
   }
 }
+
+/* 랜딩의 작동 흐름과 조사 근거 */
+.lp #trust,
+.lp #why,
+.lp #features,
+.lp #faq {
+  scroll-margin-top: 72px;
+}
+
+.lp #trust,
+.lp #why {
+  padding-block: 56px;
+}
+
+.lp-flow,
+.lp-evidence-grid {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.lp-flow {
+  margin-top: 24px;
+}
+
+.lp-flow .lp-card {
+  position: relative;
+  background: var(--canvas);
+}
+
+.lp-flow-index {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: white;
+  font-weight: 700;
+}
+
+@media (min-width: 1001px) {
+  .lp-flow .lp-card:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 40px;
+    right: -13px;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid var(--navy);
+    border-right: 2px solid var(--navy);
+    transform: rotate(45deg);
+  }
+
+  .lp-fieldwork {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.lp-evidence-heading {
+  margin-top: 24px;
+}
+
+.lp-evidence-grid {
+  margin-top: 12px;
+}
+
+.lp-evidence-grid .lp-stat {
+  padding: 16px 20px;
+}
+
+.lp-evidence-grid .lp-stat-src a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lp-evidence-quote {
+  margin-top: 20px;
+}
+
+.lp-evidence-quote blockquote {
+  font-size: 16px;
+}

@@ -13,10 +13,23 @@ import { REPO } from "./lib/screen";
 const SOURCES = ["교육청 선정·배치 지침", "복지로", "정부24 · 행정안전부 공공서비스", "국가법령정보센터"];
 
 const STATS = [
-  { value: "83%", label: "교원이 꼽은 스트레스 1위 — 학부모 민원 대응", source: "교원 10,888명 · 국가인권위원회 2024" },
-  { value: "48.3%", label: "민원 대응 때문에 본 업무에 지장", source: "기초자치단체 공무원 · 한국행정연구원 2024" },
-  { value: "52,005명", label: "한 해 선정·배치 신청을 센터 교사 1,740명이 받습니다", source: "「2026 특수교육 연차보고서」" },
-  { value: "+41%", label: "특수교육대상자 10년 증가 — 124,195명", source: "「2026 특수교육통계」" },
+  { value: "83%", label: "교원 스트레스 원인 1위 · 학부모 민원 대응", source: "교원 10,888명 · 국가인권위원회 연구용역 2024", url: "https://www.humanrights.go.kr/base/board/read?boardManagementNo=17&boardNo=7610717&menuNo=115" },
+  { value: "48.3%", label: "민원 대응으로 본 업무에 지장", source: "기초자치단체 공무원 · 한국행정연구원 2024", url: "https://sky.kipa.re.kr/$/10130/contents/7147340" },
+  { value: "52,005명", label: "1년간 선정·배치 신청 학생 수 (재배치 포함)", source: "2026 특수교육 연차보고서 · 센터 교사 1,740명", url: "https://www.nise.go.kr/boardCnts/view.do?boardID=354&boardSeq=744089&lev=0&s=nise&m=010503&opType=N" },
+  { value: "+41%", label: "특수교육대상자 10년 증가 · 2026년 124,195명", source: "특수교육통계 · 2016~2026년", url: "https://www.index.go.kr/unify/idx-info.do?idxCd=1544" },
+];
+
+const FLOW = [
+  { title: "공식 자료", detail: "교육청 지침과 복지로·정부24 등 공식 원문을 근거로 삼습니다." },
+  { title: "규칙 기반 분류", detail: "입력 조건에 맞는 제도, 서류, 기한과 확인사항을 정리합니다." },
+  { title: "AI 안내 보조 · 선택", detail: "안내문을 쉬운 말로 다듬거나, 빠진 정보의 출처 후보를 찾습니다." },
+  { title: "담당자 최종 검토", detail: "상담 담당자가 지침 원문과 확인사항을 대조하고 안내문을 전달합니다." },
+];
+
+const FIELDWORK = [
+  { value: "약 20곳", label: "기관 문의", detail: "서울을 제외한 교육청과 강원 특수학교 등" },
+  { value: "2건", label: "심층 인터뷰", detail: "기관 문의 중 대표 사례를 심층 기록" },
+  { value: "7명", label: "특수교사 설문", detail: "현직 특수교사 응답" },
 ];
 
 const FAQ = [
@@ -52,9 +65,9 @@ export default function Landing() {
             <span className="logo-name">복지그루</span>
           </Link>
           <nav className="lp-links" aria-label="랜딩 메뉴">
+            <a href="#trust">작동 흐름</a>
+            <a href="#why">통계와 현장 조사</a>
             <a href="#features">기능</a>
-            <a href="#why">왜 필요한가</a>
-            <a href="#trust">믿을 수 있는 이유</a>
             <a href="#faq">자주 묻는 질문</a>
           </nav>
           <Link href="/consult" className="lp-pill">
@@ -80,8 +93,8 @@ export default function Landing() {
               <Link href="/consult" className="lp-pill lp-pill-lg">
                 상담 시작하기
               </Link>
-              <a href="#features" className="lp-link">
-                기능 둘러보기 →
+              <a href="#trust" className="lp-link">
+                작동 흐름 보기 →
               </a>
             </div>
           </div>
@@ -151,6 +164,66 @@ export default function Landing() {
               <li key={s}>{s}</li>
             ))}
           </ul>
+        </section>
+
+        <section className="lp-sec" id="trust" aria-labelledby="flow-title">
+          <div className="lp-wrap">
+            <h2 className="lp-h2" id="flow-title">공식 자료에서 상담 안내까지</h2>
+            <ol className="lp-cards lp-flow">
+              {FLOW.map((step, index) => (
+                <li key={step.title} className="lp-card">
+                  <span className="lp-flow-index" aria-hidden="true">{index + 1}</span>
+                  <h3 className="lp-card-title">{step.title}</h3>
+                  <p className="lp-card-body">{step.detail}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="lp-fine">조건 계산은 브라우저에서 진행하며, 기본 안내문은 AI 없이도 생성됩니다.</p>
+            <div className="lp-hero-cta">
+              <a href="#why" className="lp-link">통계와 현장 조사 보기 →</a>
+              <Link href="/consult" className="lp-link">상담 화면 열기 →</Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-sec lp-sec-tint" id="why" aria-labelledby="evidence-title">
+          <div className="lp-wrap">
+            <h2 className="lp-h2" id="evidence-title">공식 통계와 현장 조사</h2>
+            <h3 className="lp-h3 lp-evidence-heading">공식 통계</h3>
+            <ul className="lp-stats lp-evidence-grid">
+              {STATS.map((stat) => (
+                <li key={stat.value} className="lp-stat">
+                  <p className="lp-stat-value">{stat.value}</p>
+                  <p className="lp-stat-label">{stat.label}</p>
+                  <p className="lp-stat-src">
+                    <a href={stat.url} target="_blank" rel="noreferrer">{stat.source}</a>
+                  </p>
+                </li>
+              ))}
+            </ul>
+
+            <h3 className="lp-h3 lp-evidence-heading">팀 현장 조사</h3>
+            <ul className="lp-stats lp-evidence-grid lp-fieldwork">
+              {FIELDWORK.map((item) => (
+                <li key={item.label} className="lp-stat">
+                  <p className="lp-stat-value">{item.value}</p>
+                  <p className="lp-stat-label">{item.label}</p>
+                  <p className="lp-stat-src">{item.detail}</p>
+                </li>
+              ))}
+            </ul>
+            <figure className="lp-quote lp-evidence-quote">
+              <blockquote>
+                「지원제도별로 각각 전화해서 확인해야 하는 점이 어려움. 센터 관할이 아닌 경우 홈페이지나
+                전화번호를 찾아서 안내하고 있음.」
+              </blockquote>
+              <figcaption>교육지원청 특수교육지원센터 담당자 인터뷰 · 2026.08</figcaption>
+            </figure>
+            <div className="lp-hero-cta">
+              <Link href="/consult" className="lp-pill">상담 시작하기</Link>
+              <a href="#features" className="lp-link">상담 기능 둘러보기 →</a>
+            </div>
+          </div>
         </section>
 
         {/* ── 기능 — 좌우로 번갈아 ── */}
@@ -246,58 +319,6 @@ export default function Landing() {
                   <li>☐ 기초조사 서류 — 담임교사용은 학교에 요청</li>
                 </ul>
                 <p className="lp-check-sum">빠진 서류 2종 · 보완 안내 복사</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 왜 필요한가 — 수치 띠 ── */}
-        <section className="lp-sec lp-sec-tint" id="why">
-          <div className="lp-wrap">
-            <p className="lp-eyebrow">왜 필요한가</p>
-            <h2 className="lp-h2">사람을 늘리기 어려운 자리입니다</h2>
-            <div className="lp-stats">
-              {STATS.map((s) => (
-                <div key={s.value} className="lp-stat">
-                  <p className="lp-stat-value">{s.value}</p>
-                  <p className="lp-stat-label">{s.label}</p>
-                  <p className="lp-stat-src">{s.source}</p>
-                </div>
-              ))}
-            </div>
-            <p className="lp-fine">수치마다 조사 대상이 다릅니다. 모두 정부기관 원문에서 확인한 값입니다.</p>
-
-            <figure className="lp-quote">
-              <blockquote>
-                「지원제도별로 각각 전화해서 확인해야 하는 점이 어려움. 센터 관할이 아닌 경우 홈페이지나
-                전화번호를 찾아서 안내하고 있음.」
-              </blockquote>
-              <figcaption>교육지원청 특수교육지원센터 담당자 인터뷰 · 2026.08</figcaption>
-            </figure>
-          </div>
-        </section>
-
-        {/* ── 신뢰 ── */}
-        <section className="lp-sec" id="trust">
-          <div className="lp-wrap">
-            <p className="lp-eyebrow">믿을 수 있는 이유</p>
-            <h2 className="lp-h2">그대로 건네도 되는 한 장</h2>
-            <div className="lp-cards">
-              <div className="lp-card">
-                <p className="lp-card-title">규칙이 고릅니다</p>
-                <p className="lp-card-body">같은 조건에는 같은 결과. AI는 문장을 다듬고 빈칸을 출처와 함께 찾는 일만 합니다.</p>
-              </div>
-              <div className="lp-card">
-                <p className="lp-card-title">하루 두 번 원문 확인</p>
-                <p className="lp-card-body">복지로 · 정부24 원문을 12시 · 18시경 다시 받아, 바뀐 것은 사람이 확인한 뒤 반영합니다.</p>
-              </div>
-              <div className="lp-card">
-                <p className="lp-card-title">아무것도 저장하지 않습니다</p>
-                <p className="lp-card-body">이름 · 연락처를 받지 않고 계산은 브라우저에서. 개인정보 처리 위탁 절차가 붙지 않습니다.</p>
-              </div>
-              <div className="lp-card">
-                <p className="lp-card-title">학생 · 학부모가 최종 수혜자</p>
-                <p className="lp-card-body">한 번에 갖춰 가서 다시 오지 않습니다. 받을 지원을 놓치지 않고 상담 만족도가 오릅니다.</p>
               </div>
             </div>
           </div>
