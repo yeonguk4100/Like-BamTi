@@ -238,9 +238,11 @@ export default function Landing() {
         {/* ── 기능 — 좌우로 번갈아 ── */}
         <section className="lp-sec lp-features" id="features">
           <div className="lp-wrap">
-            <div className="lp-screen lp-feature-intro">
-              <p className="lp-eyebrow">기능</p>
-              <h2 className="lp-h2">상담 한 건, 네 단계면 끝납니다</h2>
+            <div className="lp-screen lp-feature-pair">
+              <div>
+                <p className="lp-eyebrow">기능</p>
+                <h2 className="lp-h2">상담 한 건, 네 단계면 끝납니다</h2>
+              </div>
 
               <div className="lp-row">
                 <div>
@@ -268,68 +270,70 @@ export default function Landing() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="lp-row lp-row-rev lp-screen">
-              <div>
-                <span className="lp-num">02</span>
-                <h3 className="lp-h3">담당자가 먼저 짚을 것만 1면에</h3>
-                <p className="lp-p">
-                  만 9세에 교육청 · 복지부 지원이 같이 끝나는 갈림길처럼, 소관이 달라 어느 쪽도 알려 주지 않는
-                  것을 먼저 보여 줍니다. 모든 항목에 지침 · 원문 출처가 붙습니다. 판정하지 않고 확인 목록을
-                  드립니다.
-                </p>
-              </div>
-              <div className="lp-visual">
-                <div className="lp-mini-alert">
-                  <b>어린이집 아동에게는 교육청 공문이 가지 않습니다</b>
-                  <span>신청 시기를 직접 안내하세요 · 담당자 인터뷰</span>
+              <div className="lp-row lp-row-rev">
+                <div>
+                  <span className="lp-num">02</span>
+                  <h3 className="lp-h3">담당자가 먼저 짚을 것만 1면에</h3>
+                  <p className="lp-p">
+                    만 9세에 교육청 · 복지부 지원이 같이 끝나는 갈림길처럼, 소관이 달라 어느 쪽도 알려 주지 않는
+                    것을 먼저 보여 줍니다. 모든 항목에 지침 · 원문 출처가 붙습니다. 판정하지 않고 확인 목록을
+                    드립니다.
+                  </p>
                 </div>
-                <div className="lp-mini-alert lp-mini-amber">
-                  <b>생년월일과 학교급을 다시 확인해 주세요</b>
-                  <span>잘못 넣은 입력을 그대로 안내하지 않습니다</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="lp-row lp-screen">
-              <div>
-                <span className="lp-num">03</span>
-                <h3 className="lp-h3">학부모에게는 종이 한 장</h3>
-                <p className="lp-p">
-                  어디에 · 무엇을 들고 · 언제까지를 □ 체크리스트로. 담당자가 읽고 고친 뒤 건넵니다. 소관 밖
-                  제도를 말로 설명하지 않아도 종이가 설명합니다.
-                </p>
-              </div>
-              <div className="lp-visual">
-                <div className="lp-paper">
-                  <p>■ 1단계 — 먼저 준비할 서류</p>
-                  <p>□ 기초조사 서류</p>
-                  <p>□ 주민등록등본</p>
-                  <p>□ 장애인복지카드 사본 (해당하는 경우)</p>
-                  <p>■ 2단계 — 지역 교육지원청에서 작성할 서류</p>
-                  <p>□ 진단·평가 의뢰서 [서식 3]</p>
+                <div className="lp-visual">
+                  <div className="lp-mini-alert">
+                    <b>어린이집 아동에게는 교육청 공문이 가지 않습니다</b>
+                    <span>신청 시기를 직접 안내하세요 · 담당자 인터뷰</span>
+                  </div>
+                  <div className="lp-mini-alert lp-mini-amber">
+                    <b>생년월일과 학교급을 다시 확인해 주세요</b>
+                    <span>잘못 넣은 입력을 그대로 안내하지 않습니다</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="lp-row lp-row-rev lp-screen">
-              <div>
-                <span className="lp-num">04</span>
-                <h3 className="lp-h3">접수할 때 빠진 서류를 바로</h3>
-                <p className="lp-p">
-                  가져온 서류에 체크하면 빠진 서류와 발급처, 보완 안내 문구가 나옵니다. 되돌려 보내고 다시
-                  받는 일을 줄입니다.
-                </p>
+            <div className="lp-screen lp-feature-pair">
+              <div className="lp-row">
+                <div>
+                  <span className="lp-num">03</span>
+                  <h3 className="lp-h3">학부모에게는 종이 한 장</h3>
+                  <p className="lp-p">
+                    어디에 · 무엇을 들고 · 언제까지를 □ 체크리스트로. 담당자가 읽고 고친 뒤 건넵니다. 소관 밖
+                    제도를 말로 설명하지 않아도 종이가 설명합니다.
+                  </p>
+                </div>
+                <div className="lp-visual">
+                  <div className="lp-paper">
+                    <p>■ 1단계 — 먼저 준비할 서류</p>
+                    <p>□ 기초조사 서류</p>
+                    <p>□ 주민등록등본</p>
+                    <p>□ 장애인복지카드 사본 (해당하는 경우)</p>
+                    <p>■ 2단계 — 지역 교육지원청에서 작성할 서류</p>
+                    <p>□ 진단·평가 의뢰서 [서식 3]</p>
+                  </div>
+                </div>
               </div>
-              <div className="lp-visual">
-                <ul className="lp-check">
-                  <li className="ok">☑ 진단·평가 의뢰서</li>
-                  <li className="ok">☑ 개인정보 수집·이용 동의서</li>
-                  <li>☐ 주민등록등본 — 행정복지센터 · 정부24</li>
-                  <li>☐ 기초조사 서류 — 담임교사용은 학교에 요청</li>
-                </ul>
-                <p className="lp-check-sum">빠진 서류 2종 · 보완 안내 복사</p>
+
+              <div className="lp-row lp-row-rev">
+                <div>
+                  <span className="lp-num">04</span>
+                  <h3 className="lp-h3">접수할 때 빠진 서류를 바로</h3>
+                  <p className="lp-p">
+                    가져온 서류에 체크하면 빠진 서류와 발급처, 보완 안내 문구가 나옵니다. 되돌려 보내고 다시
+                    받는 일을 줄입니다.
+                  </p>
+                </div>
+                <div className="lp-visual">
+                  <ul className="lp-check">
+                    <li className="ok">☑ 진단·평가 의뢰서</li>
+                    <li className="ok">☑ 개인정보 수집·이용 동의서</li>
+                    <li>☐ 주민등록등본 — 행정복지센터 · 정부24</li>
+                    <li>☐ 기초조사 서류 — 담임교사용은 학교에 요청</li>
+                  </ul>
+                  <p className="lp-check-sum">빠진 서류 2종 · 보완 안내 복사</p>
+                </div>
               </div>
             </div>
           </div>
