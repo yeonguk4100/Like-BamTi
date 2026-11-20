@@ -8,6 +8,7 @@
 // 최종 수혜자는 학생 · 학부모. 수치는 정부기관 원문만, 조사 대상을 함께 적는다.
 
 import Link from "next/link";
+import { LandingScroll } from "./components/LandingScroll";
 import { REPO } from "./lib/screen";
 
 const SOURCES = ["교육청 선정·배치 지침", "복지로", "정부24 · 행정안전부 공공서비스", "국가법령정보센터"];
@@ -58,6 +59,7 @@ const FAQ = [
 export default function Landing() {
   return (
     <div className="lp">
+      <LandingScroll />
       <header className="lp-nav">
         <div className="lp-wrap lp-nav-inner">
           <Link href="/" className="logo">
